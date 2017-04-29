@@ -13,6 +13,7 @@ import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.processmining.logskeleton.models.LogSkeleton;
 
 public class PDC2017LogFilterAlgorithm {
 
@@ -58,11 +59,14 @@ public class PDC2017LogFilterAlgorithm {
 			}
 			endCountMap.put(endActivity, count + 1);
 		}
-		List<Integer> endCountList = new ArrayList<Integer>(new HashSet<Integer>(endCountMap.values()));
+		List<Integer> endCountList = new ArrayList<Integer>();
+		for (String activity : endCountMap.keySet()) {
+			endCountList.add(endCountMap.get(activity));
+		}
 		Collections.sort(endCountList);
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog();
 		Set<String> endActivities = new HashSet<String>();
-		while (filteredLog.size() * 100 < log.size() * 80) {
+		while (!endCountList.isEmpty() && filteredLog.size() < 800) {
 			int threshold = endCountList.remove(endCountList.size() - 1);
 			for (XTrace trace : log) {
 				String endActivity = XConceptExtension.instance().extractName(trace.get(trace.size() - 1));
@@ -79,12 +83,23 @@ public class PDC2017LogFilterAlgorithm {
 	}
 	
 	public XLog apply(XLog log) {
-		XLog prefixLog = applyPrefix(log);
-		XLog endLog = applyEndActivities(log);
-		if (prefixLog.size() >= endLog.size()) {
-			return prefixLog;
+		XLog filteredLog = applyPrefix(log);
+		if (filteredLog.size() < 800) {
+			filteredLog = log;
 		}
-		return endLog;
+		filteredLog = applyEndActivities(filteredLog);
+		LogSkeletonBuilderAlgorithm logSkeletonBuilder = new LogSkeletonBuilderAlgorithm();
+		LogSkeletonCheckerAlgorithm logSkeletonChecker = new LogSkeletonCheckerAlgorithm();
+		LogSkeleton skeleton = logSkeletonBuilder.apply(filteredLog);
+		return logSkeletonChecker.apply(skeleton, filteredLog);
+//		return applyPrefix(applyEndActivities(log));
+//		return applyEndActivities(applyPrefix(log));
+//		XLog prefixLog = applyPrefix(log);
+//		XLog endLog = applyEndActivities(log);
+//		if (prefixLog.size() >= endLog.size()) {
+//			return prefixLog;
+//		}
+//		return endLog;
 	}
 	
 }
