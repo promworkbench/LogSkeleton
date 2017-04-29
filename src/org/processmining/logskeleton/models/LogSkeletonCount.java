@@ -103,11 +103,11 @@ public class LogSkeletonCount {
 	public void print(String name) {
 		System.out.println("[PDC2017CountModel] Activity counts for " + name);
 		for (String activity : activityCounts.keySet()) {
-			System.out.println("[PDC2017CountModel] " + activity + ": " + activityCounts.get(activity));
+			System.out.println("[LogSkeletonCount] " + activity + ": " + activityCounts.get(activity));
 		}
 		System.out.println("[PC2017CountModel] Transitions counts for " + name);
 		for (List<String> transition : transitionCounts.keySet()) {
-			System.out.println("[PDC2017CountModel] " + transition + ": " + transitionCounts.get(transition));
+			System.out.println("[LogSkeletonCount] " + transition + ": " + transitionCounts.get(transition));
 		}
 	}
 }

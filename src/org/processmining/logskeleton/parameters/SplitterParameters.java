@@ -3,12 +3,12 @@ package org.processmining.logskeleton.parameters;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RecurrentActivitySplitterParameters {
+public class SplitterParameters {
 
 	private Set<String> milestoneActivities;
 	private String recurrentActivity;
 	
-	public RecurrentActivitySplitterParameters() {
+	public SplitterParameters() {
 		milestoneActivities = new HashSet<String>();
 	}
 	public Set<String> getMilestoneActivities() {

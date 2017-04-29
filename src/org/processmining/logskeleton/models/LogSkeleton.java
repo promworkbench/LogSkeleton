@@ -22,7 +22,6 @@ import org.processmining.plugins.graphviz.dot.DotNode;
 public class LogSkeleton implements HTMLToString {
 
 	private LogSkeletonCount countModel;
-	private LogSkeletonCount correctedCountModel;
 	private Collection<Collection<String>> sameCounts;
 	private Map<String, Set<String>> allPresets;
 	private Map<String, Set<String>> allPostsets;
@@ -32,7 +31,6 @@ public class LogSkeleton implements HTMLToString {
 
 	public LogSkeleton(LogSkeletonCount countModel, LogSkeletonCount correctedCountModel) {
 		this.countModel = countModel;
-		this.correctedCountModel = correctedCountModel;
 		sameCounts = new HashSet<Collection<String>>();
 		allPresets = new HashMap<String, Set<String>>();
 		allPostsets = new HashMap<String, Set<String>>();
@@ -119,7 +117,7 @@ public class LogSkeleton implements HTMLToString {
 				counts.add(model.get(activity));
 			}
 			if (counts.size() != 1) {
-				System.out.println("[PDC2017ConstraintModel] Check failed: " + sameCount);
+				System.out.println("[LogSkeleton] Check failed: " + sameCount);
 				ok = false;
 			}
 		}
@@ -128,36 +126,6 @@ public class LogSkeleton implements HTMLToString {
 
 	private boolean checkTransitionCounts(LogSkeletonCount model) {
 		return countModel.checkTransitionCounts(model);
-	}
-
-	private boolean checkValueInterval(int valueToCheck, List<Integer> values) {
-		int min = Integer.MAX_VALUE;
-		int max = 0;
-		double sumValues = 0.0;
-		double n = values.size();
-		if (n < 50.0) {
-			return true;
-		}
-		for (Integer value : values) {
-			min = Math.min(min, value);
-			max = Math.max(max, value);
-			sumValues += value;
-		}
-		double avgValue = ((1.0) * sumValues) / n;
-		double sumDiffs = 0.0;
-		for (Integer value : values) {
-			sumDiffs += (value - avgValue) * (value - avgValue);
-		}
-		double stdDev = Math.sqrt(sumDiffs / (n - 1));
-		double confLevel90 = 1.645;
-		double confLevel95 = 1.96;
-		double confLevel99 = 2.575;
-		double halfInterval = confLevel99 * stdDev / Math.sqrt(n);
-		if (!(min - halfInterval <= valueToCheck && valueToCheck <= max + halfInterval)) {
-			System.out.println("[PDC2017ConstraintModel] " + valueToCheck + " in [" + (min - halfInterval) + ","
-					+ (max + halfInterval) + "] " + values);
-		}
-		return min - halfInterval <= valueToCheck && valueToCheck <= max + halfInterval;
 	}
 
 	private boolean checkDistance(int distance, List<Integer> distances) {

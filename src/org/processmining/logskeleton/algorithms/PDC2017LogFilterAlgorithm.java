@@ -68,18 +68,23 @@ public class PDC2017LogFilterAlgorithm {
 				String endActivity = XConceptExtension.instance().extractName(trace.get(trace.size() - 1));
 				if (endCountMap.get(endActivity) == threshold) {
 					if (endActivities.add(endActivity)) {
-						System.out.println("[PDC2017FilterAglorithm] Added end activity: " + endActivity + " (" + threshold + ")");
+						System.out.println("[PDC2017LogFilterAglorithm] Added end activity: " + endActivity + " (" + threshold + ")");
 					}
 					filteredLog.add(trace);
 				}
 			}
 		}
-		System.out.println("[PDC2017FilterAglorithm] Filtered log contains " + filteredLog.size() + " traces, end activities are " + endActivities);
+		System.out.println("[PDC2017LogFilterAglorithm] Filtered log contains " + filteredLog.size() + " traces, end activities are " + endActivities);
 		return filteredLog;
 	}
 	
 	public XLog apply(XLog log) {
-		return applyPrefix(applyEndActivities(log));
+		XLog prefixLog = applyPrefix(log);
+		XLog endLog = applyPrefix(log);
+		if (prefixLog.size() >= endLog.size()) {
+			return prefixLog;
+		}
+		return endLog;
 	}
 	
 }

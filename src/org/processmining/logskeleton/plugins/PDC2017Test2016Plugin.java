@@ -23,8 +23,8 @@ public class PDC2017Test2016Plugin {
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		
 		PDC2017Test testModel = new PDC2017Test();
-		String Path = "D:\\Dropbox\\Projects\\";
-//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
+//		String Path = "D:\\Dropbox\\Projects\\";
+		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		
 		try {
 			for (int i = 1; i < 11; i++) {

@@ -33,9 +33,9 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.logskeleton.algorithms.LogSkeletonBuilderAlgorithm;
-import org.processmining.logskeleton.algorithms.RecurrentActivitySplitterAlgorithm;
+import org.processmining.logskeleton.algorithms.SplitterAlgorithm;
 import org.processmining.logskeleton.models.LogSkeleton;
-import org.processmining.logskeleton.parameters.RecurrentActivitySplitterParameters;
+import org.processmining.logskeleton.parameters.SplitterParameters;
 
 import com.fluxicon.slickerbox.components.SlickerButton;
 
@@ -45,7 +45,6 @@ public class ConfigurableLogSkeletonBrowserPlugin {
 
 	private UIPluginContext context;
 	private XLog log;
-	private JComponent leftPanel = null;
 	private JComponent rightPanel = null;
 	private JPanel mainPanel = null;
 	private List<List<String>> splitters;
@@ -73,8 +72,8 @@ public class ConfigurableLogSkeletonBrowserPlugin {
 	}
 
 	private void update() {
-		RecurrentActivitySplitterAlgorithm splitterAlgorithm = new RecurrentActivitySplitterAlgorithm();
-		RecurrentActivitySplitterParameters splitterParameters = new RecurrentActivitySplitterParameters();
+		SplitterAlgorithm splitterAlgorithm = new SplitterAlgorithm();
+		SplitterParameters splitterParameters = new SplitterParameters();
 		XLog filteredLog = log;
 		if (!filters.isEmpty()) {
 			filteredLog = filter(filteredLog, filters);

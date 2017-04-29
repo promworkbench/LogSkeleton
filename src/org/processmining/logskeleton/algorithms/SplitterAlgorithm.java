@@ -5,11 +5,11 @@ import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
-import org.processmining.logskeleton.parameters.RecurrentActivitySplitterParameters;
+import org.processmining.logskeleton.parameters.SplitterParameters;
 
-public class RecurrentActivitySplitterAlgorithm {
+public class SplitterAlgorithm {
 
-	public XLog apply(XLog log, RecurrentActivitySplitterParameters parameters) {
+	public XLog apply(XLog log, SplitterParameters parameters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		for (XTrace trace : log) {
 			XTrace filteredTrace = XFactoryRegistry.instance().currentDefault().createTrace(trace.getAttributes());
@@ -31,7 +31,7 @@ public class RecurrentActivitySplitterAlgorithm {
 			}
 			filteredLog.add(filteredTrace);
 		}
-		System.out.println("[PDC2017UnduplicateAglorithm] Filtered log contains " + filteredLog.size() + " traces");
+		System.out.println("[SplitterAlgorithm] Split log contains " + filteredLog.size() + " traces");
 		return filteredLog;
 	}
 
@@ -59,7 +59,7 @@ public class RecurrentActivitySplitterAlgorithm {
 			}
 			filteredLog.add(filteredTrace);
 		}
-		System.out.println("[PDC2017UnduplicateAglorithm] Filtered log contains " + filteredLog.size() + " traces");
+		System.out.println("[SplitterAlgorithm] Split log contains " + filteredLog.size() + " traces");
 		return filteredLog;
 	}
 

@@ -23,8 +23,8 @@ public class PDC2017TestPlugin {
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		PDC2017LogFilterAlgorithm filterAlgorithm = new PDC2017LogFilterAlgorithm();
 		PDC2017Test testModel = new PDC2017Test();
-		String Path = "D:\\Dropbox\\Projects\\";
-//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
+//		String Path = "D:\\Dropbox\\Projects\\";
+		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
 			for (int i = 1; i < 11; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context,
@@ -37,9 +37,9 @@ public class PDC2017TestPlugin {
 						Path + "PDC 2017\\log" + i + ".xes");
 				
 				XLog filteredMarchLog = marchLog;
-//				if (i == 1 || i == 2 || i == 5 || i == 9 || i == 10) {
-//					filteredMarchLog = filterAlgorithm.apply(marchLog);
-//				}
+				if (i == 1 || i == 2 || i == 5 || i == 9 || i == 10) {
+					filteredMarchLog = filterAlgorithm.apply(marchLog);
+				}
 				LogSkeleton model = createPlugin.run(context, filteredMarchLog);
 				context.getProvidedObjectManager().createProvidedObject("Model " + i, model, LogSkeleton.class, context);
 				XLog classifiedAprilLog = checkPlugin.run(context, model, aprilLog);
