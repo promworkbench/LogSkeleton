@@ -14,7 +14,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.framework.util.HTMLToString;
 import org.processmining.logskeleton.parameters.LogSkeletonBrowser;
-import org.processmining.logskeleton.parameters.LogSkeletonbrowserParameters;
+import org.processmining.logskeleton.parameters.LogSkeletonBrowserParameters;
 import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.graphviz.dot.DotEdge;
 import org.processmining.plugins.graphviz.dot.DotNode;
@@ -311,7 +311,7 @@ public class LogSkeleton implements HTMLToString {
 		return buf.toString();
 	}
 
-	public Dot visualize(LogSkeletonbrowserParameters parameters) {
+	public Dot visualize(LogSkeletonBrowserParameters parameters) {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
 //		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
@@ -505,20 +505,20 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	public Dot createGraph(LogSkeletonBrowser visualizer) {
-		LogSkeletonbrowserParameters parameters = new LogSkeletonbrowserParameters();
+		LogSkeletonBrowserParameters parameters = new LogSkeletonBrowserParameters();
 		parameters.getActivities().addAll(countModel.getActivities());
 		parameters.getVisualizers().add(visualizer);
 		return visualize(parameters);
 	}
 
 	public Dot createGraph(Set<LogSkeletonBrowser> visualizers) {
-		LogSkeletonbrowserParameters parameters = new LogSkeletonbrowserParameters();
+		LogSkeletonBrowserParameters parameters = new LogSkeletonBrowserParameters();
 		parameters.getActivities().addAll(countModel.getActivities());
 		parameters.getVisualizers().addAll(visualizers);
 		return visualize(parameters);
 	}
 
-	public Dot createGraph(LogSkeletonbrowserParameters parameters) {
+	public Dot createGraph(LogSkeletonBrowserParameters parameters) {
 		parameters.getActivities().addAll(parameters.getActivities());
 		parameters.getVisualizers().addAll(parameters.getVisualizers());
 		return visualize(parameters);

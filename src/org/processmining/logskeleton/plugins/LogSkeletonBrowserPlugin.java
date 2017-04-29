@@ -25,14 +25,15 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.parameters.LogSkeletonBrowser;
+import org.processmining.logskeleton.parameters.LogSkeletonBrowserParameters;
+import org.processmining.plugins.graphviz.visualisation.DotPanel;
 
 import com.fluxicon.slickerbox.components.SlickerButton;
 
 @Plugin(name = "Log Skeleton Browser", parameterLabels = { "Log Skeleton" }, returnLabels = { "Log Skeleton Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Browser")
 @Visualizer
-public class LogSkeletonBrowserPlugin extends LogSkeletonBrowserAlgorithm {
+public class LogSkeletonBrowserPlugin {
 
-	private UIPluginContext context;
 	private LogSkeleton model;
 	private LogSkeletonBrowserParameters parameters = new LogSkeletonBrowserParameters();
 	private JComponent leftDotPanel = null;
@@ -43,7 +44,6 @@ public class LogSkeletonBrowserPlugin extends LogSkeletonBrowserAlgorithm {
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
 	public JComponent run(UIPluginContext context, LogSkeleton model) {
 
-		this.context = context;
 		this.model = model;
 
 		mainPanel = new JPanel();
@@ -127,7 +127,7 @@ public class LogSkeletonBrowserPlugin extends LogSkeletonBrowserAlgorithm {
 		if (leftDotPanel != null) {
 			mainPanel.remove(leftDotPanel);
 		}
-		leftDotPanel = apply(context, model.createGraph(parameters));
+		leftDotPanel = new DotPanel(model.createGraph(parameters));
 		mainPanel.add(leftDotPanel, "0, 0, 0, 3");
 		mainPanel.validate();
 		mainPanel.repaint();
@@ -138,7 +138,7 @@ public class LogSkeletonBrowserPlugin extends LogSkeletonBrowserAlgorithm {
 		if (rightDotPanel != null) {
 			mainPanel.remove(rightDotPanel);
 		}
-		rightDotPanel = apply(context, model.createGraph(parameters));
+		rightDotPanel = new DotPanel(model.createGraph(parameters));
 		mainPanel.add(rightDotPanel, "2, 0, 2, 3");
 		mainPanel.validate();
 		mainPanel.repaint();

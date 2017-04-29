@@ -8,7 +8,7 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.RecurrentActivitySplitterAlgorithm;
 import org.processmining.logskeleton.parameters.RecurrentActivitySplitterParameters;
 
-@Plugin(name = "PDC 2017 Unduplicate Log 7 Filter", parameterLabels = { "Event log"}, returnLabels = { "Filtered log" }, returnTypes = { XLog.class }, userAccessible = true, help = "PDC 2017 Plug-in")
+@Plugin(name = "PDC 2017 Log 7 Splitter", parameterLabels = { "Event Log 7"}, returnLabels = { "Split Log 7" }, returnTypes = { XLog.class }, userAccessible = true, help = "PDC 2017 Plug-in")
 public class PDC2017Log7SplitterPlugin extends RecurrentActivitySplitterAlgorithm {
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
