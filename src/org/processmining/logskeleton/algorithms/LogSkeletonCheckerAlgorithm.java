@@ -6,12 +6,12 @@ import org.deckfour.xes.model.XTrace;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.models.LogSkeletonCount;
 
-public class CheckLogSkeletonAlgorithm {
+public class LogSkeletonCheckerAlgorithm {
 
 	public XLog apply(LogSkeleton skeleton, XLog log) {
 		XLog classifiedLog = XFactoryRegistry.instance().currentDefault().createLog();
 		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog();
-		CreateLogSkeletonAlgorithm algorithm = new CreateLogSkeletonAlgorithm();
+		LogSkeletonBuilderAlgorithm algorithm = new LogSkeletonBuilderAlgorithm();
 		
 		for (XTrace trace : log) {
 			traceLog.clear();

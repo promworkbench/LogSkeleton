@@ -14,7 +14,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 
-public class FilterLog {
+public class PDC2017LogFilterAlgorithm {
 
 	public XLog applyPrefix(XLog log) {
 		Map<XTrace, List<String>> traceMap = new HashMap<XTrace, List<String>>();

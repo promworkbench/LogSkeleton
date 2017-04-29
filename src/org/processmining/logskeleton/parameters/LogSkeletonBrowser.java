@@ -1,6 +1,6 @@
 package org.processmining.logskeleton.parameters;
 
-public enum ViewLogSkeleton {
+public enum LogSkeletonBrowser {
 	
 	ALWAYSTOGETHER("Always Together"),
 	ALWAYSBEFORE("Always Before"),
@@ -15,7 +15,7 @@ public enum ViewLogSkeleton {
 	
 	private String label;
 
-	private ViewLogSkeleton(String label) {
+	private LogSkeletonBrowser(String label) {
 		this.label = label;
 	}
 	

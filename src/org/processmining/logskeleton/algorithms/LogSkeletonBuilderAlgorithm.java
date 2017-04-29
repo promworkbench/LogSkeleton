@@ -18,7 +18,7 @@ import org.processmining.log.models.impl.EventLogArrayFactory;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.models.LogSkeletonCount;
 
-public class CreateLogSkeletonAlgorithm {
+public class LogSkeletonBuilderAlgorithm {
 
 	public LogSkeleton apply(XLog log) {
 		LogSkeletonCount countModel0 = count(log);

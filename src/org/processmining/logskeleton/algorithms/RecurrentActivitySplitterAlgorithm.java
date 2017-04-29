@@ -5,11 +5,11 @@ import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
-import org.processmining.logskeleton.parameters.SplitRecurrentActivityParameters;
+import org.processmining.logskeleton.parameters.RecurrentActivitySplitterParameters;
 
-public class SplitRecurrentActivityAlgorithm {
+public class RecurrentActivitySplitterAlgorithm {
 
-	public XLog apply(XLog log, SplitRecurrentActivityParameters parameters) {
+	public XLog apply(XLog log, RecurrentActivitySplitterParameters parameters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		for (XTrace trace : log) {
 			XTrace filteredTrace = XFactoryRegistry.instance().currentDefault().createTrace(trace.getAttributes());
