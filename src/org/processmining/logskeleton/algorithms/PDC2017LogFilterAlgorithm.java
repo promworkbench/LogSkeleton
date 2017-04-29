@@ -80,7 +80,7 @@ public class PDC2017LogFilterAlgorithm {
 	
 	public XLog apply(XLog log) {
 		XLog prefixLog = applyPrefix(log);
-		XLog endLog = applyPrefix(log);
+		XLog endLog = applyEndActivities(log);
 		if (prefixLog.size() >= endLog.size()) {
 			return prefixLog;
 		}
