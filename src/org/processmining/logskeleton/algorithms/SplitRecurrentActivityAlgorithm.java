@@ -5,6 +5,7 @@ import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.processmining.logskeleton.parameters.SplitRecurrentActivityParameters;
 
 public class SplitRecurrentActivityAlgorithm {
 
