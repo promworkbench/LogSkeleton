@@ -1,8 +1,5 @@
 package org.processmining.logskeleton.plugins;
 
-import info.clearthought.layout.TableLayout;
-import info.clearthought.layout.TableLayoutConstants;
-
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +26,9 @@ import org.processmining.logskeleton.parameters.LogSkeletonBrowserParameters;
 import org.processmining.plugins.graphviz.visualisation.DotPanel;
 
 import com.fluxicon.slickerbox.components.SlickerButton;
+
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
 
 @Plugin(name = "Log Skeleton Browser", parameterLabels = { "Log Skeleton" }, returnLabels = { "Log Skeleton Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Browser")
 @Visualizer
@@ -86,13 +86,13 @@ public class LogSkeletonBrowserPlugin {
 		final ProMList<LogSkeletonBrowser> visualizerList = new ProMList<LogSkeletonBrowser>("  Select constraints >", visualizers);
 		visualizerList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		List<LogSkeletonBrowser> selectedVisualizers = new ArrayList<LogSkeletonBrowser>();
-		selectedIndices = new int[3];
-		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSTOGETHER);
-		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSTOGETHER);
+		selectedIndices = new int[2];
+//		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSTOGETHER);
+//		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSTOGETHER);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSBEFORE);
-		selectedIndices[1] = list.indexOf(LogSkeletonBrowser.ALWAYSBEFORE);
+		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSBEFORE);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSAFTER);
-		selectedIndices[2] = list.indexOf(LogSkeletonBrowser.ALWAYSAFTER);
+		selectedIndices[1] = list.indexOf(LogSkeletonBrowser.ALWAYSAFTER);
 		visualizerList.setSelectedIndices(selectedIndices);
 		parameters.getVisualizers().addAll(selectedVisualizers);
 		visualizerList.addListSelectionListener(new ListSelectionListener() {
