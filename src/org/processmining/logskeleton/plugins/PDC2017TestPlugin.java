@@ -23,8 +23,8 @@ public class PDC2017TestPlugin {
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		PDC2017LogFilterAlgorithm filterAlgorithm = new PDC2017LogFilterAlgorithm();
 		PDC2017Test testModel = new PDC2017Test();
-//		String Path = "D:\\Dropbox\\Projects\\";
-		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
+		String Path = "D:\\Dropbox\\Projects\\";
+//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
 			for (int i = 1; i < 11; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context,
@@ -37,14 +37,53 @@ public class PDC2017TestPlugin {
 						Path + "PDC 2017\\log" + i + ".xes");
 				
 				XLog filteredMarchLog = marchLog;
-				if (i == 1 || i == 2 || i == 5 || i == 9 || i == 10) {
-					filteredMarchLog = filterAlgorithm.apply(marchLog);
+				XLog filteredAprilLog = aprilLog;
+				XLog filteredMayLog = mayLog;
+				XLog filteredJuneLog = juneLog;
+//				if (i == 1 || i == 2 || i == 5 || i == 9 || i == 10) {
+//					filteredMarchLog = filterAlgorithm.apply(marchLog);
+//				}
+				if (i == 1) {
+					filteredMarchLog = (new PDC2017Log1FilterPlugin()).run(context, marchLog);
+				} else if (i == 2) {
+					filteredMarchLog = (new PDC2017Log2FilterPlugin()).run(context, marchLog);
+				} else if (i == 5) {
+					filteredMarchLog = (new PDC2017Log5FilterPlugin()).run(context, marchLog);
+				} else if (i == 9) {
+					filteredMarchLog = (new PDC2017Log9FilterPlugin()).run(context, marchLog);
+				} else if (i == 10) {
+					filteredMarchLog = (new PDC2017Log10FilterPlugin()).run(context, marchLog);
+				}
+				if (i == 4) {
+					PDC2017Log4SplitterPlugin splitter = new PDC2017Log4SplitterPlugin();
+					filteredMarchLog = splitter.run(context, filteredMarchLog);
+					filteredAprilLog = splitter.run(context, aprilLog);
+					filteredMayLog = splitter.run(context, mayLog);
+					filteredJuneLog = splitter.run(context, juneLog);
+				} else if (i == 7) {
+					PDC2017Log7SplitterPlugin splitter = new PDC2017Log7SplitterPlugin();
+					filteredMarchLog = splitter.run(context, filteredMarchLog);
+					filteredAprilLog = splitter.run(context, aprilLog);
+					filteredMayLog = splitter.run(context, mayLog);
+					filteredJuneLog = splitter.run(context, juneLog);
+				} else if (i == 9) {
+					PDC2017Log9SplitterPlugin splitter = new PDC2017Log9SplitterPlugin();
+					filteredMarchLog = splitter.run(context, filteredMarchLog);
+					filteredAprilLog = splitter.run(context, aprilLog);
+					filteredMayLog = splitter.run(context, mayLog);
+					filteredJuneLog = splitter.run(context, juneLog);
+				} else if (i == 10) {
+					PDC2017Log10SplitterPlugin splitter = new PDC2017Log10SplitterPlugin();
+					filteredMarchLog = splitter.run(context, filteredMarchLog);
+					filteredAprilLog = splitter.run(context, aprilLog);
+					filteredMayLog = splitter.run(context, mayLog);
+					filteredJuneLog = splitter.run(context, juneLog);
 				}
 				LogSkeleton model = createPlugin.run(context, filteredMarchLog);
 				context.getProvidedObjectManager().createProvidedObject("Model " + i, model, LogSkeleton.class, context);
-				XLog classifiedAprilLog = checkPlugin.run(context, model, aprilLog);
-				XLog classifiedMayLog = checkPlugin.run(context, model, mayLog);
-				XLog classifiedJuneLog = checkPlugin.run(context, model, juneLog);
+				XLog classifiedAprilLog = checkPlugin.run(context, model, filteredAprilLog);
+				XLog classifiedMayLog = checkPlugin.run(context, model, filteredMayLog);
+				XLog classifiedJuneLog = checkPlugin.run(context, model, filteredJuneLog);
 				testModel.add(i, classifiedAprilLog, classifiedMayLog, classifiedJuneLog, model);
 			}
 			return testModel;
