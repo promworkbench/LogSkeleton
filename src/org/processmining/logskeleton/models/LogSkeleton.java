@@ -27,7 +27,7 @@ public class LogSkeleton implements HTMLToString {
 	private Map<String, Set<String>> allPostsets;
 	private Map<String, Set<String>> anyPresets;
 	private Map<String, Set<String>> anyPostsets;
-	private Map<List<String>, List<Integer>> distances;
+//	private Map<List<String>, List<Integer>> distances;
 
 	public LogSkeleton(LogSkeletonCount countModel, LogSkeletonCount correctedCountModel) {
 		this.countModel = countModel;
@@ -36,7 +36,7 @@ public class LogSkeleton implements HTMLToString {
 		allPostsets = new HashMap<String, Set<String>>();
 		anyPresets = new HashMap<String, Set<String>>();
 		anyPostsets = new HashMap<String, Set<String>>();
-		distances = new HashMap<List<String>, List<Integer>>();
+//		distances = new HashMap<List<String>, List<Integer>>();
 	}
 
 	public void addSameCount(Collection<String> activities) {
@@ -73,17 +73,17 @@ public class LogSkeleton implements HTMLToString {
 			postset.addAll(anyPostsets.get(activity));
 		}
 		anyPostsets.put(activity, postset);
-		int distance = 1;
-		for (String postActivity : post) {
-			List<String> pair = new ArrayList<String>();
-			pair.add(activity);
-			pair.add(postActivity);
-			if (!distances.containsKey(pair)) {
-				distances.put(pair, new ArrayList<Integer>());
-			}
-			distances.get(pair).add(distance);
-			distance++;
-		}
+//		int distance = 1;
+//		for (String postActivity : post) {
+//			List<String> pair = new ArrayList<String>();
+//			pair.add(activity);
+//			pair.add(postActivity);
+//			if (!distances.containsKey(pair)) {
+//				distances.put(pair, new ArrayList<Integer>());
+//			}
+//			distances.get(pair).add(distance);
+//			distance++;
+//		}
 	}
 
 	public void cleanPrePost() {
@@ -128,24 +128,24 @@ public class LogSkeleton implements HTMLToString {
 		return countModel.checkTransitionCounts(model);
 	}
 
-	private boolean checkDistance(int distance, List<Integer> distances) {
-		if (distance > 0) {
-			return true;
-		}
-		if (distance > 2 || distances.size() < 10) {
-			return true;
-		}
-		int min = Integer.MAX_VALUE;
-		int max = 0;
-		for (Integer value : distances) {
-			min = Math.min(min, value);
-			max = Math.max(max, value);
-		}
-		if (min > distance || distance > max) {
-			System.out.println("[PDC2017ConstraintModel] " + distance + " " + distances);
-		}
-		return min <= distance && distance <= max;
-	}
+//	private boolean checkDistance(int distance, List<Integer> distances) {
+//		if (distance > 0) {
+//			return true;
+//		}
+//		if (distance > 2 || distances.size() < 10) {
+//			return true;
+//		}
+//		int min = Integer.MAX_VALUE;
+//		int max = 0;
+//		for (Integer value : distances) {
+//			min = Math.min(min, value);
+//			max = Math.max(max, value);
+//		}
+//		if (min > distance || distance > max) {
+//			System.out.println("[PDC2017ConstraintModel] " + distance + " " + distances);
+//		}
+//		return min <= distance && distance <= max;
+//	}
 
 	private boolean checkCausalDependencies(XTrace trace) {
 		List<String> postset = new ArrayList<String>();
@@ -159,16 +159,16 @@ public class LogSkeleton implements HTMLToString {
 		while (!postset.isEmpty()) {
 			if (prevActivity != null) {
 				preset.add(prevActivity);
-				int distance = 1;
-				for (String postActivity : postset) {
-					List<String> pair = new ArrayList<String>();
-					pair.add(prevActivity);
-					pair.add(postActivity);
-					if (distances.containsKey(pair) && !checkDistance(distance, distances.get(pair))) {
-						//						return false;
-					}
-					distance++;
-				}
+//				int distance = 1;
+//				for (String postActivity : postset) {
+//					List<String> pair = new ArrayList<String>();
+//					pair.add(prevActivity);
+//					pair.add(postActivity);
+//					if (distances.containsKey(pair) && !checkDistance(distance, distances.get(pair))) {
+//						//						return false;
+//					}
+//					distance++;
+//				}
 			}
 			String activity = postset.remove(0);
 			if (!preset.containsAll(allPresets.get(activity))) {
