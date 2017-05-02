@@ -1,6 +1,13 @@
 package org.processmining.logskeleton.plugins;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.deckfour.xes.extension.std.XConceptExtension;
+import org.deckfour.xes.factory.XFactoryRegistry;
+import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
+import org.deckfour.xes.model.XTrace;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.abstractplugins.ImportPlugin;
 import org.processmining.framework.plugin.PluginContext;
@@ -8,6 +15,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.PDC2017LogFilterAlgorithm;
 import org.processmining.logskeleton.models.LogSkeleton;
+import org.processmining.logskeleton.models.LogSkeletonCount;
 import org.processmining.logskeleton.models.PDC2017Test;
 import org.processmining.plugins.log.OpenLogFilePlugin;
 
@@ -30,7 +38,7 @@ public class PDC2017TestPlugin {
 				XLog marchLog = (XLog) logImporter.importFile(context,
 						Path + "PDC 2017\\log" + i + ".xes");
 				XLog aprilLog = (XLog) logImporter.importFile(context,
-						Path + "PDC 2016\\April\\test_log_april_" + i + ".xes");
+						Path + "PDC 2017\\test_log_may\\test_log_may_" + i + ".xes");
 				XLog mayLog = (XLog) logImporter.importFile(context,
 						Path + "PDC 2016\\May\\test_log_may_" + i + ".xes");
 				XLog juneLog = (XLog) logImporter.importFile(context,
@@ -84,6 +92,38 @@ public class PDC2017TestPlugin {
 				XLog classifiedAprilLog = checkPlugin.run(context, model, filteredAprilLog);
 				XLog classifiedMayLog = checkPlugin.run(context, model, filteredMayLog);
 				XLog classifiedJuneLog = checkPlugin.run(context, model, filteredJuneLog);
+				
+				Set<String> positiveAprilTraces = new HashSet<String>();
+				for (XTrace trace : classifiedAprilLog) {
+					positiveAprilTraces.add(XConceptExtension.instance().extractName(trace));
+				}
+				for (String activity : model.getActivities()) {
+					if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
+						continue;
+					}
+					Set<String> filters = new HashSet<String>();
+					filters.add(activity);
+					XLog filteredMarchSubLog = filter(filteredMarchLog, filters);
+					XLog filteredAprilSubLog = filter(filteredAprilLog, filters);
+					LogSkeleton subModel = createPlugin.run(context, filteredMarchSubLog);
+					XLog classifiedAprilSubLog = checkPlugin.run(context, subModel, filteredAprilSubLog);
+					Set<String> negativeAprilSubTraces = new HashSet<String>();
+					for (XTrace subTrace : filteredAprilSubLog) {
+						if (!classifiedAprilSubLog.contains(subTrace)) {
+							negativeAprilSubTraces.add(XConceptExtension.instance().extractName(subTrace));
+						}
+					}
+					positiveAprilTraces.removeAll(negativeAprilSubTraces);
+				}
+				XLog newClassifiedAprilLog = XFactoryRegistry.instance().currentDefault().createLog();
+				for (XTrace trace : classifiedAprilLog) {
+					if (positiveAprilTraces.contains(XConceptExtension.instance().extractName(trace))) {
+						newClassifiedAprilLog.add(trace);
+					}
+				}
+				classifiedAprilLog = newClassifiedAprilLog;
+				
+				
 				testModel.add(i, classifiedAprilLog, classifiedMayLog, classifiedJuneLog, model);
 			}
 			return testModel;
@@ -91,6 +131,21 @@ public class PDC2017TestPlugin {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private static XLog filter(XLog log, Set<String> filters) {
+		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog();
+		for (XTrace trace : log) {
+			boolean ok = false;
+			Set<String> toMatch = new HashSet<String>(filters);
+			for (XEvent event : trace) {
+				toMatch.remove(XConceptExtension.instance().extractName(event));
+			}
+			if (toMatch.isEmpty()) {
+				filteredLog.add(trace);
+			}
+		}
+		return filteredLog;
 	}
 
 }

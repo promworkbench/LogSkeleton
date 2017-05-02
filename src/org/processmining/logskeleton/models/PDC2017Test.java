@@ -51,20 +51,20 @@ public class PDC2017Test implements HTMLToString {
 				buf.append("<h1>June</h1>");
 				logs = juneLogs;
 			}
-			buf.append("<table><tr><th>Log/Trace</th>");
+			buf.append("<table><tr><th></th>");
 			for (int n = 1; n < 21; n++) {
-				buf.append("<th>" + n + "</th>");
+				buf.append("<th>trace_" + n + "</th>");
 			}
-			buf.append("<th>#Yes</th>");
+			buf.append("<th>#True</th>");
 			buf.append("</tr>");
 			for (int i = 0; i < numbers.size(); i++) {
 				Set<String> acceptedTraces = new HashSet<String>();
 				for (XTrace trace : logs.get(i)) {
 					acceptedTraces.add(XConceptExtension.instance().extractName(trace));
 				}
-				buf.append("<tr><td>" + numbers.get(i) + "</td>");
+				buf.append("<tr><td>model_" + numbers.get(i) + "</td>");
 				for (int n = 1; n < 21; n++) {
-					buf.append("<td>" + (acceptedTraces.contains("" + n) ? "<b>Yes</b>" : "<i>No</i>") + "</td>");
+					buf.append("<td>" + (acceptedTraces.contains("" + n) ? "TRUE" : "FALSE") + "</td>");
 				}
 				buf.append("<td>" + logs.get(i).size() + "</td>");
 				buf.append("</tr>");

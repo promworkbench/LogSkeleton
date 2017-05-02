@@ -39,9 +39,9 @@ import org.processmining.logskeleton.parameters.SplitterParameters;
 
 import com.fluxicon.slickerbox.components.SlickerButton;
 
-@Plugin(name = "Configurable Log Skeleton Browser", parameterLabels = { "Event Log" }, returnLabels = { "Configurable Log SKeleton Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Configurable Log Skeleton Browser")
+@Plugin(name = "Log Skeleton Filter and Browser", parameterLabels = { "Event Log" }, returnLabels = { "Log Skeleton Filter and Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Filter and Browser")
 @Visualizer
-public class ConfigurableLogSkeletonBrowserPlugin {
+public class LogSkeletonFilterBrowserPlugin {
 
 	private UIPluginContext context;
 	private XLog log;
@@ -102,13 +102,11 @@ public class ConfigurableLogSkeletonBrowserPlugin {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog();
 		for (XTrace trace : log) {
 			boolean ok = false;
+			Set<String> toMatch = new HashSet<String>(filters);
 			for (XEvent event : trace) {
-				String activity = XConceptExtension.instance().extractName(event);
-				if (filters.contains(activity)) {
-					ok = true;
-				}
+				toMatch.remove(XConceptExtension.instance().extractName(event));
 			}
-			if (ok) {
+			if (toMatch.isEmpty()) {
 				filteredLog.add(trace);
 			}
 		}
