@@ -31,8 +31,9 @@ public class PDC2017TestPlugin {
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		PDC2017LogFilterAlgorithm filterAlgorithm = new PDC2017LogFilterAlgorithm();
 		PDC2017Test testModel = new PDC2017Test();
-		String Path = "D:\\Dropbox\\Projects\\";
-		//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
+//		String Path = "D:\\Dropbox\\Projects\\";
+//		String Path = "C:\\Users\\hverbeek\\Dropbox\\Projects\\";
+		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
 			for (int i = 1; i < 11; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");
@@ -51,14 +52,19 @@ public class PDC2017TestPlugin {
 				//				}
 				if (i == 1) {
 					filteredMarchLog = (new PDC2017Log1FilterPlugin()).run(context, marchLog);
+//					filteredMarchLog = filterAlgorithm.apply(marchLog);
 				} else if (i == 2) {
 					filteredMarchLog = (new PDC2017Log2FilterPlugin()).run(context, marchLog);
+//					filteredMarchLog = filterAlgorithm.apply(marchLog);
 				} else if (i == 5) {
 					filteredMarchLog = (new PDC2017Log5FilterPlugin()).run(context, marchLog);
+//					filteredMarchLog = filterAlgorithm.apply(marchLog);
 				} else if (i == 9) {
 					filteredMarchLog = (new PDC2017Log9FilterPlugin()).run(context, marchLog);
+//					filteredMarchLog = filterAlgorithm.apply(marchLog);
 				} else if (i == 10) {
 					filteredMarchLog = (new PDC2017Log10FilterPlugin()).run(context, marchLog);
+//					filteredMarchLog = filterAlgorithm.apply(marchLog);
 				}
 				if (i == 4) {
 					PDC2017Log4SplitterPlugin splitter = new PDC2017Log4SplitterPlugin();
@@ -116,6 +122,9 @@ public class PDC2017TestPlugin {
 			positiveTestTraces.add(XConceptExtension.instance().extractName(trace));
 		}
 		for (String activity : trainingModel.getActivities()) {
+			if (positiveTestTraces.size() <= 10) {
+				continue;
+			}
 			if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 				continue;
 			}
