@@ -117,7 +117,7 @@ public class LogSkeleton implements HTMLToString {
 				counts.add(model.get(activity));
 			}
 			if (counts.size() != 1) {
-				System.out.println("[LogSkeleton] Check failed: " + sameCount);
+//				System.out.println("[LogSkeleton] Check failed: " + sameCount);
 				ok = false;
 			}
 		}

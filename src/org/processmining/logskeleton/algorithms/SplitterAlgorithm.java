@@ -31,7 +31,7 @@ public class SplitterAlgorithm {
 			}
 			filteredLog.add(filteredTrace);
 		}
-		System.out.println("[SplitterAlgorithm] Split log contains " + filteredLog.size() + " traces");
+//		System.out.println("[SplitterAlgorithm] Split log contains " + filteredLog.size() + " traces");
 		return filteredLog;
 	}
 
