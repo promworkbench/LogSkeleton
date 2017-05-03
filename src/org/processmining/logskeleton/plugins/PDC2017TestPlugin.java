@@ -118,11 +118,15 @@ public class PDC2017TestPlugin {
 	private static XLog classify(PluginContext context, LogSkeleton trainingModel, XLog trainingLog, XLog testLog) {
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
-		XLog classifiedTestLog = checkPlugin.run(context, trainingModel, testLog);
+		Set<String> messages = new HashSet<String>();
+		XLog classifiedTestLog = checkPlugin.run(context, trainingModel, testLog, messages, false);
 		Set<String> positiveTestTraces = new HashSet<String>();
 		int threshold = 10;
 		for (XTrace trace : classifiedTestLog) {
 			positiveTestTraces.add(XConceptExtension.instance().extractName(trace));
+		}
+		for (String message : messages) {
+			System.out.println("[PDC2017TestPlugin]" + message);
 		}
 		for (int i = 0; i < 2; i++) {
 			for (String activity : trainingModel.getActivities()) {
@@ -140,7 +144,7 @@ public class PDC2017TestPlugin {
 					continue;
 				}
 				LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
-				Set<String> messages = new HashSet<String>();
+				messages = new HashSet<String>();
 				XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel, filteredTestLog,
 						messages, i == 1);
 				for (XTrace subTrace : filteredTestLog) {
@@ -183,7 +187,7 @@ public class PDC2017TestPlugin {
 						continue;
 					}
 					LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
-					Set<String> messages = new HashSet<String>();
+					messages = new HashSet<String>();
 					XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel, filteredTestLog,
 							messages, i == 1);
 					for (XTrace subTrace : filteredTestLog) {
