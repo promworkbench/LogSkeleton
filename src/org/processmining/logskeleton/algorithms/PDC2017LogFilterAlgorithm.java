@@ -91,7 +91,7 @@ public class PDC2017LogFilterAlgorithm {
 		LogSkeletonBuilderAlgorithm logSkeletonBuilder = new LogSkeletonBuilderAlgorithm();
 		LogSkeletonCheckerAlgorithm logSkeletonChecker = new LogSkeletonCheckerAlgorithm();
 		LogSkeleton skeleton = logSkeletonBuilder.apply(filteredLog);
-		return logSkeletonChecker.apply(skeleton, filteredLog);
+		return logSkeletonChecker.apply(skeleton, filteredLog, new HashSet<String>(), true);
 //		return applyPrefix(applyEndActivities(log));
 //		return applyEndActivities(applyPrefix(log));
 //		XLog prefixLog = applyPrefix(log);

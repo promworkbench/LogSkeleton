@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class LogSkeletonCount {
 
@@ -21,12 +22,14 @@ public class LogSkeletonCount {
 		transitionCounts = new HashMap<List<String>, Integer>();
 	}
 	
-	public boolean checkTransitionCounts(LogSkeletonCount model) {
+	public boolean checkTransitionCounts(LogSkeletonCount model, Set<String> messages, String caseId) {
 		for (List<String> transition : model.transitionCounts.keySet()) {
 			if (!transitionCounts.keySet().contains(transition)) {
+				messages.add("[LogSkeletonCount] Case " + caseId + ": Next fails for " + transition);
 				return false;
 			}
 			if (transitionCounts.get(transition) < model.transitionCounts.get(transition)) {
+				messages.add("[LogSkeletonCount] Case " + caseId + ": Next fails for " + transition);
 				return false;
 			}
 		}

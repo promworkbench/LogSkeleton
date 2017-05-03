@@ -6,10 +6,10 @@ public enum LogSkeletonBrowser {
 	ALWAYSBEFORE("Always Before"),
 	ALWAYSAFTER("Always After"),
 	NEVERTOGETHER("Never Together"),
-	NEVERBEFORE("Never Before"),
-	NEVERAFTER("Never After"),
-	SOMETIMESBEFORE("Sometimes Before"),
-	SOMETIMESAFTER("Sometimes After"),
+//	NEVERBEFORE("Never Before"),
+//	NEVERAFTER("Never After"),
+//	SOMETIMESBEFORE("Sometimes Before"),
+//	SOMETIMESAFTER("Sometimes After"),
 	NEXTONEWAY("Next (One Way)"),
 	NEXTBOTHWAYS("Next (Both Ways)");
 	

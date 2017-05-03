@@ -1,5 +1,8 @@
 package org.processmining.logskeleton.plugins;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
@@ -14,6 +17,10 @@ public class LogSkeletonCheckerPlugin extends LogSkeletonCheckerAlgorithm {
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0, 1 })
 	public XLog run(PluginContext context, LogSkeleton model, XLog log) {
-		return apply(model, log);
+		return apply(model, log, new HashSet<String>(), true);
+	}
+
+	public XLog run(PluginContext context, LogSkeleton model, XLog log, Set<String> messages, boolean checkTransitionCounts) {
+		return apply(model, log, messages, checkTransitionCounts);
 	}
 }
