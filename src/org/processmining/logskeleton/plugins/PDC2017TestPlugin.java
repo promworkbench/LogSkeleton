@@ -35,7 +35,7 @@ public class PDC2017TestPlugin {
 		//		String Path = "C:\\Users\\hverbeek\\Dropbox\\Projects\\";
 		//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
-			for (int i = 1; i < 11; i++) {
+			for (int i = 3; i < 4; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");
 				XLog aprilLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_may\\test_log_may_"
 						+ i + ".xes");
@@ -68,8 +68,20 @@ public class PDC2017TestPlugin {
 					//					filteredMarchLog = filterAlgorithm.apply(marchLog);
 				}
 				System.out.println("====== Split " + i + " ======");
-				if (i == 4) {
+				if (i == 2) {
+					PDC2017Log2SplitterPlugin splitter = new PDC2017Log2SplitterPlugin();
+					filteredMarchLog = splitter.run(context, filteredMarchLog);
+					filteredAprilLog = splitter.run(context, aprilLog);
+					filteredMayLog = splitter.run(context, mayLog);
+					filteredJuneLog = splitter.run(context, juneLog);
+				} else if (i == 4) {
 					PDC2017Log4SplitterPlugin splitter = new PDC2017Log4SplitterPlugin();
+					filteredMarchLog = splitter.run(context, filteredMarchLog);
+					filteredAprilLog = splitter.run(context, aprilLog);
+					filteredMayLog = splitter.run(context, mayLog);
+					filteredJuneLog = splitter.run(context, juneLog);
+				} else if (i == 5) {
+					PDC2017Log5SplitterPlugin splitter = new PDC2017Log5SplitterPlugin();
 					filteredMarchLog = splitter.run(context, filteredMarchLog);
 					filteredAprilLog = splitter.run(context, aprilLog);
 					filteredMayLog = splitter.run(context, mayLog);
@@ -136,29 +148,38 @@ public class PDC2017TestPlugin {
 				if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 					continue;
 				}
-				Set<String> filters = new HashSet<String>();
-				filters.add(activity);
-				XLog filteredTrainingLog = filter(trainingLog, filters);
-				XLog filteredTestLog = filter(testLog, filters);
-				if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()) {
-					continue;
-				}
-				LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
-				messages = new HashSet<String>();
-				XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel, filteredTestLog,
-						messages, i == 1);
-				for (XTrace subTrace : filteredTestLog) {
-					if (positiveTestTraces.size() <= threshold) {
+
+				for (int f = 0; f < 2; f++) {
+					Set<String> positiveFilters = new HashSet<String>();
+					Set<String> negativeFilters = new HashSet<String>();
+					if (f == 0) {
+						positiveFilters.add(activity);
+					} else {
+						negativeFilters.add(activity);
+					}
+					XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
+					XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
+					if (filteredTestLog.isEmpty() || filteredTrainingLog.size() < 100) {
 						continue;
 					}
-					if (!classifiedFilteredTestLog.contains(subTrace)) {
-						String caseId = XConceptExtension.instance().extractName(subTrace);
-						if (positiveTestTraces.remove(caseId)) {
-							System.out.println("[PDC2017TestPlugin] Case "
-									+ XConceptExtension.instance().extractName(subTrace) + " excluded by filter "
-									+ filters);
-							for (String message : messages) {
-								System.out.println("[PDC2017TestPlugin]" + message);
+					LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
+					messages = new HashSet<String>();
+					XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel, filteredTestLog,
+							messages, i == 1);
+					for (XTrace subTrace : filteredTestLog) {
+						if (positiveTestTraces.size() <= threshold) {
+							continue;
+						}
+						if (!classifiedFilteredTestLog.contains(subTrace)) {
+							String caseId = XConceptExtension.instance().extractName(subTrace);
+							if (positiveTestTraces.remove(caseId)) {
+								System.out.println("[PDC2017TestPlugin] Case "
+										+ XConceptExtension.instance().extractName(subTrace)
+										+ " excluded by positive filter " + positiveFilters + " and negative filter "
+										+ negativeFilters);
+								for (String message : messages) {
+									System.out.println("[PDC2017TestPlugin]" + message);
+								}
 							}
 						}
 					}
@@ -178,30 +199,42 @@ public class PDC2017TestPlugin {
 					if (activity.compareTo(activity2) >= 0) {
 						continue;
 					}
-					Set<String> filters = new HashSet<String>();
-					filters.add(activity);
-					filters.add(activity2);
-					XLog filteredTrainingLog = filter(trainingLog, filters);
-					XLog filteredTestLog = filter(testLog, filters);
-					if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()) {
-						continue;
-					}
-					LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
-					messages = new HashSet<String>();
-					XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel, filteredTestLog,
-							messages, i == 1);
-					for (XTrace subTrace : filteredTestLog) {
-						if (positiveTestTraces.size() <= threshold) {
+					for (int f = 0; f < 4; f++) {
+						Set<String> positiveFilters = new HashSet<String>();
+						Set<String> negativeFilters = new HashSet<String>();
+						if (f == 0 || f == 1) {
+							positiveFilters.add(activity);
+						} else {
+							negativeFilters.add(activity);
+						}
+						if (f == 0 || f == 2) {
+							positiveFilters.add(activity2);
+						} else {
+							negativeFilters.add(activity2);
+						}
+						XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
+						XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
+						if (filteredTestLog.isEmpty() || filteredTrainingLog.size() < 100) {
 							continue;
 						}
-						if (!classifiedFilteredTestLog.contains(subTrace)) {
-							String caseId = XConceptExtension.instance().extractName(subTrace);
-							if (positiveTestTraces.remove(caseId)) {
-								System.out.println("[PDC2017TestPlugin] Case "
-										+ XConceptExtension.instance().extractName(subTrace) + " excluded by filter "
-										+ filters);
-								for (String message : messages) {
-									System.out.println("[PDC2017TestPlugin]" + message);
+						LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
+						messages = new HashSet<String>();
+						XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel,
+								filteredTestLog, messages, i == 1);
+						for (XTrace subTrace : filteredTestLog) {
+							if (positiveTestTraces.size() <= threshold) {
+								continue;
+							}
+							if (!classifiedFilteredTestLog.contains(subTrace)) {
+								String caseId = XConceptExtension.instance().extractName(subTrace);
+								if (positiveTestTraces.remove(caseId)) {
+									System.out.println("[PDC2017TestPlugin] Case "
+											+ XConceptExtension.instance().extractName(subTrace)
+											+ " excluded by positive filter " + positiveFilters
+											+ " and negative filter " + negativeFilters);
+									for (String message : messages) {
+										System.out.println("[PDC2017TestPlugin]" + message);
+									}
 								}
 							}
 						}
@@ -218,15 +251,20 @@ public class PDC2017TestPlugin {
 		return newClassifiedAprilLog;
 	}
 
-	private static XLog filter(XLog log, Set<String> filters) {
+	private static XLog filter(XLog log, Set<String> positiveFilters, Set<String> negativeFilters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog();
 		for (XTrace trace : log) {
-			boolean ok = false;
-			Set<String> toMatch = new HashSet<String>(filters);
+			boolean ok = true;
+			Set<String> toMatch = new HashSet<String>(positiveFilters);
 			for (XEvent event : trace) {
-				toMatch.remove(XConceptExtension.instance().extractName(event));
+				String activity = XConceptExtension.instance().extractName(event);
+				if (negativeFilters.contains(activity)) {
+					ok = false;
+					;
+				}
+				toMatch.remove(activity);
 			}
-			if (toMatch.isEmpty()) {
+			if (ok && toMatch.isEmpty()) {
 				filteredLog.add(trace);
 			}
 		}

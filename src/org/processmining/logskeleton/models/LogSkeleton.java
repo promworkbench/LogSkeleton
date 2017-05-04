@@ -27,7 +27,8 @@ public class LogSkeleton implements HTMLToString {
 	private Map<String, Set<String>> allPostsets;
 	private Map<String, Set<String>> anyPresets;
 	private Map<String, Set<String>> anyPostsets;
-//	private Map<List<String>, List<Integer>> distances;
+
+	//	private Map<List<String>, List<Integer>> distances;
 
 	public LogSkeleton(LogSkeletonCount countModel, LogSkeletonCount correctedCountModel) {
 		this.countModel = countModel;
@@ -36,7 +37,7 @@ public class LogSkeleton implements HTMLToString {
 		allPostsets = new HashMap<String, Set<String>>();
 		anyPresets = new HashMap<String, Set<String>>();
 		anyPostsets = new HashMap<String, Set<String>>();
-//		distances = new HashMap<List<String>, List<Integer>>();
+		//		distances = new HashMap<List<String>, List<Integer>>();
 	}
 
 	public void addSameCount(Collection<String> activities) {
@@ -73,17 +74,17 @@ public class LogSkeleton implements HTMLToString {
 			postset.addAll(anyPostsets.get(activity));
 		}
 		anyPostsets.put(activity, postset);
-//		int distance = 1;
-//		for (String postActivity : post) {
-//			List<String> pair = new ArrayList<String>();
-//			pair.add(activity);
-//			pair.add(postActivity);
-//			if (!distances.containsKey(pair)) {
-//				distances.put(pair, new ArrayList<Integer>());
-//			}
-//			distances.get(pair).add(distance);
-//			distance++;
-//		}
+		//		int distance = 1;
+		//		for (String postActivity : post) {
+		//			List<String> pair = new ArrayList<String>();
+		//			pair.add(activity);
+		//			pair.add(postActivity);
+		//			if (!distances.containsKey(pair)) {
+		//				distances.put(pair, new ArrayList<Integer>());
+		//			}
+		//			distances.get(pair).add(distance);
+		//			distance++;
+		//		}
 	}
 
 	public void cleanPrePost() {
@@ -128,24 +129,24 @@ public class LogSkeleton implements HTMLToString {
 		return countModel.checkTransitionCounts(model, messages, caseId);
 	}
 
-//	private boolean checkDistance(int distance, List<Integer> distances) {
-//		if (distance > 0) {
-//			return true;
-//		}
-//		if (distance > 2 || distances.size() < 10) {
-//			return true;
-//		}
-//		int min = Integer.MAX_VALUE;
-//		int max = 0;
-//		for (Integer value : distances) {
-//			min = Math.min(min, value);
-//			max = Math.max(max, value);
-//		}
-//		if (min > distance || distance > max) {
-//			System.out.println("[PDC2017ConstraintModel] " + distance + " " + distances);
-//		}
-//		return min <= distance && distance <= max;
-//	}
+	//	private boolean checkDistance(int distance, List<Integer> distances) {
+	//		if (distance > 0) {
+	//			return true;
+	//		}
+	//		if (distance > 2 || distances.size() < 10) {
+	//			return true;
+	//		}
+	//		int min = Integer.MAX_VALUE;
+	//		int max = 0;
+	//		for (Integer value : distances) {
+	//			min = Math.min(min, value);
+	//			max = Math.max(max, value);
+	//		}
+	//		if (min > distance || distance > max) {
+	//			System.out.println("[PDC2017ConstraintModel] " + distance + " " + distances);
+	//		}
+	//		return min <= distance && distance <= max;
+	//	}
 
 	private boolean checkCausalDependencies(XTrace trace, Set<String> messages) {
 		String caseId = XConceptExtension.instance().extractName(trace);
@@ -160,38 +161,40 @@ public class LogSkeleton implements HTMLToString {
 		while (!postset.isEmpty()) {
 			if (prevActivity != null) {
 				preset.add(prevActivity);
-//				int distance = 1;
-//				for (String postActivity : postset) {
-//					List<String> pair = new ArrayList<String>();
-//					pair.add(prevActivity);
-//					pair.add(postActivity);
-//					if (distances.containsKey(pair) && !checkDistance(distance, distances.get(pair))) {
-//						//						return false;
-//					}
-//					distance++;
-//				}
+				//				int distance = 1;
+				//				for (String postActivity : postset) {
+				//					List<String> pair = new ArrayList<String>();
+				//					pair.add(prevActivity);
+				//					pair.add(postActivity);
+				//					if (distances.containsKey(pair) && !checkDistance(distance, distances.get(pair))) {
+				//						//						return false;
+				//					}
+				//					distance++;
+				//				}
 			}
 			String activity = postset.remove(0);
 			if (allPresets.containsKey(activity) && !preset.containsAll(allPresets.get(activity))) {
 				Set<String> missing = new HashSet<String>(allPresets.get(activity));
 				missing.removeAll(preset);
-				messages.add("[LogSkeleton] Case " + caseId + ": Always Before fails for " + activity + ", missing are " + missing);
+				messages.add("[LogSkeleton] Case " + caseId + ": Always Before fails for " + activity
+						+ ", missing are " + missing);
 				return false;
 			}
 			if (allPostsets.containsKey(activity) && !postset.containsAll(allPostsets.get(activity))) {
 				Set<String> missing = new HashSet<String>(allPostsets.get(activity));
 				missing.removeAll(postset);
-				messages.add("[LogSkeleton] Case " + caseId + ": Always After fails for " + activity + ", missing are " + missing);
+				messages.add("[LogSkeleton] Case " + caseId + ": Always After fails for " + activity + ", missing are "
+						+ missing);
 				return false;
 			}
-//			if (!anyPresets.get(activity).containsAll(preset)) {
-//				System.out.println("[LogSkeleton] Sometimes Before fails on " + prevActivity + " and " + activity);
-//				return false;
-//			}
-//			if (!anyPostsets.get(activity).containsAll(postset)) {
-//				System.out.println("[LogSkeleton] Sometimes After fails on " + prevActivity + " and " + activity);
-//				return false;
-//			}
+			//			if (!anyPresets.get(activity).containsAll(preset)) {
+			//				System.out.println("[LogSkeleton] Sometimes Before fails on " + prevActivity + " and " + activity);
+			//				return false;
+			//			}
+			//			if (!anyPostsets.get(activity).containsAll(postset)) {
+			//				System.out.println("[LogSkeleton] Sometimes After fails on " + prevActivity + " and " + activity);
+			//				return false;
+			//			}
 			prevActivity = activity;
 		}
 		return true;
@@ -205,11 +208,11 @@ public class LogSkeleton implements HTMLToString {
 		}
 		//		ok = ok && checkPlaceCounts(model);
 		//		ok = ok && checkPlaceRelations(trace, model);
-		ok = ok && checkCausalDependencies(trace, messages);
-		if (!ok) {
-			return false;
-		}
 		if (checkTransitionCounts) {
+			ok = ok && checkCausalDependencies(trace, messages);
+			if (!ok) {
+				return false;
+			}
 			ok = ok && checkTransitionCounts(model, messages, XConceptExtension.instance().extractName(trace));
 		}
 		return ok;
@@ -299,8 +302,8 @@ public class LogSkeleton implements HTMLToString {
 	public Dot visualize(LogSkeletonBrowserParameters parameters) {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
-//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
-//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
+		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
+		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
 		for (String activity : parameters.getActivities()) {
 			map.put(activity, graph.addNode(activity + "\n" + countModel.get(activity)));
 		}
@@ -374,76 +377,76 @@ public class LogSkeleton implements HTMLToString {
 					}
 					break;
 				}
-//				case NEVERBEFORE : {
-//					for (String toActivity : anyPresets.keySet()) {
-//						if (parameters.getActivities().contains(toActivity)) {
-//							for (String fromActivity : countModel.getActivities()) {
-//								if (parameters.getActivities().contains(fromActivity)) {
-//									if (!anyPresets.get(toActivity).contains(fromActivity)
-//											&& anyPostsets.get(toActivity).contains(fromActivity)) {
-//										DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
-//										arc.setOption("dir", "both");
-//										arc.setOption("arrowtail", "normal");
-//										arc.setOption("arrowhead", "box");
-//									}
-//								}
-//							}
-//						}
-//					}
-//					break;
-//				}
-//				case NEVERAFTER : {
-//					for (String toActivity : anyPostsets.keySet()) {
-//						if (parameters.getActivities().contains(toActivity)) {
-//							for (String fromActivity : countModel.getActivities()) {
-//								if (parameters.getActivities().contains(fromActivity)) {
-//									if (!anyPostsets.get(toActivity).contains(fromActivity)
-//											&& anyPresets.get(toActivity).contains(fromActivity)) {
-//										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-//										arc.setOption("dir", "both");
-//										arc.setOption("arrowtail", "boxnormal");
-//										arc.setOption("arrowhead", "none");
-//									}
-//								}
-//							}
-//						}
-//					}
-//					break;
-//				}
-//				case SOMETIMESBEFORE : {
-//					for (String toActivity : anyPresets.keySet()) {
-//						if (parameters.getActivities().contains(toActivity)) {
-//							for (String fromActivity : countModel.getActivities()) {
-//								if (parameters.getActivities().contains(fromActivity)) {
-//									if (anyPresets.get(toActivity).contains(fromActivity)) {
-//										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-//										arc.setOption("dir", "both");
-//										arc.setOption("arrowtail", "none");
-//										arc.setOption("arrowhead", "odiamondnormal");
-//									}
-//								}
-//							}
-//						}
-//					}
-//					break;
-//				}
-//				case SOMETIMESAFTER : {
-//					for (String toActivity : anyPostsets.keySet()) {
-//						if (parameters.getActivities().contains(toActivity)) {
-//							for (String fromActivity : countModel.getActivities()) {
-//								if (parameters.getActivities().contains(fromActivity)) {
-//									if (anyPostsets.get(toActivity).contains(fromActivity)) {
-//										DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
-//										arc.setOption("dir", "both");
-//										arc.setOption("arrowtail", "odiamond");
-//										arc.setOption("arrowhead", "normal");
-//									}
-//								}
-//							}
-//						}
-//					}
-//					break;
-//				}
+				//				case NEVERBEFORE : {
+				//					for (String toActivity : anyPresets.keySet()) {
+				//						if (parameters.getActivities().contains(toActivity)) {
+				//							for (String fromActivity : countModel.getActivities()) {
+				//								if (parameters.getActivities().contains(fromActivity)) {
+				//									if (!anyPresets.get(toActivity).contains(fromActivity)
+				//											&& anyPostsets.get(toActivity).contains(fromActivity)) {
+				//										DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
+				//										arc.setOption("dir", "both");
+				//										arc.setOption("arrowtail", "normal");
+				//										arc.setOption("arrowhead", "box");
+				//									}
+				//								}
+				//							}
+				//						}
+				//					}
+				//					break;
+				//				}
+				//				case NEVERAFTER : {
+				//					for (String toActivity : anyPostsets.keySet()) {
+				//						if (parameters.getActivities().contains(toActivity)) {
+				//							for (String fromActivity : countModel.getActivities()) {
+				//								if (parameters.getActivities().contains(fromActivity)) {
+				//									if (!anyPostsets.get(toActivity).contains(fromActivity)
+				//											&& anyPresets.get(toActivity).contains(fromActivity)) {
+				//										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+				//										arc.setOption("dir", "both");
+				//										arc.setOption("arrowtail", "boxnormal");
+				//										arc.setOption("arrowhead", "none");
+				//									}
+				//								}
+				//							}
+				//						}
+				//					}
+				//					break;
+				//				}
+				//				case SOMETIMESBEFORE : {
+				//					for (String toActivity : anyPresets.keySet()) {
+				//						if (parameters.getActivities().contains(toActivity)) {
+				//							for (String fromActivity : countModel.getActivities()) {
+				//								if (parameters.getActivities().contains(fromActivity)) {
+				//									if (anyPresets.get(toActivity).contains(fromActivity)) {
+				//										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+				//										arc.setOption("dir", "both");
+				//										arc.setOption("arrowtail", "none");
+				//										arc.setOption("arrowhead", "odiamondnormal");
+				//									}
+				//								}
+				//							}
+				//						}
+				//					}
+				//					break;
+				//				}
+				//				case SOMETIMESAFTER : {
+				//					for (String toActivity : anyPostsets.keySet()) {
+				//						if (parameters.getActivities().contains(toActivity)) {
+				//							for (String fromActivity : countModel.getActivities()) {
+				//								if (parameters.getActivities().contains(fromActivity)) {
+				//									if (anyPostsets.get(toActivity).contains(fromActivity)) {
+				//										DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
+				//										arc.setOption("dir", "both");
+				//										arc.setOption("arrowtail", "odiamond");
+				//										arc.setOption("arrowhead", "normal");
+				//									}
+				//								}
+				//							}
+				//						}
+				//					}
+				//					break;
+				//				}
 				case NEXTONEWAY : {
 					for (String toActivity : countModel.getActivities()) {
 						if (parameters.getActivities().contains(toActivity)) {
