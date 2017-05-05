@@ -48,7 +48,8 @@ public class LogSkeletonFilterBrowserPlugin {
 	private JComponent rightPanel = null;
 	private JPanel mainPanel = null;
 	private List<List<String>> splitters;
-	private Set<String> filters;
+	private Set<String> positiveFilters;
+	private Set<String> negativeFilters;
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
@@ -62,7 +63,8 @@ public class LogSkeletonFilterBrowserPlugin {
 		mainPanel.setOpaque(false);
 
 		splitters = new ArrayList<List<String>>();
-		filters = new HashSet<String>();
+		positiveFilters = new HashSet<String>();
+		negativeFilters = new HashSet<String>();
 
 		mainPanel.add(getControlPanel(), "0, 0");
 
@@ -75,8 +77,8 @@ public class LogSkeletonFilterBrowserPlugin {
 		SplitterAlgorithm splitterAlgorithm = new SplitterAlgorithm();
 		SplitterParameters splitterParameters = new SplitterParameters();
 		XLog filteredLog = log;
-		if (!filters.isEmpty()) {
-			filteredLog = filter(filteredLog, filters);
+		if (!positiveFilters.isEmpty() || !negativeFilters.isEmpty()) {
+			filteredLog = filter(filteredLog, positiveFilters, negativeFilters);
 		}
 		for (List<String> splitter : splitters) {
 			splitterParameters.setDuplicateActivity(splitter.get(0));
@@ -98,15 +100,20 @@ public class LogSkeletonFilterBrowserPlugin {
 		mainPanel.repaint();
 	}
 
-	private XLog filter(XLog log, Set<String> filters) {
+	private static XLog filter(XLog log, Set<String> positiveFilters, Set<String> negativeFilters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog();
 		for (XTrace trace : log) {
-			boolean ok = false;
-			Set<String> toMatch = new HashSet<String>(filters);
+			boolean ok = true;
+			Set<String> toMatch = new HashSet<String>(positiveFilters);
 			for (XEvent event : trace) {
-				toMatch.remove(XConceptExtension.instance().extractName(event));
+				String activity = XConceptExtension.instance().extractName(event);
+				if (negativeFilters.contains(activity)) {
+					ok = false;
+					;
+				}
+				toMatch.remove(activity);
 			}
-			if (toMatch.isEmpty()) {
+			if (ok && toMatch.isEmpty()) {
 				filteredLog.add(trace);
 			}
 		}
@@ -130,32 +137,48 @@ public class LogSkeletonFilterBrowserPlugin {
 		JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log);
 		double size[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL },
-				{ TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 } };
 		controlPanel.setLayout(new TableLayout(size));
 		controlPanel.setOpaque(false);
-		DefaultListModel<String> activityModel = new DefaultListModel<String>();
+		
+		DefaultListModel<String> requiredActivityModel = new DefaultListModel<String>();
 		for (String activity : activities) {
-			activityModel.addElement(activity);
+			requiredActivityModel.addElement(activity);
 		}
-
-		final ProMList<String> activityList = new ProMList<String>("Filters", activityModel);
-		activityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		activityList.addListSelectionListener(new ListSelectionListener() {
+		final ProMList<String> requiredActivityList = new ProMList<String>("Required activities", requiredActivityModel);
+		requiredActivityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		requiredActivityList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				List<String> selectedActivities = activityList.getSelectedValuesList();
-				filters.clear();
-				filters.addAll(selectedActivities);
+				List<String> selectedActivities = requiredActivityList.getSelectedValuesList();
+				positiveFilters.clear();
+				positiveFilters.addAll(selectedActivities);
 			}
 		});
-		activityList.setPreferredSize(new Dimension(100, 100));
-		controlPanel.add(activityList, "0, 0, 1, 0");
+		requiredActivityList.setPreferredSize(new Dimension(100, 100));
+		controlPanel.add(requiredActivityList, "0, 0, 1, 0");
 
-		controlPanel.add(new JLabel("Splitters"), "0, 1, 1, 1");
+		DefaultListModel<String> forbiddenActivityModel = new DefaultListModel<String>();
+		for (String activity : activities) {
+			forbiddenActivityModel.addElement(activity);
+		}
+		final ProMList<String> forbiddenActivityList = new ProMList<String>("Forbidden activities", forbiddenActivityModel);
+		forbiddenActivityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		forbiddenActivityList.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				List<String> selectedActivities = forbiddenActivityList.getSelectedValuesList();
+				negativeFilters.clear();
+				negativeFilters.addAll(selectedActivities);
+			}
+		});
+		forbiddenActivityList.setPreferredSize(new Dimension(100, 100));
+		controlPanel.add(forbiddenActivityList, "0, 1, 1, 1");
+
+		controlPanel.add(new JLabel("Splitters"), "0, 2, 1, 2");
 		final ProMTextField inputs[][] = new ProMTextField[2][10];
 		for (int row = 0; row < 10; row++) {
 			for (int col = 0; col < 2; col++) {
 				inputs[col][row] = new ProMTextField();
-				controlPanel.add(inputs[col][row], "" + col + ", " + (row + 2));
+				controlPanel.add(inputs[col][row], "" + col + ", " + (row + 3));
 			}
 		}
 		final SlickerButton button = new SlickerButton("   Filter >>");
@@ -177,7 +200,7 @@ public class LogSkeletonFilterBrowserPlugin {
 			}
 
 		});
-		controlPanel.add(button, "0, 12, 1, 12");
+		controlPanel.add(button, "0, 13, 1, 13");
 
 		return controlPanel;
 	}
