@@ -17,10 +17,11 @@ public class LogSkeletonCheckerPlugin extends LogSkeletonCheckerAlgorithm {
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0, 1 })
 	public XLog run(PluginContext context, LogSkeleton model, XLog log) {
-		return apply(model, log, new HashSet<String>(), true);
+		boolean[] checks = new boolean[] { true, true, true };
+		return apply(model, log, new HashSet<String>(), checks);
 	}
 
-	public XLog run(PluginContext context, LogSkeleton model, XLog log, Set<String> messages, boolean checkTransitionCounts) {
-		return apply(model, log, messages, checkTransitionCounts);
+	public XLog run(PluginContext context, LogSkeleton model, XLog log, Set<String> messages, boolean[] checks) {
+		return apply(model, log, messages, checks);
 	}
 }

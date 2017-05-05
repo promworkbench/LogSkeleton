@@ -200,20 +200,25 @@ public class LogSkeleton implements HTMLToString {
 		return true;
 	}
 
-	public boolean check(XTrace trace, LogSkeletonCount model, Set<String> messages, boolean checkTransitionCounts) {
+	public boolean check(XTrace trace, LogSkeletonCount model, Set<String> messages, boolean[] checks) {
 		boolean ok = true;
-		ok = ok && checkSameCounts(model, messages, XConceptExtension.instance().extractName(trace));
-		if (!ok) {
-			return false;
+		if (checks[0]) {
+			ok = ok && checkSameCounts(model, messages, XConceptExtension.instance().extractName(trace));
+			if (!ok) {
+				return false;
+			}
 		}
-		//		ok = ok && checkPlaceCounts(model);
-		//		ok = ok && checkPlaceRelations(trace, model);
-		if (checkTransitionCounts) {
+		if (checks[1]) {
 			ok = ok && checkCausalDependencies(trace, messages);
 			if (!ok) {
 				return false;
 			}
+		}
+		if (checks[2]) {
 			ok = ok && checkTransitionCounts(model, messages, XConceptExtension.instance().extractName(trace));
+			if (!ok) {
+				return false;
+			}
 		}
 		return ok;
 	}

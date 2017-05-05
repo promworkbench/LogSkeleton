@@ -10,7 +10,7 @@ import org.processmining.logskeleton.models.LogSkeletonCount;
 
 public class LogSkeletonCheckerAlgorithm {
 
-	public XLog apply(LogSkeleton skeleton, XLog log, Set<String> messages, boolean checkTransitionCounts) {
+	public XLog apply(LogSkeleton skeleton, XLog log, Set<String> messages, boolean[] checks) {
 		XLog classifiedLog = XFactoryRegistry.instance().currentDefault().createLog();
 		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog();
 		LogSkeletonBuilderAlgorithm algorithm = new LogSkeletonBuilderAlgorithm();
@@ -20,7 +20,7 @@ public class LogSkeletonCheckerAlgorithm {
 			traceLog.add(trace);
 			LogSkeletonCount traceModel = algorithm.count(traceLog);
 //			traceModel.print("Trace " + XConceptExtension.instance().extractName(trace));
-			if (skeleton.check(trace, traceModel, messages, checkTransitionCounts)) {
+			if (skeleton.check(trace, traceModel, messages, checks)) {
 				classifiedLog.add(trace);
 			}
 		}

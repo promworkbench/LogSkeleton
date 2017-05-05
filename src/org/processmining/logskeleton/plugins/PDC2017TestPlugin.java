@@ -13,7 +13,6 @@ import org.processmining.framework.abstractplugins.ImportPlugin;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.logskeleton.algorithms.PDC2017LogFilterAlgorithm;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.models.LogSkeletonCount;
 import org.processmining.logskeleton.models.PDC2017Test;
@@ -28,14 +27,12 @@ public class PDC2017TestPlugin {
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = {})
 	public static PDC2017Test run(final PluginContext context) {
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
-		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
-		PDC2017LogFilterAlgorithm filterAlgorithm = new PDC2017LogFilterAlgorithm();
 		PDC2017Test testModel = new PDC2017Test();
-		String Path = "D:\\Dropbox\\Projects\\";
+		//		String Path = "D:\\Dropbox\\Projects\\";
 		//		String Path = "C:\\Users\\hverbeek\\Dropbox\\Projects\\";
-		//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
+		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
-			for (int i = 3; i < 4; i++) {
+			for (int i = 1; i < 11; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");
 				XLog aprilLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_may\\test_log_may_"
 						+ i + ".xes");
@@ -131,7 +128,8 @@ public class PDC2017TestPlugin {
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		Set<String> messages = new HashSet<String>();
-		XLog classifiedTestLog = checkPlugin.run(context, trainingModel, testLog, messages, false);
+		boolean[] checks = new boolean[] { true, true, false };
+		XLog classifiedTestLog = checkPlugin.run(context, trainingModel, testLog, messages, checks);
 		Set<String> positiveTestTraces = new HashSet<String>();
 		int threshold = 10;
 		for (XTrace trace : classifiedTestLog) {
@@ -140,7 +138,10 @@ public class PDC2017TestPlugin {
 		for (String message : messages) {
 			System.out.println("[PDC2017TestPlugin]" + message);
 		}
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
+			checks[0] = (i == 0);
+			checks[1] = (i == 1);
+			checks[2] = (i == 2);
 			for (String activity : trainingModel.getActivities()) {
 				if (positiveTestTraces.size() <= threshold) {
 					continue;
@@ -159,17 +160,17 @@ public class PDC2017TestPlugin {
 					}
 					XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
 					XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
-					if (filteredTestLog.isEmpty() || filteredTrainingLog.size() < 100) {
+					if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()) {
 						continue;
 					}
 					LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
 					messages = new HashSet<String>();
 					XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel, filteredTestLog,
-							messages, i == 1);
+							messages, checks);
 					for (XTrace subTrace : filteredTestLog) {
-						if (positiveTestTraces.size() <= threshold) {
-							continue;
-						}
+//						if (positiveTestTraces.size() <= threshold) {
+//							continue;
+//						}
 						if (!classifiedFilteredTestLog.contains(subTrace)) {
 							String caseId = XConceptExtension.instance().extractName(subTrace);
 							if (positiveTestTraces.remove(caseId)) {
@@ -214,17 +215,17 @@ public class PDC2017TestPlugin {
 						}
 						XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
 						XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
-						if (filteredTestLog.isEmpty() || filteredTrainingLog.size() < 100) {
+						if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()) {
 							continue;
 						}
 						LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
 						messages = new HashSet<String>();
 						XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel,
-								filteredTestLog, messages, i == 1);
+								filteredTestLog, messages, checks);
 						for (XTrace subTrace : filteredTestLog) {
-							if (positiveTestTraces.size() <= threshold) {
-								continue;
-							}
+//							if (positiveTestTraces.size() <= threshold) {
+//								continue;
+//							}
 							if (!classifiedFilteredTestLog.contains(subTrace)) {
 								String caseId = XConceptExtension.instance().extractName(subTrace);
 								if (positiveTestTraces.remove(caseId)) {
