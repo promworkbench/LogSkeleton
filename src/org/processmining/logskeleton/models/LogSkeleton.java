@@ -503,24 +503,22 @@ public class LogSkeleton implements HTMLToString {
 		}
 		graph.setOption("labelloc", "b");
 		String label = "";
-		String separator = "";
 		if (!required.isEmpty()) {
-			label += separator + "Required Activities Filters: " + required;
-			separator = "\n";
+			label += "Required Activities Filters: " + required + "\\l";
 		}
 		if (!forbidden.isEmpty()) {
-			label += separator + "Forbidden Activities Filters: " + forbidden;
-			separator = "\n";
+			label += "Forbidden Activities Filters: " + forbidden + "\\l";
 		}
 		if (!splitters.isEmpty()) {
-			label += separator + "Activity Splitters: " + splitters;
-			separator = "\n";
+			label += "Activity Splitters: " + splitters + "\\l";
 		}
-		label += separator + "Show Activities: " + parameters.getActivities();
-		separator = "\n";
-		label += separator + "Show Constraints: " + parameters.getVisualizers();
-		separator = "\n";
+		List<String> activities = new ArrayList<String>(parameters.getActivities());
+		Collections.sort(activities);
+		label += "Show Activities: " + activities + "\\l";
+		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
+		graph.setOption("fontsize", "8.0");
 		graph.setOption("label", label);
+		graph.setOption("labeljust", "l");
 		return graph;
 	}
 
