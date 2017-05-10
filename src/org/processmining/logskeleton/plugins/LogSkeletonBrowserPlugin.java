@@ -134,7 +134,7 @@ public class LogSkeletonBrowserPlugin {
 //		mainPanel.repaint();
 		JFrame frame = new JFrame();
 		frame.add(leftDotPanel);
-		frame.setTitle("Log Skeleton Viewer " + parameters.getVisualizers());
+		frame.setTitle("Log Skeleton Viewer on " + model.getLabel());
 		frame.setSize(1024, 768);
 		frame.setVisible(true);
 	}
