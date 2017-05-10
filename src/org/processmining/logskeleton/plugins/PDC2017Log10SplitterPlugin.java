@@ -40,6 +40,11 @@ public class PDC2017Log10SplitterPlugin extends SplitterAlgorithm {
 		parameters.getMilestoneActivities().add("q.1");
 		parameters.setDuplicateActivity("g");
 		filteredLog = apply(filteredLog, parameters);
+		// Split q.1 over q.1
+//		parameters.getMilestoneActivities().clear();
+//		parameters.getMilestoneActivities().add("q.1");
+//		parameters.setDuplicateActivity("q.1");
+//		filteredLog = apply(filteredLog, parameters);
 		return filteredLog;
 	}
 

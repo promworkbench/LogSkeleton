@@ -1,5 +1,8 @@
 package org.processmining.logskeleton.plugins;
 
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
+
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +12,7 @@ import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -27,9 +31,6 @@ import org.processmining.plugins.graphviz.visualisation.DotPanel;
 
 import com.fluxicon.slickerbox.components.SlickerButton;
 
-import info.clearthought.layout.TableLayout;
-import info.clearthought.layout.TableLayoutConstants;
-
 @Plugin(name = "Log Skeleton Browser", parameterLabels = { "Log Skeleton" }, returnLabels = { "Log Skeleton Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Browser")
 @Visualizer
 public class LogSkeletonBrowserPlugin {
@@ -47,7 +48,7 @@ public class LogSkeletonBrowserPlugin {
 		this.model = model;
 
 		mainPanel = new JPanel();
-		double size[][] = { { TableLayoutConstants.FILL, 200, TableLayoutConstants.FILL },
+		double size[][] = { { TableLayoutConstants.FILL, 250 },
 				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
@@ -60,7 +61,7 @@ public class LogSkeletonBrowserPlugin {
 			selectedIndices[i] = i;
 			i++;
 		}
-		final ProMList<String> activityList = new ProMList<String>("  Select activities >", activities);
+		final ProMList<String> activityList = new ProMList<String>("View Activities", activities);
 		activityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		activityList.setSelectedIndices(selectedIndices);
 		parameters.getActivities().addAll(model.getActivities());
@@ -83,7 +84,7 @@ public class LogSkeletonBrowserPlugin {
 		for (LogSkeletonBrowser visualizer : list) {
 			visualizers.addElement(visualizer);
 		}
-		final ProMList<LogSkeletonBrowser> visualizerList = new ProMList<LogSkeletonBrowser>("  Select constraints >", visualizers);
+		final ProMList<LogSkeletonBrowser> visualizerList = new ProMList<LogSkeletonBrowser>("View Constraints", visualizers);
 		visualizerList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		List<LogSkeletonBrowser> selectedVisualizers = new ArrayList<LogSkeletonBrowser>();
 		selectedIndices = new int[2];
@@ -109,7 +110,7 @@ public class LogSkeletonBrowserPlugin {
 		visualizerList.setPreferredSize(new Dimension(100, 100));
 		mainPanel.add(visualizerList, "1, 2");
 
-		final SlickerButton button = new SlickerButton("< Copy  ");
+		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateLeft();
@@ -118,20 +119,24 @@ public class LogSkeletonBrowserPlugin {
 		});
 		mainPanel.add(button, "1, 3");
 		
-		updateLeft();
+//		updateLeft();
 		updateRight();
 		return mainPanel;
 	}
 
 	private void updateLeft() {
-		if (leftDotPanel != null) {
-			mainPanel.remove(leftDotPanel);
-		}
+//		if (leftDotPanel != null) {
+//			mainPanel.remove(leftDotPanel);
+//		}
 		leftDotPanel = new DotPanel(model.createGraph(parameters));
-		mainPanel.add(leftDotPanel, "0, 0, 0, 3");
-		mainPanel.validate();
-		mainPanel.repaint();
-
+//		mainPanel.add(leftDotPanel, "0, 0, 0, 3");
+//		mainPanel.validate();
+//		mainPanel.repaint();
+		JFrame frame = new JFrame();
+		frame.add(leftDotPanel);
+		frame.setTitle("Log Skeleton Viewer " + parameters.getVisualizers());
+		frame.setSize(1024, 768);
+		frame.setVisible(true);
 	}
 
 	private void updateRight() {
@@ -139,7 +144,7 @@ public class LogSkeletonBrowserPlugin {
 			mainPanel.remove(rightDotPanel);
 		}
 		rightDotPanel = new DotPanel(model.createGraph(parameters));
-		mainPanel.add(rightDotPanel, "2, 0, 2, 3");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 3");
 		mainPanel.validate();
 		mainPanel.repaint();
 

@@ -28,9 +28,9 @@ public class PDC2017TestPlugin {
 	public static PDC2017Test run(final PluginContext context) {
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		PDC2017Test testModel = new PDC2017Test();
-		//		String Path = "D:\\Dropbox\\Projects\\";
+				String Path = "D:\\Dropbox\\Projects\\";
 		//		String Path = "C:\\Users\\hverbeek\\Dropbox\\Projects\\";
-		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
+		//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
 			for (int i = 1; i < 11; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");

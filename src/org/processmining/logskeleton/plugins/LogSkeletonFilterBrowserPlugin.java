@@ -3,6 +3,7 @@ package org.processmining.logskeleton.plugins;
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -32,11 +34,13 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
+import org.processmining.framework.util.ui.widgets.WidgetColors;
 import org.processmining.logskeleton.algorithms.LogSkeletonBuilderAlgorithm;
 import org.processmining.logskeleton.algorithms.SplitterAlgorithm;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 
+import com.fluxicon.slickerbox.components.RoundedPanel;
 import com.fluxicon.slickerbox.components.SlickerButton;
 
 @Plugin(name = "Log Skeleton Filter and Browser", parameterLabels = { "Event Log" }, returnLabels = { "Log Skeleton Filter and Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Filter and Browser")
@@ -58,7 +62,7 @@ public class LogSkeletonFilterBrowserPlugin {
 		this.log = log;
 
 		mainPanel = new JPanel();
-		double size[][] = { { 200, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
+		double size[][] = { { 250, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -136,16 +140,18 @@ public class LogSkeletonFilterBrowserPlugin {
 	private JComponent getControlPanel() {
 		JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log);
-		double size[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 } };
+		double size[][] = { { TableLayoutConstants.FILL },
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
 		controlPanel.setLayout(new TableLayout(size));
 		controlPanel.setOpaque(false);
-		
+		controlPanel.setBackground(WidgetColors.COLOR_LIST_BG);
+		controlPanel.setForeground(WidgetColors.COLOR_LIST_FG);
+
 		DefaultListModel<String> requiredActivityModel = new DefaultListModel<String>();
 		for (String activity : activities) {
 			requiredActivityModel.addElement(activity);
 		}
-		final ProMList<String> requiredActivityList = new ProMList<String>("Required activities", requiredActivityModel);
+		final ProMList<String> requiredActivityList = new ProMList<String>("Required Activities Filter", requiredActivityModel);
 		requiredActivityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		requiredActivityList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -155,13 +161,14 @@ public class LogSkeletonFilterBrowserPlugin {
 			}
 		});
 		requiredActivityList.setPreferredSize(new Dimension(100, 100));
-		controlPanel.add(requiredActivityList, "0, 0, 1, 0");
+		controlPanel.add(requiredActivityList, "0, 0");
 
 		DefaultListModel<String> forbiddenActivityModel = new DefaultListModel<String>();
 		for (String activity : activities) {
 			forbiddenActivityModel.addElement(activity);
 		}
-		final ProMList<String> forbiddenActivityList = new ProMList<String>("Forbidden activities", forbiddenActivityModel);
+		final ProMList<String> forbiddenActivityList = new ProMList<String>("Forbidden Activities Filter",
+				forbiddenActivityModel);
 		forbiddenActivityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		forbiddenActivityList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -171,17 +178,40 @@ public class LogSkeletonFilterBrowserPlugin {
 			}
 		});
 		forbiddenActivityList.setPreferredSize(new Dimension(100, 100));
-		controlPanel.add(forbiddenActivityList, "0, 1, 1, 1");
+		controlPanel.add(forbiddenActivityList, "0, 1");
 
-		controlPanel.add(new JLabel("Splitters"), "0, 2, 1, 2");
+		RoundedPanel splitterPanel = new RoundedPanel(10, 5, 0);
+		splitterPanel.setPreferredSize(new Dimension(100, 100));
+		double splitterSize[][] = {
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL },
+				{ 30, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
+						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
+						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
+						TableLayoutConstants.FILL, TableLayoutConstants.FILL } };
+		splitterPanel.setLayout(new TableLayout(splitterSize));
+		splitterPanel.setBackground(WidgetColors.COLOR_ENCLOSURE_BG);
+		splitterPanel.setForeground(WidgetColors.COLOR_LIST_FG);
+
+		splitterPanel.setOpaque(false);
+		JLabel splitterLabel = new JLabel("Activity Splitters");
+		splitterLabel.setOpaque(false);
+		splitterLabel.setForeground(WidgetColors.COLOR_LIST_SELECTION_FG);
+		splitterLabel.setFont(splitterLabel.getFont().deriveFont(13f));
+		splitterLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		splitterLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		splitterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+
+		splitterPanel.add(splitterLabel, "0, 0, 1, 0");
 		final ProMTextField inputs[][] = new ProMTextField[2][10];
 		for (int row = 0; row < 10; row++) {
 			for (int col = 0; col < 2; col++) {
-				inputs[col][row] = new ProMTextField();
-				controlPanel.add(inputs[col][row], "" + col + ", " + (row + 3));
+				inputs[col][row] = new ProMTextField("", (col == 0 ? "Split Activity " : "Over Activity ") + (1 + col + 2*row));
+				splitterPanel.add(inputs[col][row], "" + col + ", " + (row + 1));
 			}
 		}
-		final SlickerButton button = new SlickerButton("   Filter >>");
+		controlPanel.add(splitterPanel, "0, 2");
+
+		final SlickerButton button = new SlickerButton("Apply Filters and Splitters");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				splitters = new ArrayList<List<String>>();
@@ -200,7 +230,7 @@ public class LogSkeletonFilterBrowserPlugin {
 			}
 
 		});
-		controlPanel.add(button, "0, 13, 1, 13");
+		controlPanel.add(button, "0, 3");
 
 		return controlPanel;
 	}
