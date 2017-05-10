@@ -94,6 +94,9 @@ public class LogSkeletonFilterBrowserPlugin {
 		}
 		LogSkeletonBuilderAlgorithm discoveryAlgorithm = new LogSkeletonBuilderAlgorithm();
 		LogSkeleton model = discoveryAlgorithm.apply(filteredLog);
+		model.setRequired(positiveFilters);
+		model.setForbidden(negativeFilters);
+		model.setSplitters(splitters);
 		LogSkeletonBrowserPlugin visualizerPlugin = new LogSkeletonBrowserPlugin();
 		if (rightPanel != null) {
 			mainPanel.remove(rightPanel);
@@ -224,7 +227,6 @@ public class LogSkeletonFilterBrowserPlugin {
 						System.out.println("[PDC2017LogVisualizerPlugin] Filter added: " + filter);
 						splitters.add(filter);
 					}
-					;
 				}
 				update();
 			}

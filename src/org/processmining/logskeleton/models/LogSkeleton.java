@@ -28,6 +28,10 @@ public class LogSkeleton implements HTMLToString {
 	private Map<String, Set<String>> anyPresets;
 	private Map<String, Set<String>> anyPostsets;
 
+	private Set<String> required;
+	private Set<String> forbidden;
+	private List<List<String>> splitters;
+	
 	//	private Map<List<String>, List<Integer>> distances;
 
 	public LogSkeleton(LogSkeletonCount countModel, LogSkeletonCount correctedCountModel) {
@@ -38,6 +42,9 @@ public class LogSkeleton implements HTMLToString {
 		anyPresets = new HashMap<String, Set<String>>();
 		anyPostsets = new HashMap<String, Set<String>>();
 		//		distances = new HashMap<List<String>, List<Integer>>();
+		required = new HashSet<String>();
+		forbidden = new HashSet<String>();
+		splitters = new ArrayList<List<String>>();
 	}
 
 	public void addSameCount(Collection<String> activities) {
@@ -494,6 +501,26 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
+		graph.setOption("labelloc", "b");
+		String label = "";
+		String separator = "";
+		if (!required.isEmpty()) {
+			label += separator + "Required Activities Filters: " + required;
+			separator = "\n";
+		}
+		if (!forbidden.isEmpty()) {
+			label += separator + "Forbidden Activities Filters: " + forbidden;
+			separator = "\n";
+		}
+		if (!splitters.isEmpty()) {
+			label += separator + "Activity Splitters: " + splitters;
+			separator = "\n";
+		}
+		label += separator + "Show Activities: " + parameters.getActivities();
+		separator = "\n";
+		label += separator + "Show Constraints: " + parameters.getVisualizers();
+		separator = "\n";
+		graph.setOption("label", label);
 		return graph;
 	}
 
@@ -519,5 +546,29 @@ public class LogSkeleton implements HTMLToString {
 
 	public Collection<String> getActivities() {
 		return countModel.getActivities();
+	}
+
+	public Set<String> getRequired() {
+		return required;
+	}
+
+	public void setRequired(Set<String> required) {
+		this.required = required;
+	}
+
+	public Set<String> getForbidden() {
+		return forbidden;
+	}
+
+	public void setForbidden(Set<String> forbidden) {
+		this.forbidden = forbidden;
+	}
+
+	public List<List<String>> getSplitters() {
+		return splitters;
+	}
+
+	public void setSplitters(List<List<String>> splitters) {
+		this.splitters = splitters;
 	}
 }
