@@ -108,7 +108,7 @@ public class LogSkeletonFilterBrowserPlugin {
 	}
 
 	private static XLog filter(XLog log, Set<String> positiveFilters, Set<String> negativeFilters) {
-		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog();
+		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		for (XTrace trace : log) {
 			boolean ok = true;
 			Set<String> toMatch = new HashSet<String>(positiveFilters);

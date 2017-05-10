@@ -34,6 +34,8 @@ public class LogSkeletonBuilderAlgorithm {
 		LogSkeleton constraintModel = new LogSkeleton(countModel, countModel2);
 		addSameCounts(counts, constraintModel);
 		createCausalDependencies(log, countModel, constraintModel);
+		String label = XConceptExtension.instance().extractName(log);
+		constraintModel.setLabel(label == null ? "<not specified>" : label);
 		return constraintModel;
 	}
 

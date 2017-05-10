@@ -31,6 +31,7 @@ public class LogSkeleton implements HTMLToString {
 	private Set<String> required;
 	private Set<String> forbidden;
 	private List<List<String>> splitters;
+	private String label;
 	
 	//	private Map<List<String>, List<Integer>> distances;
 
@@ -45,6 +46,7 @@ public class LogSkeleton implements HTMLToString {
 		required = new HashSet<String>();
 		forbidden = new HashSet<String>();
 		splitters = new ArrayList<List<String>>();
+		label = null;
 	}
 
 	public void addSameCount(Collection<String> activities) {
@@ -502,7 +504,7 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 		graph.setOption("labelloc", "b");
-		String label = "";
+		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
 		if (!required.isEmpty()) {
 			label += "Required Activities Filters: " + required + "\\l";
 		}
@@ -568,5 +570,13 @@ public class LogSkeleton implements HTMLToString {
 
 	public void setSplitters(List<List<String>> splitters) {
 		this.splitters = splitters;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 }
