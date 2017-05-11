@@ -518,29 +518,29 @@ public class LogSkeleton implements HTMLToString {
 		Collections.sort(activities);
 //		label += "Show Activities: " + activities + "\\l";
 //		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
-		String label = "<table bgcolor=\"#550000\" cellborder=\"0\" cellpadding=\"0\" fontcolor=\"#ffffff\" columns=\"3\" style=\"rounded\">";
-		label += encodeHeader("Used parameter settings");
-		label += encodeRow("Event log", this.label == null ? "<not specified>" : this.label);
+		String label = "<table bgcolor=\"gold\" cellborder=\"0\" cellpadding=\"0\" columns=\"3\" style=\"rounded\">";
+		label += encodeHeader("Skeleton Configuration");
+		label += encodeRow("Event Log", this.label == null ? "<not specified>" : this.label);
 		if (!required.isEmpty()) {
-			label += encodeRow("Required Activities Filters", required.toString());
+			label += encodeRow("Required Activities Filter", required.toString());
 		}
 		if (!forbidden.isEmpty()) {
-			label += encodeRow("Forbidden Activities Filters", forbidden.toString());
+			label += encodeRow("Forbidden Activities Filter", forbidden.toString());
 		}
 		if (!splitters.isEmpty()) {
 			label += encodeRow("Activity Splitters", splitters.toString());
 		}
-		label += encodeRow("Show Activities", activities.toString());
-		label += encodeRow("Show Constraints", parameters.getVisualizers().toString());
+		label += encodeRow("View Activities", activities.toString());
+		label += encodeRow("View Constraints", parameters.getVisualizers().toString());
 		label += "</table>";
-		graph.setOption("fontsize", "10.0");
+		graph.setOption("fontsize", "8.0");
 		graph.setOption("label", "<"+ label + ">");
 //		graph.setOption("labeljust", "l");
 		return graph;
 	}
 
 	private String encodeHeader(String title) {
-		return "<tr><td colspan=\"3\"><font face=\"Helvetica\" color=\"#e0e0e0\"><b>" + encodeHTML(title) + "</b></font></td></tr><hr/>";
+		return "<tr><td colspan=\"3\"><b>" + encodeHTML(title) + "</b></td></tr><hr/>";
 	}
 	
 	private String encodeRow(String label, String value) {
@@ -548,7 +548,7 @@ public class LogSkeleton implements HTMLToString {
 	}
 	
 	private String encodeRow(String label, String value, int padding) {
-		return "<tr><td align=\"right\"><font face=\"Helvetica\" color=\"#e0e0e0\"><i>" + label + "</i></font></td><td><font face=\"Helvetica\" color=\"#e0e0e0\"> : </font></td><td align=\"left\"><font face=\"Helvetica\" color=\"#e0e0e0\">" + encodeHTML(value) + "</font></td></tr>";
+		return "<tr><td align=\"right\"><i>" + label + "</i></td><td> : </td><td align=\"left\">" + encodeHTML(value) + "</td></tr>";
 	}
 	
 	private String encodeHTML(String s) {
