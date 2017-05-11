@@ -504,26 +504,61 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 		graph.setOption("labelloc", "b");
-		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
-		if (!required.isEmpty()) {
-			label += "Required Activities Filters: " + required + "\\l";
-		}
-		if (!forbidden.isEmpty()) {
-			label += "Forbidden Activities Filters: " + forbidden + "\\l";
-		}
-		if (!splitters.isEmpty()) {
-			label += "Activity Splitters: " + splitters + "\\l";
-		}
+//		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
+//		if (!required.isEmpty()) {
+//			label += "Required Activities Filters: " + required + "\\l";
+//		}
+//		if (!forbidden.isEmpty()) {
+//			label += "Forbidden Activities Filters: " + forbidden + "\\l";
+//		}
+//		if (!splitters.isEmpty()) {
+//			label += "Activity Splitters: " + splitters + "\\l";
+//		}
 		List<String> activities = new ArrayList<String>(parameters.getActivities());
 		Collections.sort(activities);
-		label += "Show Activities: " + activities + "\\l";
-		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
-		graph.setOption("fontsize", "8.0");
-		graph.setOption("label", label);
-		graph.setOption("labeljust", "l");
+//		label += "Show Activities: " + activities + "\\l";
+//		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
+		String label = "<table bgcolor=\"#550000\" cellborder=\"0\" cellpadding=\"0\" fontcolor=\"#ffffff\" columns=\"3\" style=\"rounded\">";
+		label += encodeHeader("Used parameter settings");
+		label += encodeRow("Event log", this.label == null ? "<not specified>" : this.label);
+		if (!required.isEmpty()) {
+			label += encodeRow("Required Activities Filters", required.toString());
+		}
+		if (!forbidden.isEmpty()) {
+			label += encodeRow("Forbidden Activities Filters", forbidden.toString());
+		}
+		if (!splitters.isEmpty()) {
+			label += encodeRow("Activity Splitters", splitters.toString());
+		}
+		label += encodeRow("Show Activities", activities.toString());
+		label += encodeRow("Show Constraints", parameters.getVisualizers().toString());
+		label += "</table>";
+		graph.setOption("fontsize", "10.0");
+		graph.setOption("label", "<"+ label + ">");
+//		graph.setOption("labeljust", "l");
 		return graph;
 	}
 
+	private String encodeHeader(String title) {
+		return "<tr><td colspan=\"3\"><font face=\"Helvetica\" color=\"#e0e0e0\"><b>" + encodeHTML(title) + "</b></font></td></tr><hr/>";
+	}
+	
+	private String encodeRow(String label, String value) {
+		return encodeRow(label, value, 0);
+	}
+	
+	private String encodeRow(String label, String value, int padding) {
+		return "<tr><td align=\"right\"><font face=\"Helvetica\" color=\"#e0e0e0\"><i>" + label + "</i></font></td><td><font face=\"Helvetica\" color=\"#e0e0e0\"> : </font></td><td align=\"left\"><font face=\"Helvetica\" color=\"#e0e0e0\">" + encodeHTML(value) + "</font></td></tr>";
+	}
+	
+	private String encodeHTML(String s) {
+		String s2 = s;
+		if (s.startsWith("[") && s.endsWith("]")) {
+			s2 = s.substring(1, s.length() - 1);
+		}
+		return s2.replaceAll("&",  "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;");
+	}
+	
 	public Dot createGraph(LogSkeletonBrowser visualizer) {
 		LogSkeletonBrowserParameters parameters = new LogSkeletonBrowserParameters();
 		parameters.getActivities().addAll(countModel.getActivities());
