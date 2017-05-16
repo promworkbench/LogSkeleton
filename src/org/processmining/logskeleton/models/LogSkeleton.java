@@ -319,7 +319,11 @@ public class LogSkeleton implements HTMLToString {
 		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
 		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
 		for (String activity : parameters.getActivities()) {
-			map.put(activity, graph.addNode(activity + "\n" + countModel.get(activity)));
+			DotNode node = graph.addNode("<<table border=\"1\" cellborder=\"0\" cellpadding=\"2\" style=\"rounded\"><tr><td><font point-size=\"24\"><b>" + encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + countModel.get(activity) + "</td></tr></table>>");
+			node.setOption("shape", "none");
+//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
+//			node.setLabel("<" + encodeHTML(activity) + ">");
+			map.put(activity, node);
 		}
 		for (LogSkeletonBrowser visualizer : parameters.getVisualizers()) {
 			switch (visualizer) {
@@ -553,7 +557,7 @@ public class LogSkeleton implements HTMLToString {
 	
 	private String encodeHTML(String s) {
 		String s2 = s;
-		if (s.startsWith("[") && s.endsWith("]")) {
+		if (s.length() > 2 && s.startsWith("[") && s.endsWith("]")) {
 			s2 = s.substring(1, s.length() - 1);
 		}
 		return s2.replaceAll("&",  "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;");
