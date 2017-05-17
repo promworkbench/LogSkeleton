@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.plugins;
 
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
@@ -27,6 +28,8 @@ public class PDC2017Log2SplitterPlugin extends SplitterAlgorithm {
 		parameters.setDuplicateActivity("s");
 		filteredLog = apply(filteredLog, parameters);
 		// Done
+		XConceptExtension.instance().assignName(filteredLog,
+				XConceptExtension.instance().extractName(log) + " | split: [a, a], [s, s]");
 		return filteredLog;
 	}
 }

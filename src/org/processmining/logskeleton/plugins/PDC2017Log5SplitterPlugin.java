@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.plugins;
 
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
@@ -16,28 +17,36 @@ public class PDC2017Log5SplitterPlugin extends SplitterAlgorithm {
 	public XLog run(PluginContext context, XLog log) {
 		SplitterParameters parameters = new SplitterParameters();
 		XLog filteredLog = log;
-		for (int i = 0; i < 4; i++) {
-			String suffix = "";
-			for (int j = 0; j < i; j++) {
-				suffix = suffix + ".1";
-			}
-			// Split a over itself
-			parameters.getMilestoneActivities().clear();
-			parameters.getMilestoneActivities().add("a");
-			parameters.setDuplicateActivity("a");
-			filteredLog = apply(filteredLog, parameters);
-			// Split s over itself
-			parameters.getMilestoneActivities().clear();
-			parameters.getMilestoneActivities().add("i" + suffix);
-			parameters.setDuplicateActivity("i" + suffix);
-			filteredLog = apply(filteredLog, parameters);
-			// Split t over itself
-			parameters.getMilestoneActivities().clear();
-			parameters.getMilestoneActivities().add("g" + suffix);
-			parameters.setDuplicateActivity("g" + suffix);
-			filteredLog = apply(filteredLog, parameters);
-		}
+		// Split a over itself
+		parameters.getMilestoneActivities().clear();
+		parameters.getMilestoneActivities().add("a");
+		parameters.setDuplicateActivity("a");
+		filteredLog = apply(filteredLog, parameters);
+		// Split i over itself
+		parameters.getMilestoneActivities().clear();
+		parameters.getMilestoneActivities().add("i");
+		parameters.setDuplicateActivity("i");
+		filteredLog = apply(filteredLog, parameters);
+		// Split g over itself
+		parameters.getMilestoneActivities().clear();
+		parameters.getMilestoneActivities().add("g");
+		parameters.setDuplicateActivity("g");
+		filteredLog = apply(filteredLog, parameters);
+		// Split i.1 over itself
+		parameters.getMilestoneActivities().clear();
+		parameters.getMilestoneActivities().add("i.1");
+		parameters.setDuplicateActivity("i.1");
+		filteredLog = apply(filteredLog, parameters);
+		// Split g over itself
+		parameters.getMilestoneActivities().clear();
+		parameters.getMilestoneActivities().add("g.1");
+		parameters.setDuplicateActivity("g.1");
+		filteredLog = apply(filteredLog, parameters);
 		// Done
+		XConceptExtension.instance().assignName(
+				filteredLog,
+				XConceptExtension.instance().extractName(log)
+						+ " | split: [a, a], [i, i], [g, g], [i.1, i,1], [g.1, g.1]");
 		return filteredLog;
 	}
 }

@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.plugins;
 
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
@@ -18,6 +19,10 @@ public class PDC2017Log9FilterPlugin {
 	public XLog run(PluginContext context, XLog log) {
 		LogSkeletonBuilderAlgorithm skeletonBuilder = new LogSkeletonBuilderAlgorithm();
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XConceptExtension.instance().assignName(
+				filteredLog,
+				XConceptExtension.instance().extractName(log)
+						+ " | filter: c+f=1, c+l=1");
 		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		for (XTrace trace : log) {
 			traceLog.clear();

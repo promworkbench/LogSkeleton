@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.plugins;
 
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
@@ -33,7 +34,7 @@ public class PDC2017Log7SplitterPlugin extends SplitterAlgorithm {
 		// Split h.0 over c.0
 		parameters.getMilestoneActivities().clear();
 		parameters.getMilestoneActivities().add("c.0");
-		parameters.getMilestoneActivities().add("h.0");
+//		parameters.getMilestoneActivities().add("h.0");
 		parameters.setDuplicateActivity("h.0");
 		filteredLog = apply(filteredLog, parameters);
 		// Split p over e
@@ -47,6 +48,10 @@ public class PDC2017Log7SplitterPlugin extends SplitterAlgorithm {
 		parameters.setDuplicateActivity("c.0");
 		filteredLog = apply(filteredLog, parameters);
 		// Done, except for b...
+		XConceptExtension.instance().assignName(
+				filteredLog,
+				XConceptExtension.instance().extractName(log)
+						+ " | split: [n, f], [h, i], [c,i], [h.0, c.0], [p, e], [c.0, h.0.0], 7B");
 		return apply7B(filteredLog);
 	}
 

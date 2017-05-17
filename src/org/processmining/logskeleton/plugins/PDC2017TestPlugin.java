@@ -32,7 +32,7 @@ public class PDC2017TestPlugin {
 		//		String Path = "C:\\Users\\hverbeek\\Dropbox\\Projects\\";
 		//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
-			for (int i = 1; i < 11; i++) {
+			for (int i = 7; i < 8; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");
 				XLog aprilLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_may\\test_log_may_"
 						+ i + ".xes");

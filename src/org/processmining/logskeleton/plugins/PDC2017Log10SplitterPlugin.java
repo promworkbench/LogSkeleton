@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.plugins;
 
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
@@ -8,7 +9,7 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.SplitterAlgorithm;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 
-@Plugin(name = "PDC 2017 Log 10 Splitter", parameterLabels = { "Event Log 10"}, returnLabels = { "Split Log 10" }, returnTypes = { XLog.class }, userAccessible = true, help = "PDC 2017 Plug-in")
+@Plugin(name = "PDC 2017 Log 10 Splitter", parameterLabels = { "Event Log 10" }, returnLabels = { "Split Log 10" }, returnTypes = { XLog.class }, userAccessible = true, help = "PDC 2017 Plug-in")
 public class PDC2017Log10SplitterPlugin extends SplitterAlgorithm {
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
@@ -50,6 +51,10 @@ public class PDC2017Log10SplitterPlugin extends SplitterAlgorithm {
 		parameters.getMilestoneActivities().add("q.1");
 		parameters.setDuplicateActivity("q.1");
 		filteredLog = apply(filteredLog, parameters);
+		XConceptExtension.instance().assignName(
+				filteredLog,
+				XConceptExtension.instance().extractName(log)
+						+ " | split: [o, j], [i, j], [q, q], [j, j], [g, q.1], [o.1, o.1], [q.1, q.1]");
 		return filteredLog;
 	}
 

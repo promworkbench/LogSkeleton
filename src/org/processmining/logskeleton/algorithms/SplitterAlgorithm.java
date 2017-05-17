@@ -2,6 +2,7 @@ package org.processmining.logskeleton.algorithms;
 
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
+import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
@@ -10,7 +11,7 @@ import org.processmining.logskeleton.parameters.SplitterParameters;
 public class SplitterAlgorithm {
 
 	public XLog apply(XLog log, SplitterParameters parameters) {
-		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog((XAttributeMap) log.getAttributes().clone());
 		for (XTrace trace : log) {
 			XTrace filteredTrace = XFactoryRegistry.instance().currentDefault().createTrace(trace.getAttributes());
 			int milestone = 0;

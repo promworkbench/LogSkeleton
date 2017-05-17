@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.plugins;
 
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
@@ -10,7 +11,7 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.LogSkeletonBuilderAlgorithm;
 import org.processmining.logskeleton.models.LogSkeletonCount;
 
-@Plugin(name = "PDC 2017 Log 2 Filter", parameterLabels = { "Event Log 2"}, returnLabels = { "Filtered Log 2" }, returnTypes = { XLog.class }, userAccessible = true, help = "PDC 2017 Plug-in")
+@Plugin(name = "PDC 2017 Log 2 Filter", parameterLabels = { "Event Log 2" }, returnLabels = { "Filtered Log 2" }, returnTypes = { XLog.class }, userAccessible = true, help = "PDC 2017 Plug-in")
 public class PDC2017Log2FilterPlugin {
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
@@ -18,6 +19,8 @@ public class PDC2017Log2FilterPlugin {
 	public XLog run(PluginContext context, XLog log) {
 		LogSkeletonBuilderAlgorithm skeletonBuilder = new LogSkeletonBuilderAlgorithm();
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XConceptExtension.instance().assignName(filteredLog,
+				XConceptExtension.instance().extractName(log) + " | filter: k=1, d=1, b=i+e");
 		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		for (XTrace trace : log) {
 			traceLog.clear();
