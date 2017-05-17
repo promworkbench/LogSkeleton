@@ -32,7 +32,7 @@ public class LogSkeleton implements HTMLToString {
 	private Set<String> forbidden;
 	private List<List<String>> splitters;
 	private String label;
-	
+
 	//	private Map<List<String>, List<Integer>> distances;
 
 	public LogSkeleton(LogSkeletonCount countModel, LogSkeletonCount correctedCountModel) {
@@ -50,7 +50,9 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	public void addSameCount(Collection<String> activities) {
-		sameCounts.add(activities);
+		List<String> orderedActivities = new ArrayList<String>(activities);
+		Collections.sort(orderedActivities);
+		sameCounts.add(orderedActivities);
 	}
 
 	public Collection<String> getSameCounts(String activity) {
@@ -316,13 +318,33 @@ public class LogSkeleton implements HTMLToString {
 	public Dot visualize(LogSkeletonBrowserParameters parameters) {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
+		// Set312 color scheme, with white as last resort.
+		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "white" };
+		int colorIndex = 0;
 		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
 		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
+		Map<String, String> colorMap = new HashMap<String, String>();
 		for (String activity : parameters.getActivities()) {
-			DotNode node = graph.addNode("<<table border=\"1\" cellborder=\"0\" cellpadding=\"2\" style=\"rounded\"><tr><td><font point-size=\"24\"><b>" + encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + countModel.get(activity) + "</td></tr></table>>");
+			String colorActivity = getSameCounts(activity).iterator().next();
+			String activityColor = colorMap.get(colorActivity);
+			if (activityColor == null) {
+				activityColor = colors[colorIndex];
+				colorMap.put(colorActivity, activityColor);
+				if (colorIndex < colors.length - 1) {
+					colorIndex++;
+				}
+			}
+			DotNode node = graph
+					.addNode("<<table align=\"center\" bgcolor=\"" + activityColor + "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"2\"><font point-size=\"24\"><b>"
+							+ encodeHTML(activity)
+							+ "</b></font></td></tr><hr/><tr><td>"
+							+ colorActivity
+							+ "</td><td>"
+							+ countModel.get(activity)
+							+ "</td></tr></table>>");
 			node.setOption("shape", "none");
-//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
-//			node.setLabel("<" + encodeHTML(activity) + ">");
+			//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
+			//			node.setLabel("<" + encodeHTML(activity) + ">");
 			map.put(activity, node);
 		}
 		for (LogSkeletonBrowser visualizer : parameters.getVisualizers()) {
@@ -508,20 +530,20 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 		graph.setOption("labelloc", "b");
-//		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
-//		if (!required.isEmpty()) {
-//			label += "Required Activities Filters: " + required + "\\l";
-//		}
-//		if (!forbidden.isEmpty()) {
-//			label += "Forbidden Activities Filters: " + forbidden + "\\l";
-//		}
-//		if (!splitters.isEmpty()) {
-//			label += "Activity Splitters: " + splitters + "\\l";
-//		}
+		//		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
+		//		if (!required.isEmpty()) {
+		//			label += "Required Activities Filters: " + required + "\\l";
+		//		}
+		//		if (!forbidden.isEmpty()) {
+		//			label += "Forbidden Activities Filters: " + forbidden + "\\l";
+		//		}
+		//		if (!splitters.isEmpty()) {
+		//			label += "Activity Splitters: " + splitters + "\\l";
+		//		}
 		List<String> activities = new ArrayList<String>(parameters.getActivities());
 		Collections.sort(activities);
-//		label += "Show Activities: " + activities + "\\l";
-//		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
+		//		label += "Show Activities: " + activities + "\\l";
+		//		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
 		String label = "<table bgcolor=\"gold\" cellborder=\"0\" cellpadding=\"0\" columns=\"3\" style=\"rounded\">";
 		label += encodeHeader("Skeleton Configuration");
 		label += encodeRow("Event Log", this.label == null ? "<not specified>" : this.label);
@@ -538,31 +560,32 @@ public class LogSkeleton implements HTMLToString {
 		label += encodeRow("View Constraints", parameters.getVisualizers().toString());
 		label += "</table>";
 		graph.setOption("fontsize", "8.0");
-		graph.setOption("label", "<"+ label + ">");
-//		graph.setOption("labeljust", "l");
+		graph.setOption("label", "<" + label + ">");
+		//		graph.setOption("labeljust", "l");
 		return graph;
 	}
 
 	private String encodeHeader(String title) {
 		return "<tr><td colspan=\"3\"><b>" + encodeHTML(title) + "</b></td></tr><hr/>";
 	}
-	
+
 	private String encodeRow(String label, String value) {
 		return encodeRow(label, value, 0);
 	}
-	
+
 	private String encodeRow(String label, String value, int padding) {
-		return "<tr><td align=\"right\"><i>" + label + "</i></td><td> : </td><td align=\"left\">" + encodeHTML(value) + "</td></tr>";
+		return "<tr><td align=\"right\"><i>" + label + "</i></td><td> : </td><td align=\"left\">" + encodeHTML(value)
+				+ "</td></tr>";
 	}
-	
+
 	private String encodeHTML(String s) {
 		String s2 = s;
 		if (s.length() > 2 && s.startsWith("[") && s.endsWith("]")) {
 			s2 = s.substring(1, s.length() - 1);
 		}
-		return s2.replaceAll("&",  "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;");
+		return s2.replaceAll("&", "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;");
 	}
-	
+
 	public Dot createGraph(LogSkeletonBrowser visualizer) {
 		LogSkeletonBrowserParameters parameters = new LogSkeletonBrowserParameters();
 		parameters.getActivities().addAll(countModel.getActivities());
