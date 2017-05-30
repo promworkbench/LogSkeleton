@@ -650,6 +650,8 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	public void exportToFile(CsvWriter writer) throws IOException {
+		writer.write(label);
+		writer.endRecord();
 		countModel.exportToFile(writer);
 		writer.write("always together");
 		writer.write("" + sameCounts.size());
@@ -725,6 +727,9 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	public void importFromStream(CsvReader reader) throws IOException {
+		if (reader.readRecord()) {
+			label = reader.get(0);
+		}
 		sameCounts = new HashSet<Collection<String>>();
 		countModel.importFromStream(reader);
 		if (reader.readRecord()) {
