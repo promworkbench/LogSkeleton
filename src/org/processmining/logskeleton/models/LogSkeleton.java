@@ -42,7 +42,7 @@ public class LogSkeleton implements HTMLToString {
 	public LogSkeleton() {
 		this(new LogSkeletonCount());
 	}
-	
+
 	public LogSkeleton(LogSkeletonCount countModel) {
 		this.countModel = countModel;
 		sameCounts = new HashSet<Collection<String>>();
@@ -703,17 +703,23 @@ public class LogSkeleton implements HTMLToString {
 			writer.endRecord();
 		}
 		writer.write("required");
+		writer.write(required.isEmpty() ? "0" : "1");
 		writer.endRecord();
-		for (String activity : required) {
-			writer.write(activity);
+		if (!required.isEmpty()) {
+			for (String activity : required) {
+				writer.write(activity);
+			}
+			writer.endRecord();
 		}
-		writer.endRecord();
 		writer.write("forbidden");
+		writer.write(forbidden.isEmpty() ? "0" : "1");
 		writer.endRecord();
-		for (String activity : forbidden) {
-			writer.write(activity);
+		if (!forbidden.isEmpty()) {
+			for (String activity : forbidden) {
+				writer.write(activity);
+			}
+			writer.endRecord();
 		}
-		writer.endRecord();
 		writer.write("splitters");
 		writer.write("" + splitters.size());
 		writer.endRecord();
@@ -814,9 +820,12 @@ public class LogSkeleton implements HTMLToString {
 		required = new HashSet<String>();
 		if (reader.readRecord()) {
 			if (reader.get(0).equals("required")) {
-				if (reader.readRecord()) {
-					for (int column = 0; column < reader.getColumnCount(); column++) {
-						required.add(reader.get(column));
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						for (int column = 0; column < reader.getColumnCount(); column++) {
+							required.add(reader.get(column));
+						}
 					}
 				}
 			}
@@ -824,9 +833,12 @@ public class LogSkeleton implements HTMLToString {
 		forbidden = new HashSet<String>();
 		if (reader.readRecord()) {
 			if (reader.get(0).equals("forbidden")) {
-				if (reader.readRecord()) {
-					for (int column = 0; column < reader.getColumnCount(); column++) {
-						forbidden.add(reader.get(column));
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						for (int column = 0; column < reader.getColumnCount(); column++) {
+							forbidden.add(reader.get(column));
+						}
 					}
 				}
 			}
