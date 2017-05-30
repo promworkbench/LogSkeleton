@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.models;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +20,9 @@ import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.graphviz.dot.DotEdge;
 import org.processmining.plugins.graphviz.dot.DotNode;
 
+import com.csvreader.CsvReader;
+import com.csvreader.CsvWriter;
+
 public class LogSkeleton implements HTMLToString {
 
 	private LogSkeletonCount countModel;
@@ -35,7 +39,11 @@ public class LogSkeleton implements HTMLToString {
 
 	//	private Map<List<String>, List<Integer>> distances;
 
-	public LogSkeleton(LogSkeletonCount countModel, LogSkeletonCount correctedCountModel) {
+	public LogSkeleton() {
+		this(new LogSkeletonCount());
+	}
+	
+	public LogSkeleton(LogSkeletonCount countModel) {
 		this.countModel = countModel;
 		sameCounts = new HashSet<Collection<String>>();
 		allPresets = new HashMap<String, Set<String>>();
@@ -319,7 +327,8 @@ public class LogSkeleton implements HTMLToString {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
 		// Set312 color scheme, with white as last resort.
-		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "white" };
+		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
+				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "white" };
 		int colorIndex = 0;
 		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
 		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
@@ -335,13 +344,11 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 			DotNode node = graph
-					.addNode("<<table align=\"center\" bgcolor=\"" + activityColor + "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"2\"><font point-size=\"24\"><b>"
-							+ encodeHTML(activity)
-							+ "</b></font></td></tr><hr/><tr><td>"
-							+ colorActivity
-							+ "</td><td>"
-							+ countModel.get(activity)
-							+ "</td></tr></table>>");
+					.addNode("<<table align=\"center\" bgcolor=\""
+							+ activityColor
+							+ "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"2\"><font point-size=\"24\"><b>"
+							+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + colorActivity + "</td><td>"
+							+ countModel.get(activity) + "</td></tr></table>>");
 			node.setOption("shape", "none");
 			//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
 			//			node.setLabel("<" + encodeHTML(activity) + ">");
@@ -640,5 +647,199 @@ public class LogSkeleton implements HTMLToString {
 
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	public void exportToFile(CsvWriter writer) throws IOException {
+		countModel.exportToFile(writer);
+		writer.write("always together");
+		writer.write("" + sameCounts.size());
+		writer.endRecord();
+		for (Collection<String> activities : sameCounts) {
+			for (String activity : activities) {
+				writer.write(activity);
+			}
+			writer.endRecord();
+		}
+		writer.write("always before");
+		writer.write("" + allPresets.size());
+		writer.endRecord();
+		for (String activity : allPresets.keySet()) {
+			writer.write(activity);
+			for (String activity2 : allPresets.get(activity)) {
+				writer.write(activity2);
+			}
+			writer.endRecord();
+		}
+		writer.write("always after");
+		writer.write("" + allPostsets.size());
+		writer.endRecord();
+		for (String activity : allPostsets.keySet()) {
+			writer.write(activity);
+			for (String activity2 : allPostsets.get(activity)) {
+				writer.write(activity2);
+			}
+			writer.endRecord();
+		}
+		writer.write("sometimes before");
+		writer.write("" + anyPresets.size());
+		writer.endRecord();
+		for (String activity : anyPresets.keySet()) {
+			writer.write(activity);
+			for (String activity2 : anyPresets.get(activity)) {
+				writer.write(activity2);
+			}
+			writer.endRecord();
+		}
+		writer.write("sometimes after");
+		writer.write("" + anyPostsets.size());
+		writer.endRecord();
+		for (String activity : anyPostsets.keySet()) {
+			writer.write(activity);
+			for (String activity2 : anyPostsets.get(activity)) {
+				writer.write(activity2);
+			}
+			writer.endRecord();
+		}
+		writer.write("required");
+		writer.endRecord();
+		for (String activity : required) {
+			writer.write(activity);
+		}
+		writer.endRecord();
+		writer.write("forbidden");
+		writer.endRecord();
+		for (String activity : forbidden) {
+			writer.write(activity);
+		}
+		writer.endRecord();
+		writer.write("splitters");
+		writer.write("" + splitters.size());
+		writer.endRecord();
+		for (List<String> splitter : splitters) {
+			for (String activity : splitter) {
+				writer.write(activity);
+			}
+			writer.endRecord();
+		}
+		writer.endRecord();
+	}
+
+	public void importFromStream(CsvReader reader) throws IOException {
+		sameCounts = new HashSet<Collection<String>>();
+		countModel.importFromStream(reader);
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("always together")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						List<String> orderedActivities = new ArrayList<String>();
+						for (int column = 0; column < reader.getColumnCount(); column++) {
+							orderedActivities.add(reader.get(column));
+						}
+						Collections.sort(orderedActivities);
+						sameCounts.add(orderedActivities);
+					}
+				}
+			}
+		}
+		allPresets = new HashMap<String, Set<String>>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("always before")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						String activity = reader.get(0);
+						Set<String> activities = new HashSet<String>();
+						for (int column = 1; column < reader.getColumnCount(); column++) {
+							activities.add(reader.get(column));
+						}
+						allPresets.put(activity, activities);
+					}
+				}
+			}
+		}
+		allPostsets = new HashMap<String, Set<String>>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("always after")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						String activity = reader.get(0);
+						Set<String> activities = new HashSet<String>();
+						for (int column = 1; column < reader.getColumnCount(); column++) {
+							activities.add(reader.get(column));
+						}
+						allPostsets.put(activity, activities);
+					}
+				}
+			}
+		}
+		anyPresets = new HashMap<String, Set<String>>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("sometimes before")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						String activity = reader.get(0);
+						Set<String> activities = new HashSet<String>();
+						for (int column = 1; column < reader.getColumnCount(); column++) {
+							activities.add(reader.get(column));
+						}
+						anyPresets.put(activity, activities);
+					}
+				}
+			}
+		}
+		anyPostsets = new HashMap<String, Set<String>>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("sometimes after")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						String activity = reader.get(0);
+						Set<String> activities = new HashSet<String>();
+						for (int column = 1; column < reader.getColumnCount(); column++) {
+							activities.add(reader.get(column));
+						}
+						anyPostsets.put(activity, activities);
+					}
+				}
+			}
+		}
+		required = new HashSet<String>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("required")) {
+				if (reader.readRecord()) {
+					for (int column = 0; column < reader.getColumnCount(); column++) {
+						required.add(reader.get(column));
+					}
+				}
+			}
+		}
+		forbidden = new HashSet<String>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("forbidden")) {
+				if (reader.readRecord()) {
+					for (int column = 0; column < reader.getColumnCount(); column++) {
+						forbidden.add(reader.get(column));
+					}
+				}
+			}
+		}
+		splitters = new ArrayList<List<String>>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("splitters")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						List<String> splitter = new ArrayList<String>();
+						for (int column = 0; column < reader.getColumnCount(); column++) {
+							splitter.add(reader.get(column));
+						}
+						splitters.add(splitter);
+					}
+				}
+			}
+		}
 	}
 }

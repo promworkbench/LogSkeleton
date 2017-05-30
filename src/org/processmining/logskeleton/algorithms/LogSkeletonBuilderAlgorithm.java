@@ -31,7 +31,7 @@ public class LogSkeletonBuilderAlgorithm {
 		countModel.print("Count model");
 		EventLogArray logs = split(log);
 		Collection<LogSkeletonCount> counts = createCounts(logs);
-		LogSkeleton constraintModel = new LogSkeleton(countModel, countModel2);
+		LogSkeleton constraintModel = new LogSkeleton(countModel);
 		addSameCounts(counts, constraintModel);
 		createCausalDependencies(log, countModel, constraintModel);
 		String label = XConceptExtension.instance().extractName(log);

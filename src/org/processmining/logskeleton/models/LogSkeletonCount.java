@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.models;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.csvreader.CsvReader;
+import com.csvreader.CsvWriter;
 
 public class LogSkeletonCount {
 
@@ -111,6 +115,56 @@ public class LogSkeletonCount {
 //		System.out.println("[PC2017CountModel] Transitions counts for " + name);
 		for (List<String> transition : transitionCounts.keySet()) {
 //			System.out.println("[LogSkeletonCount] " + transition + ": " + transitionCounts.get(transition));
+		}
+	}
+	
+	public void exportToFile(CsvWriter writer) throws IOException {
+		writer.write("activity counts");
+		writer.write("" + activityCounts.keySet().size());
+		writer.endRecord();
+		for (String activity : activityCounts.keySet()) {
+			writer.write(activity);
+			writer.write("" + activityCounts.get(activity));
+			writer.endRecord();
+		}
+		writer.write("transition counts");
+		writer.write("" + transitionCounts.keySet().size());
+		writer.endRecord();
+		for (List<String> transitionList : transitionCounts.keySet()) {
+			for (String transition : transitionList) {
+				writer.write(transition);
+			}
+			writer.write("" + transitionCounts.get(transitionList));
+			writer.endRecord();
+		}
+	}
+	
+	public void importFromStream(CsvReader reader) throws IOException {
+		activityCounts = new HashMap<String, Integer>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("activity counts")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						activityCounts.put(reader.get(0), Integer.valueOf(reader.get(1)));
+					}
+				}
+			}
+		}
+		transitionCounts = new HashMap<List<String>, Integer>();
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("transition counts")) {
+				int rows = Integer.valueOf(reader.get(1));
+				for (int row = 0; row < rows; row++) {
+					if (reader.readRecord()) {
+						List<String> transitions = new ArrayList<String>();
+						for (int column = 0; column < reader.getColumnCount() - 1; column++) {
+							transitions.add(reader.get(column));
+						}
+						transitionCounts.put(transitions, Integer.valueOf(reader.get(reader.getColumnCount() - 1)));
+					}
+				}
+			}
 		}
 	}
 }
