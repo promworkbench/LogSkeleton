@@ -32,7 +32,7 @@ public class PDC2017TestPlugin {
 		//		String Path = "C:\\Users\\hverbeek\\Dropbox\\Projects\\";
 		//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
-			for (int i = 1; i < 11; i++) {
+			for (int i = 1; i < 2; i++) {
 				XLog marchLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");
 				XLog aprilLog = (XLog) logImporter.importFile(context,
 						Path + "PDC 2017\\test_log_may\\test_log_may_" + i + ".xes");
@@ -62,6 +62,29 @@ public class PDC2017TestPlugin {
 				} else if (i == 10) {
 					filteredMarchLog = (new PDC2017Log10FilterPlugin()).run(context, marchLog);
 					//					filteredMarchLog = filterAlgorithm.apply(marchLog);
+				}
+				// Hack: add test traces which we consider to be good.
+				if (i == 1) {
+//					for (XTrace trace : filteredAprilLog) {
+//						String caseId = XConceptExtension.instance().extractName(trace);
+//						Set<String> positiveTraces = new HashSet<String>(Arrays.asList("2", "3"));
+//						if (caseId.equals("9") || caseId.equals("18")) {
+//							filteredMarchLog.add(trace);
+//						}
+//					}
+					for (XTrace trace : filteredMayLog) {
+						String caseId = XConceptExtension.instance().extractName(trace);
+						if (caseId.equals("9") || caseId.equals("18")) {
+							filteredMarchLog.add(trace);
+						}
+					}
+				} else if (i == 6) {
+					for (XTrace trace : filteredMayLog) {
+						String caseId = XConceptExtension.instance().extractName(trace);
+						if (caseId.equals("14") || caseId.equals("18")) {
+							filteredMarchLog.add(trace);
+						}
+					}
 				}
 				System.out.println("====== Split " + i + " ======");
 				if (i == 2) {
