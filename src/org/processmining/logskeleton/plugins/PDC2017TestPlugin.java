@@ -24,31 +24,31 @@ public class PDC2017TestPlugin {
 		//		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		try {
 			for (int i = 1; i < 11; i++) {
-				XLog marchLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");
-				XLog aprilLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_may\\test_log_may_"
+				XLog trainingLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\log" + i + ".xes");
+				XLog testLogMay = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_may\\test_log_may_"
 						+ i + ".xes");
-				XLog mayLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_june\\test_log_june_"
+				XLog testLogJune = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_june\\test_log_june_"
 						+ i + ".xes");
-				XLog juneLog = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_june\\test_log_june_"
+				XLog testLogFinal = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_june\\test_log_june_"
 						+ i + ".xes");
 
 				LogSkeletonClassifierAlgorithm classifierAlgorithm = new LogSkeletonClassifierAlgorithm();
 
 				// Classify the logs
-				System.out.println("====== Classify April " + i + " ======");
-				XLog classifiedAprilLog = classifierAlgorithm.apply(context, marchLog, aprilLog);
-				context.getProvidedObjectManager().createProvidedObject("Log April " + i, classifiedAprilLog,
-						XLog.class, context);
 				System.out.println("====== Classify May " + i + " ======");
-				XLog classifiedMayLog = classifierAlgorithm.apply(context, marchLog, mayLog);
-				context.getProvidedObjectManager().createProvidedObject("Log May " + i, classifiedMayLog, XLog.class,
-						context);
+				XLog classifiedTestLogMay = classifierAlgorithm.apply(context, trainingLog, testLogMay);
+				context.getProvidedObjectManager().createProvidedObject("Test Log May " + i, classifiedTestLogMay,
+						XLog.class, context);
 				System.out.println("====== Classify June " + i + " ======");
-				XLog classifiedJuneLog = classifierAlgorithm.apply(context, marchLog, juneLog);
-				context.getProvidedObjectManager().createProvidedObject("Log June " + i, classifiedJuneLog, XLog.class,
+				XLog classifiedTestLogJune = classifierAlgorithm.apply(context, trainingLog, testLogJune);
+				context.getProvidedObjectManager().createProvidedObject("Test Log June " + i, classifiedTestLogJune, XLog.class,
+						context);
+				System.out.println("====== Classify Final " + i + " ======");
+				XLog classifiedTestLogFinal = classifierAlgorithm.apply(context, trainingLog, testLogFinal);
+				context.getProvidedObjectManager().createProvidedObject("Test Log Final " + i, classifiedTestLogFinal, XLog.class,
 						context);
 
-				testModel.add(i, classifiedAprilLog, classifiedMayLog, classifiedJuneLog);
+				testModel.add(i, classifiedTestLogMay, classifiedTestLogJune, classifiedTestLogFinal);
 			}
 			return testModel;
 		} catch (Exception e) {

@@ -115,7 +115,7 @@ public class LogSkeletonClassifierAlgorithm {
 				XLog.class, context);
 
 		/*
-		 * Return thelog containing all assumed positive test traces.
+		 * Return the log containing all assumed positive test traces.
 		 */
 		return classifiedTestLog;
 	}
