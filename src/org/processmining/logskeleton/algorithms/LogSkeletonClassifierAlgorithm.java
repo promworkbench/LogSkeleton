@@ -37,6 +37,9 @@ public class LogSkeletonClassifierAlgorithm {
 		XLog filteredTrainingLog = trainingLog;
 		XLog filteredTestLog = testLog;
 
+		/*
+		 * Filter out the assumed noise.
+		 */
 		System.out.println("====== Filter " + name + " ======");
 		if (name.equals("log1")) {
 			filteredTrainingLog = (new PDC2017Log1FilterPlugin()).run(context, trainingLog);
@@ -50,6 +53,9 @@ public class LogSkeletonClassifierAlgorithm {
 			filteredTrainingLog = (new PDC2017Log10FilterPlugin()).run(context, trainingLog);
 		}
 
+		/*
+		 * Extend log with assumed false negatives from test log. Assumption is here that the test log is not that complete :-(.
+		 */
 		if (name.equals("log1")) {
 			// June 9
 //			addTrace(filteredMarchLog, new ArrayList<String>(Arrays.asList("c", "s", "m", "a", "p", "w", "v", "g", "e", "t", "u", "n", "d", "o")));
@@ -62,6 +68,9 @@ public class LogSkeletonClassifierAlgorithm {
 			addTrace(filteredTrainingLog, new ArrayList<String>(Arrays.asList("c", "t", "q", "c", "a", "t", "r")));
 		}
 
+		/*
+		 * Split the assumed reoccurring activities. 
+		 */
 		System.out.println("====== Split " + name + " ======");
 		if (name.equals("log2")) {
 			PDC2017Log2SplitterPlugin splitter = new PDC2017Log2SplitterPlugin();
@@ -89,16 +98,25 @@ public class LogSkeletonClassifierAlgorithm {
 			filteredTestLog = splitter.run(context, filteredTestLog);
 		}
 		
+		/*
+		 * Build the log skeleton.
+		 */
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		LogSkeleton model = createPlugin.run(context, filteredTrainingLog);
 		context.getProvidedObjectManager()
 				.createProvidedObject("Model for " + name, model, LogSkeleton.class, context);
 
+		/*
+		 * Use the log skeleton to classify the test traces.
+		 */
 		System.out.println("====== Classify " + name + " ======");
 		XLog classifiedTestLog = classify(context, model, filteredTrainingLog, filteredTestLog, name);
 		context.getProvidedObjectManager().createProvidedObject("Classified Log " + name, classifiedTestLog,
 				XLog.class, context);
 
+		/*
+		 * Return thelog containing all assumed positive test traces.
+		 */
 		return classifiedTestLog;
 	}
 	
