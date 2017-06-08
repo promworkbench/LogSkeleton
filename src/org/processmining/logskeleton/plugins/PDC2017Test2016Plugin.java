@@ -50,7 +50,7 @@ public class PDC2017Test2016Plugin {
 //				XLog filteredMayLog = checkPlugin.run(context, filteredModel, filterAlgorithm.applyNeverTogether(classifiedMayLog, model));
 //				XLog filteredJuneLog = checkPlugin.run(context, filteredModel, filterAlgorithm.applyNeverTogether(classifiedJuneLog, model));
 				
-				testModel.add(i, classifiedAprilLog, classifiedMayLog, classifiedJuneLog, model);
+				testModel.add(i, classifiedAprilLog, classifiedMayLog, classifiedJuneLog);
 //				testModel.add(i, filteredAprilLog, filteredMayLog, filteredJuneLog, model);
 			}
 			return testModel;

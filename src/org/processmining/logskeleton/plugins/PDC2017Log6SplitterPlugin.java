@@ -37,31 +37,30 @@ public class PDC2017Log6SplitterPlugin extends SplitterAlgorithm {
 		parameters.getMilestoneActivities().add("e");
 		parameters.setDuplicateActivity("e");
 		filteredLog = apply(filteredLog, parameters);
-		// Split d.1 over e.1
-		parameters.getMilestoneActivities().clear();
-		parameters.getMilestoneActivities().add("e.1");
-		parameters.setDuplicateActivity("d.1");
-		filteredLog = apply(filteredLog, parameters);
-		// Split h.1 over e.1
-		parameters.getMilestoneActivities().clear();
-		parameters.getMilestoneActivities().add("e.1");
-		parameters.setDuplicateActivity("h.1");
-		filteredLog = apply(filteredLog, parameters);
-		// Split p.1 over e.1
-		parameters.getMilestoneActivities().clear();
-		parameters.getMilestoneActivities().add("e.1");
-		parameters.setDuplicateActivity("p.1");
-		filteredLog = apply(filteredLog, parameters);
-		// Split e.1 over itself
-		parameters.getMilestoneActivities().clear();
-		parameters.getMilestoneActivities().add("e.1");
-		parameters.setDuplicateActivity("e.1");
-		filteredLog = apply(filteredLog, parameters);
+		//		// Split d.1 over e.1
+		//		parameters.getMilestoneActivities().clear();
+		//		parameters.getMilestoneActivities().add("e.1");
+		//		parameters.setDuplicateActivity("d.1");
+		//		filteredLog = apply(filteredLog, parameters);
+		//		// Split h.1 over e.1
+		//		parameters.getMilestoneActivities().clear();
+		//		parameters.getMilestoneActivities().add("e.1");
+		//		parameters.setDuplicateActivity("h.1");
+		//		filteredLog = apply(filteredLog, parameters);
+		//		// Split p.1 over e.1
+		//		parameters.getMilestoneActivities().clear();
+		//		parameters.getMilestoneActivities().add("e.1");
+		//		parameters.setDuplicateActivity("p.1");
+		//		filteredLog = apply(filteredLog, parameters);
+		//		// Split e.1 over itself
+		//		parameters.getMilestoneActivities().clear();
+		//		parameters.getMilestoneActivities().add("e.1");
+		//		parameters.setDuplicateActivity("e.1");
+		//		filteredLog = apply(filteredLog, parameters);
 		// Done
-		XConceptExtension.instance().assignName(
-				filteredLog,
-				XConceptExtension.instance().extractName(log)
-						+ " | split: [d, e], [h, e], [p, e], [e, e], [d.1, e.1], [h.1, e.1], [p.1, e.1], [e.1, e.1]");
+		XConceptExtension.instance().assignName(filteredLog, XConceptExtension.instance().extractName(log)
+		//						+ " | split: [d, e], [h, e], [p, e], [e, e], [d.1, e.1], [h.1, e.1], [p.1, e.1], [e.1, e.1]");
+				+ " | split: [d, e], [h, e], [p, e], [e, e]");
 		return filteredLog;
 	}
 }

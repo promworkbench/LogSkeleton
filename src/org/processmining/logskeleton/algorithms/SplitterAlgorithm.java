@@ -37,7 +37,7 @@ public class SplitterAlgorithm {
 	}
 
 	public XLog apply7B(XLog log) {
-		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog((XAttributeMap) log.getAttributes().clone());
 		for (XTrace trace : log) {
 			XTrace filteredTrace = XFactoryRegistry.instance().currentDefault().createTrace(trace.getAttributes());
 			for (int i = 0; i < trace.size(); i++) {

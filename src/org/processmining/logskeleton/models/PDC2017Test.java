@@ -16,22 +16,19 @@ public class PDC2017Test implements HTMLToString {
 	private List<XLog> aprilLogs;
 	private List<XLog> mayLogs;
 	private List<XLog> juneLogs;
-	private List<LogSkeleton> models;
 
 	public PDC2017Test() {
 		numbers = new ArrayList<Integer>();
 		aprilLogs = new ArrayList<XLog>();
 		mayLogs = new ArrayList<XLog>();
 		juneLogs = new ArrayList<XLog>();
-		models = new ArrayList<LogSkeleton>();
 	}
 
-	public void add(int i, XLog aprilLog, XLog mayLog, XLog juneLog, LogSkeleton model) {
+	public void add(int i, XLog aprilLog, XLog mayLog, XLog juneLog) {
 		numbers.add(i);
 		aprilLogs.add(aprilLog);
 		mayLogs.add(mayLog);
 		juneLogs.add(juneLog);
-		models.add(model);
 	}
 
 	public String toHTMLString(boolean includeHTMLTags) {

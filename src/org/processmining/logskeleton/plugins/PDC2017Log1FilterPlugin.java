@@ -2,6 +2,7 @@ package org.processmining.logskeleton.plugins;
 
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
+import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -18,10 +19,11 @@ public class PDC2017Log1FilterPlugin {
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
 	public XLog run(PluginContext context, XLog log) {
 		LogSkeletonBuilderAlgorithm skeletonBuilder = new LogSkeletonBuilderAlgorithm();
-		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XLog filteredLog = XFactoryRegistry.instance().currentDefault()
+				.createLog((XAttributeMap) log.getAttributes().clone());
 		XConceptExtension.instance().assignName(filteredLog,
 				XConceptExtension.instance().extractName(log) + " | filter: f=j, f+d=1, b=l, c=s, d=o, d=h");
-		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog((XAttributeMap) log.getAttributes().clone());
 		for (XTrace trace : log) {
 			traceLog.clear();
 			traceLog.add(trace);
@@ -41,6 +43,9 @@ public class PDC2017Log1FilterPlugin {
 			if (count.get("d") != count.get("o") || count.get("d") != count.get("h")) {
 				continue;
 			}
+			//			if (count.get("d") != count.get("o")) {
+			//				continue;
+			//			}
 			filteredLog.add(trace);
 		}
 		return filteredLog;

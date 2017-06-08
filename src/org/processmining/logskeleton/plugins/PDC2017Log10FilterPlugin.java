@@ -23,7 +23,7 @@ public class PDC2017Log10FilterPlugin {
 				.createLog((XAttributeMap) log.getAttributes().clone());
 		XConceptExtension.instance().assignName(filteredLog,
 				XConceptExtension.instance().extractName(log) + " | filter: d=1");
-		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog((XAttributeMap) log.getAttributes().clone());
 		for (XTrace trace : log) {
 			traceLog.clear();
 			traceLog.add(trace);
