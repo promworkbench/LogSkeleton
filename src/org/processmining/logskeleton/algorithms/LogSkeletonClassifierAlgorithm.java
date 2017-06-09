@@ -54,13 +54,25 @@ public class LogSkeletonClassifierAlgorithm {
 		}
 
 		/*
-		 * Extend log with assumed false negatives from test log. Assumption is here that the test log is not that complete :-(.
+		 * Extend log with assumed false negatives from test log. Assumption is
+		 * here that the test log is not that complete :-(.
 		 */
 		if (name.equals("log1")) {
+			// June 4
+			addTrace(
+					filteredTrainingLog,
+					new ArrayList<String>(Arrays.asList("g", "w", "p", "c", "v", "m", "b", "u", "t", "s", "f", "r",
+							"l", "k", "j")));
 			// June 9
-//			addTrace(filteredMarchLog, new ArrayList<String>(Arrays.asList("c", "s", "m", "a", "p", "w", "v", "g", "e", "t", "u", "n", "d", "o")));
+//			addTrace(
+//					filteredTrainingLog,
+//					new ArrayList<String>(Arrays.asList("c", "s", "m", "a", "p", "w", "v", "g", "e", "t", "u", "n",
+//							"d", "o")));
 			// June 18
-			addTrace(filteredTrainingLog, new ArrayList<String>(Arrays.asList("p", "v", "g", "e", "t", "c", "a", "w", "u", "m", "n", "s", "h", "o")));
+//			addTrace(
+//					filteredTrainingLog,
+//					new ArrayList<String>(Arrays.asList("p", "v", "g", "e", "t", "c", "a", "w", "u", "m", "n", "s",
+//							"h", "o")));
 		} else if (name.equals("log6")) {
 			// June 11
 			addTrace(filteredTrainingLog, new ArrayList<String>(Arrays.asList("d", "n", "a", "f", "k")));
@@ -69,7 +81,7 @@ public class LogSkeletonClassifierAlgorithm {
 		}
 
 		/*
-		 * Split the assumed reoccurring activities. 
+		 * Split the assumed reoccurring activities.
 		 */
 		System.out.println("====== Split " + name + " ======");
 		if (name.equals("log2")) {
@@ -97,14 +109,13 @@ public class LogSkeletonClassifierAlgorithm {
 			filteredTrainingLog = splitter.run(context, filteredTrainingLog);
 			filteredTestLog = splitter.run(context, filteredTestLog);
 		}
-		
+
 		/*
 		 * Build the log skeleton.
 		 */
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		LogSkeleton model = createPlugin.run(context, filteredTrainingLog);
-		context.getProvidedObjectManager()
-				.createProvidedObject("Model for " + name, model, LogSkeleton.class, context);
+		context.getProvidedObjectManager().createProvidedObject("Model for " + name, model, LogSkeleton.class, context);
 
 		/*
 		 * Use the log skeleton to classify the test traces.
@@ -119,8 +130,9 @@ public class LogSkeletonClassifierAlgorithm {
 		 */
 		return classifiedTestLog;
 	}
-	
-	private static XLog classify(PluginContext context, LogSkeleton trainingModel, XLog trainingLog, XLog testLog, String name) {
+
+	private static XLog classify(PluginContext context, LogSkeleton trainingModel, XLog trainingLog, XLog testLog,
+			String name) {
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		Set<String> messages = new HashSet<String>();
@@ -145,8 +157,14 @@ public class LogSkeletonClassifierAlgorithm {
 				if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 					continue;
 				}
+				if (!trainingModel.getSameCounts(activity).iterator().next().equals(activity)) {
+					continue;
+				}
 
 				for (int f = 0; f < 2; f++) {
+					if (positiveTestTraces.size() <= threshold) {
+						continue;
+					}
 					Set<String> positiveFilters = new HashSet<String>();
 					Set<String> negativeFilters = new HashSet<String>();
 					if (f == 0) {
@@ -154,6 +172,7 @@ public class LogSkeletonClassifierAlgorithm {
 					} else {
 						negativeFilters.add(activity);
 					}
+					//					System.out.println("LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
 					XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
 					XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
 					if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty() || filteredTrainingLog.size() < 16) {
@@ -190,14 +209,26 @@ public class LogSkeletonClassifierAlgorithm {
 				if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 					continue;
 				}
+				if (!trainingModel.getSameCounts(activity).iterator().next().equals(activity)) {
+					continue;
+				}
 				for (String activity2 : trainingModel.getActivities()) {
+					if (positiveTestTraces.size() <= threshold) {
+						continue;
+					}
 					if (activity2 == LogSkeletonCount.STARTEVENT || activity2 == LogSkeletonCount.ENDEVENT) {
 						continue;
 					}
-					if (activity.compareTo(activity2) >= 0) {
+					if (!trainingModel.getSameCounts(activity2).iterator().next().equals(activity2)) {
+						continue;
+					}
+					if (trainingModel.getSameCounts(activity).contains(activity2)) {
 						continue;
 					}
 					for (int f = 0; f < 4; f++) {
+						if (positiveTestTraces.size() <= threshold) {
+							continue;
+						}
 						Set<String> positiveFilters = new HashSet<String>();
 						Set<String> negativeFilters = new HashSet<String>();
 						if (f == 0 || f == 1) {
@@ -210,6 +241,7 @@ public class LogSkeletonClassifierAlgorithm {
 						} else {
 							negativeFilters.add(activity2);
 						}
+						//						System.out.println("LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
 						XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
 						XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
 						if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()
@@ -249,57 +281,91 @@ public class LogSkeletonClassifierAlgorithm {
 				if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 					continue;
 				}
+				if (!trainingModel.getSameCounts(activity).iterator().next().equals(activity)) {
+					continue;
+				}
 				for (String activity2 : trainingModel.getActivities()) {
+					if (positiveTestTraces.size() <= threshold) {
+						continue;
+					}
 					if (activity2 == LogSkeletonCount.STARTEVENT || activity2 == LogSkeletonCount.ENDEVENT) {
 						continue;
 					}
-					if (activity.compareTo(activity2) >= 0) {
+					if (!trainingModel.getSameCounts(activity2).iterator().next().equals(activity2)) {
+						continue;
+					}
+					if (trainingModel.getSameCounts(activity).contains(activity2)) {
 						continue;
 					}
 					for (String activity3 : trainingModel.getActivities()) {
+						if (positiveTestTraces.size() <= threshold) {
+							continue;
+						}
 						if (activity3 == LogSkeletonCount.STARTEVENT || activity3 == LogSkeletonCount.ENDEVENT) {
 							continue;
 						}
-						if (activity3.compareTo(activity2) >= 0) {
+						if (!trainingModel.getSameCounts(activity3).iterator().next().equals(activity3)) {
 							continue;
 						}
-						if (activity3.compareTo(activity) >= 0) {
+						if (trainingModel.getSameCounts(activity).contains(activity3)) {
 							continue;
 						}
-						Set<String> positiveFilters = new HashSet<String>();
-						Set<String> negativeFilters = new HashSet<String>();
-						negativeFilters.add(activity);
-						negativeFilters.add(activity2);
-						negativeFilters.add(activity3);
-						XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
-						XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
-						if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()
-								|| filteredTrainingLog.size() < 16) {
+						if (trainingModel.getSameCounts(activity2).contains(activity3)) {
 							continue;
 						}
-						//						System.out.println("[PDC2017TestPlugin] Remaining traces 2: " + filteredTrainingLog.size());
-						LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
-						messages = new HashSet<String>();
-						XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel,
-								filteredTestLog, messages, checks);
-						for (XTrace subTrace : filteredTestLog) {
-							//							if (positiveTestTraces.size() <= threshold) {
-							//								continue;
-							//							}
-							if (!classifiedFilteredTestLog.contains(subTrace)) {
-								String caseId = XConceptExtension.instance().extractName(subTrace);
-								if (positiveTestTraces.remove(caseId)) {
-									System.out.println("[PDC2017TestPlugin] Case "
-											+ XConceptExtension.instance().extractName(subTrace)
-											+ " excluded by positive filter " + positiveFilters
-											+ " and negative filter " + negativeFilters + ", support = "
-											+ filteredTrainingLog.size());
-									for (String message : messages) {
-										System.out.println("[PDC2017TestPlugin]" + message);
+						for (int f = 7; f < 8; f++) {
+							if (positiveTestTraces.size() <= threshold) {
+								continue;
+							}
+							Set<String> positiveFilters = new HashSet<String>();
+							Set<String> negativeFilters = new HashSet<String>();
+							if (f == 0 || f == 1 || f == 2 || f == 3) {
+								positiveFilters.add(activity);
+							} else {
+								negativeFilters.add(activity);
+							}
+							if (f == 0 || f == 1 || f == 4 || f == 5) {
+								positiveFilters.add(activity2);
+							} else {
+								negativeFilters.add(activity2);
+							}
+							if (f == 0 || f == 2 || f == 4 || f == 6) {
+								positiveFilters.add(activity3);
+							} else {
+								negativeFilters.add(activity3);
+							}
+							//							System.out.println("LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
+							XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
+							XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
+							if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()
+									|| filteredTrainingLog.size() < 16) {
+								continue;
+							}
+							//						System.out.println("[PDC2017TestPlugin] Remaining traces 2: " + filteredTrainingLog.size());
+							LogSkeleton filteredTrainingModel = createPlugin.run(context, filteredTrainingLog);
+							messages = new HashSet<String>();
+							XLog classifiedFilteredTestLog = checkPlugin.run(context, filteredTrainingModel,
+									filteredTestLog, messages, checks);
+							for (XTrace subTrace : filteredTestLog) {
+								//							if (positiveTestTraces.size() <= threshold) {
+								//								continue;
+								//							}
+								if (!classifiedFilteredTestLog.contains(subTrace)) {
+									String caseId = XConceptExtension.instance().extractName(subTrace);
+									if (positiveTestTraces.remove(caseId)) {
+										System.out.println("[PDC2017TestPlugin] Case "
+												+ XConceptExtension.instance().extractName(subTrace)
+												+ " excluded by positive filter " + positiveFilters
+												+ " and negative filter " + negativeFilters + ", support = "
+												+ filteredTrainingLog.size());
+										for (String message : messages) {
+											System.out.println("[PDC2017TestPlugin]" + message);
+										}
 									}
 								}
 							}
 						}
+
 					}
 				}
 			}
