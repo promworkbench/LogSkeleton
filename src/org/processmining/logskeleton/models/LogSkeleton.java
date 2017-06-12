@@ -354,6 +354,7 @@ public class LogSkeleton implements HTMLToString {
 			//			node.setLabel("<" + encodeHTML(activity) + ">");
 			map.put(activity, node);
 		}
+		Map<String, Set<String>> arcs = new HashMap<String, Set<String>>();
 		for (LogSkeletonBrowser visualizer : parameters.getVisualizers()) {
 			switch (visualizer) {
 				case ALWAYSTOGETHER : {
@@ -380,6 +381,10 @@ public class LogSkeleton implements HTMLToString {
 						if (parameters.getActivities().contains(toActivity)) {
 							for (String fromActivity : allPresets.get(toActivity)) {
 								if (parameters.getActivities().contains(fromActivity)) {
+									if (!arcs.containsKey(fromActivity)) {
+										arcs.put(fromActivity, new HashSet<String>());
+									}
+									arcs.get(fromActivity).add(toActivity);
 									DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
 									arc.setOption("dir", "both");
 									arc.setOption("arrowtail", "none");
@@ -395,6 +400,10 @@ public class LogSkeleton implements HTMLToString {
 						if (parameters.getActivities().contains(toActivity)) {
 							for (String fromActivity : allPostsets.get(toActivity)) {
 								if (parameters.getActivities().contains(fromActivity)) {
+									if (!arcs.containsKey(toActivity)) {
+										arcs.put(toActivity, new HashSet<String>());
+									}
+									arcs.get(toActivity).add(fromActivity);
 									DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
 									arc.setOption("dir", "both");
 									arc.setOption("arrowtail", "obox");
@@ -533,6 +542,28 @@ public class LogSkeleton implements HTMLToString {
 						}
 					}
 					break;
+				}
+			}
+		}
+		if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)
+				&& parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)
+				&& !parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+			for (String toActivity : countModel.getActivities()) {
+				if (parameters.getActivities().contains(toActivity)) {
+					for (String fromActivity : countModel.getActivities()) {
+						if (parameters.getActivities().contains(fromActivity)) {
+							if (countModel.get(fromActivity, toActivity) > 0
+									&& countModel.get(toActivity, fromActivity) == 0) {
+								if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
+									DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+									arc.setOption("dir", "both");
+									arc.setOption("arrowtail", "odot");
+									arc.setOption("arrowhead", "normal");
+									arc.setLabel("" + countModel.get(fromActivity, toActivity));
+								}
+							}
+						}
+					}
 				}
 			}
 		}
