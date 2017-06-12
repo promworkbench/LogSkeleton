@@ -552,7 +552,7 @@ public class LogSkeleton implements HTMLToString {
 				if (parameters.getActivities().contains(toActivity)) {
 					for (String fromActivity : countModel.getActivities()) {
 						if (parameters.getActivities().contains(fromActivity)) {
-							if (countModel.get(fromActivity, toActivity) > 0
+							if (countModel.get(fromActivity, toActivity) > 100
 									&& countModel.get(toActivity, fromActivity) == 0) {
 								if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
 									DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
