@@ -552,14 +552,17 @@ public class LogSkeleton implements HTMLToString {
 				if (parameters.getActivities().contains(toActivity)) {
 					for (String fromActivity : countModel.getActivities()) {
 						if (parameters.getActivities().contains(fromActivity)) {
-							if (countModel.get(fromActivity, toActivity) > 100
+							if (countModel.get(fromActivity, toActivity) > 0
 									&& countModel.get(toActivity, fromActivity) == 0) {
 								if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
-									DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-									arc.setOption("dir", "both");
-									arc.setOption("arrowtail", "odot");
-									arc.setOption("arrowhead", "normal");
-									arc.setLabel("" + countModel.get(fromActivity, toActivity));
+									if (5 * countModel.get(fromActivity, toActivity) > Math.min(
+											countModel.get(fromActivity), countModel.get(toActivity))) {
+										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+										arc.setOption("dir", "both");
+										arc.setOption("arrowtail", "odot");
+										arc.setOption("arrowhead", "normal");
+										arc.setLabel("" + countModel.get(fromActivity, toActivity));
+									}
 								}
 							}
 						}
