@@ -328,7 +328,9 @@ public class LogSkeleton implements HTMLToString {
 		Dot graph = new Dot();
 		// Set312 color scheme, with white as last resort.
 		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
-				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "white" };
+				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "#8dd3c7:#ffffb3", "#bebada:#fb8072",
+				"#80b1d3:#fdb462", "#b3de69:#fccde5", "#d9d9d9:#bc80bd", "#ccebc5:#ffed6f", "#ffffb3:#bebada",
+				"#fb8072:#80b1d3", "#fdb462:#b3de69", "#fccde5:#d9d9d9", "#bc80bd:#ccebc5", "#ffed6f:#8dd3c7", "white" };
 		int colorIndex = 0;
 		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
 		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
