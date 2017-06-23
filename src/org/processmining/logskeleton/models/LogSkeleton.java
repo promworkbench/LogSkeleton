@@ -327,10 +327,27 @@ public class LogSkeleton implements HTMLToString {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
 		// Set312 color scheme, with white as last resort.
-		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
-				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "#8dd3c7:#ffffb3", "#bebada:#fb8072",
-				"#80b1d3:#fdb462", "#b3de69:#fccde5", "#d9d9d9:#bc80bd", "#ccebc5:#ffed6f", "#ffffb3:#bebada",
-				"#fb8072:#80b1d3", "#fdb462:#b3de69", "#fccde5:#d9d9d9", "#bc80bd:#ccebc5", "#ffed6f:#8dd3c7", "white" };
+		String[] set312Colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
+				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
+//		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
+//				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "#8dd3c7:#ffffb3", "#bebada:#fb8072",
+//				"#80b1d3:#fdb462", "#b3de69:#fccde5", "#d9d9d9:#bc80bd", "#ccebc5:#ffed6f", "#ffffb3:#bebada",
+//				"#fb8072:#80b1d3", "#fdb462:#b3de69", "#fccde5:#d9d9d9", "#bc80bd:#ccebc5", "#ffed6f:#8dd3c7", "white" };
+		String[] colors = new String[100];
+		for (int i = 0; i < 99; i++) {
+			int m = i / 12;
+			int d = i % 12;
+			if (m == 0) {
+				// Basic color, no gradient.
+				colors[i] = set312Colors[i];
+			} else {
+				// Extended color, gradient.
+				colors[i] = set312Colors[d] + ":" + set312Colors[(d + m) % 12];
+			}
+		}
+		// Fall-back color
+		colors[99] = "white";
+		
 		int colorIndex = 0;
 		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
 		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
