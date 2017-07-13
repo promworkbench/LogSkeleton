@@ -29,7 +29,7 @@ public class PDC2017TestPlugin {
 						+ i + ".xes");
 				XLog testLogJune = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_june\\test_log_june_"
 						+ i + ".xes");
-				XLog testLogFinal = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_june\\test_log_june_"
+				XLog testLogFinal = (XLog) logImporter.importFile(context, Path + "PDC 2017\\test_log_contest_2017\\test_log_july_"
 						+ i + ".xes");
 
 				LogSkeletonClassifierAlgorithm classifierAlgorithm = new LogSkeletonClassifierAlgorithm();
