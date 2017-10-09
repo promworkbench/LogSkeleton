@@ -433,6 +433,50 @@ public class LogSkeleton implements HTMLToString {
 					}
 					break;
 				}
+				case OFTENNEXT: {
+					for (String toActivity : countModel.getActivities()) {
+						if (parameters.getActivities().contains(toActivity)) {
+							for (String fromActivity : countModel.getActivities()) {
+								if (parameters.getActivities().contains(fromActivity)) {
+									if (countModel.get(fromActivity, toActivity) > 0) {
+										if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
+											if (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity)) {
+												DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+												arc.setOption("dir", "both");
+												arc.setOption("arrowtail", "dot");
+												arc.setOption("arrowhead", "normal");
+												arc.setLabel("" + countModel.get(fromActivity, toActivity));
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					break;
+				}
+				case OFTENPREVIOUS: {
+					for (String toActivity : countModel.getActivities()) {
+						if (parameters.getActivities().contains(toActivity)) {
+							for (String fromActivity : countModel.getActivities()) {
+								if (parameters.getActivities().contains(fromActivity)) {
+									if (countModel.get(fromActivity, toActivity) > 0) {
+										if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
+											if (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity)) {
+												DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+												arc.setOption("dir", "both");
+												arc.setOption("arrowtail", "none");
+												arc.setOption("arrowhead", "dotnormal");
+												arc.setLabel("" + countModel.get(fromActivity, toActivity));
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					break;
+				}
 				case NEVERTOGETHER : {
 					for (String fromActivity : countModel.getActivities()) {
 						if (parameters.getActivities().contains(fromActivity)) {
@@ -561,31 +605,6 @@ public class LogSkeleton implements HTMLToString {
 						}
 					}
 					break;
-				}
-			}
-		}
-		if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)
-				&& parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)
-				&& !parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
-			for (String toActivity : countModel.getActivities()) {
-				if (parameters.getActivities().contains(toActivity)) {
-					for (String fromActivity : countModel.getActivities()) {
-						if (parameters.getActivities().contains(fromActivity)) {
-							if (countModel.get(fromActivity, toActivity) > 0
-									&& countModel.get(toActivity, fromActivity) == 0) {
-								if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
-									if (5 * countModel.get(fromActivity, toActivity) > Math.min(
-											countModel.get(fromActivity), countModel.get(toActivity))) {
-										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-										arc.setOption("dir", "both");
-										arc.setOption("arrowtail", "odot");
-										arc.setOption("arrowhead", "normal");
-										arc.setLabel("" + countModel.get(fromActivity, toActivity));
-									}
-								}
-							}
-						}
-					}
 				}
 			}
 		}
