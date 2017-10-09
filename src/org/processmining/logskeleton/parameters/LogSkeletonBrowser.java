@@ -2,12 +2,13 @@ package org.processmining.logskeleton.parameters;
 
 public enum LogSkeletonBrowser {
 	
-	ALWAYSTOGETHER("Always Together"),
-	ALWAYSBEFORE("Always Before"),
+//	ALWAYSTOGETHER("Always Together"),
 	ALWAYSAFTER("Always After"),
+	ALWAYSBEFORE("Always Before"),
 	OFTENNEXT("Often Next"),
 	OFTENPREVIOUS("Often Previous"),
-	NEVERTOGETHER("Never Together"),
+	NEVERTOGETHERSELF("Never Together (Self)"),
+	NEVERTOGETHER("Never Together (Other)"),
 //	NEVERBEFORE("Never Before"),
 //	NEVERAFTER("Never After"),
 //	SOMETIMESBEFORE("Sometimes Before"),

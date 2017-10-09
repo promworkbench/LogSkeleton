@@ -327,12 +327,12 @@ public class LogSkeleton implements HTMLToString {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
 		// Set312 color scheme, with white as last resort.
-		String[] set312Colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
-				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
-//		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
-//				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "#8dd3c7:#ffffb3", "#bebada:#fb8072",
-//				"#80b1d3:#fdb462", "#b3de69:#fccde5", "#d9d9d9:#bc80bd", "#ccebc5:#ffed6f", "#ffffb3:#bebada",
-//				"#fb8072:#80b1d3", "#fdb462:#b3de69", "#fccde5:#d9d9d9", "#bc80bd:#ccebc5", "#ffed6f:#8dd3c7", "white" };
+		String[] set312Colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462",
+				"#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
+		//		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
+		//				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "#8dd3c7:#ffffb3", "#bebada:#fb8072",
+		//				"#80b1d3:#fdb462", "#b3de69:#fccde5", "#d9d9d9:#bc80bd", "#ccebc5:#ffed6f", "#ffffb3:#bebada",
+		//				"#fb8072:#80b1d3", "#fdb462:#b3de69", "#fccde5:#d9d9d9", "#bc80bd:#ccebc5", "#ffed6f:#8dd3c7", "white" };
 		String[] colors = new String[100];
 		for (int i = 0; i < 99; i++) {
 			int m = i / 12;
@@ -347,7 +347,7 @@ public class LogSkeleton implements HTMLToString {
 		}
 		// Fall-back color
 		colors[99] = "white";
-		
+
 		int colorIndex = 0;
 		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
 		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
@@ -373,241 +373,125 @@ public class LogSkeleton implements HTMLToString {
 			//			node.setLabel("<" + encodeHTML(activity) + ">");
 			map.put(activity, node);
 		}
-		Map<String, Set<String>> arcs = new HashMap<String, Set<String>>();
-		for (LogSkeletonBrowser visualizer : parameters.getVisualizers()) {
-			switch (visualizer) {
-				case ALWAYSTOGETHER : {
-					for (Collection<String> siblings : sameCounts) {
-						for (String fromActivity : siblings) {
-							if (parameters.getActivities().contains(fromActivity)) {
-								for (String toActivity : siblings) {
-									if (parameters.getActivities().contains(toActivity)) {
-										if (fromActivity.compareTo(toActivity) > 0) {
-											DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-											arc.setOption("dir", "both");
-											arc.setOption("arrowtail", "obox");
-											arc.setOption("arrowhead", "obox");
-										}
-									}
+
+		for (String fromActivity : parameters.getActivities()) {
+			if (parameters.getActivities().contains(fromActivity)) {
+				for (String toActivity : parameters.getActivities()) {
+					if (parameters.getActivities().contains(toActivity)) {
+						String tailDecorator = null;
+						String headDecorator = null;
+						String tailLabel = null;
+						String headLabel = null;
+						String tailArrow = null;
+						String headArrow = null;
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
+							if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
+								tailDecorator = "obox";
+								headArrow = "normal";
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
+							if (headDecorator == null && allPresets.get(toActivity).contains(fromActivity)) {
+								headDecorator = "obox";
+								headArrow = "normal";
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
+							if (tailDecorator == null
+									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
+								tailDecorator = "odot";
+								headArrow = "normal";
+								headLabel = "" + countModel.get(fromActivity, toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
+							if (headDecorator == null
+									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
+								headDecorator = "odot";
+								headArrow = "normal";
+								headLabel = "" + countModel.get(fromActivity, toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHERSELF)) {
+							if (fromActivity.equals(toActivity)) {
+								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
+										&& !anyPresets.get(fromActivity).contains(toActivity)
+										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+									headDecorator = "box";
+								}
+								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
+										&& !anyPresets.get(fromActivity).contains(toActivity)
+										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+									tailDecorator = "box";
+								}
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
+							if (!fromActivity.equals(toActivity)) {
+								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
+										&& !anyPresets.get(fromActivity).contains(toActivity)
+										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+									headDecorator = "box";
+								}
+								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
+										&& !anyPresets.get(fromActivity).contains(toActivity)
+										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+									tailDecorator = "box";
+								}
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+									&& countModel.get(toActivity, fromActivity) == 0) {
+								tailDecorator = "odot";
+								headLabel = "" + countModel.get(fromActivity, toActivity);
+								headArrow = "normal";
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
+							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+									&& countModel.get(toActivity, fromActivity) > 0) {
+								tailDecorator = "odot";
+								headLabel = "" + countModel.get(fromActivity, toActivity);
+								headArrow = "normal";
+							}
+							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
+									&& countModel.get(toActivity, fromActivity) > 0) {
+								headDecorator = "odot";
+								tailLabel = "" + countModel.get(toActivity, fromActivity);
+								tailArrow = "vee";
+							}
+						}
+						if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
+							DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+							arc.setOption("dir", "both");
+							if (tailDecorator == null) {
+								tailDecorator = "";
+							}
+							if (tailArrow == null) {
+								tailArrow = "none";
+							}
+							if (headDecorator == null) {
+								headDecorator = "";
+							}
+							if (headArrow == null) {
+								headArrow = "none";
+							}
+							arc.setOption("arrowtail", tailDecorator + tailArrow);
+							arc.setOption("arrowhead", headDecorator + headArrow);
+							if (headLabel != null) {
+								if (tailLabel == null) {
+									arc.setLabel(headLabel);
+								} else {
+									arc.setLabel(headLabel + "/" + tailLabel);
 								}
 							}
 						}
 					}
-					break;
-				}
-				case ALWAYSBEFORE : {
-					for (String toActivity : allPresets.keySet()) {
-						if (parameters.getActivities().contains(toActivity)) {
-							for (String fromActivity : allPresets.get(toActivity)) {
-								if (parameters.getActivities().contains(fromActivity)) {
-									if (!arcs.containsKey(fromActivity)) {
-										arcs.put(fromActivity, new HashSet<String>());
-									}
-									arcs.get(fromActivity).add(toActivity);
-									DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-									arc.setOption("dir", "both");
-									arc.setOption("arrowtail", "none");
-									arc.setOption("arrowhead", "oboxnormal");
-								}
-							}
-						}
-					}
-					break;
-				}
-				case ALWAYSAFTER : {
-					for (String toActivity : allPostsets.keySet()) {
-						if (parameters.getActivities().contains(toActivity)) {
-							for (String fromActivity : allPostsets.get(toActivity)) {
-								if (parameters.getActivities().contains(fromActivity)) {
-									if (!arcs.containsKey(toActivity)) {
-										arcs.put(toActivity, new HashSet<String>());
-									}
-									arcs.get(toActivity).add(fromActivity);
-									DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
-									arc.setOption("dir", "both");
-									arc.setOption("arrowtail", "obox");
-									arc.setOption("arrowhead", "normal");
-								}
-							}
-						}
-					}
-					break;
-				}
-				case OFTENNEXT: {
-					for (String toActivity : countModel.getActivities()) {
-						if (parameters.getActivities().contains(toActivity)) {
-							for (String fromActivity : countModel.getActivities()) {
-								if (parameters.getActivities().contains(fromActivity)) {
-									if (countModel.get(fromActivity, toActivity) > 0) {
-										if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
-											if (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity)) {
-												DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-												arc.setOption("dir", "both");
-												arc.setOption("arrowtail", "dot");
-												arc.setOption("arrowhead", "normal");
-												arc.setLabel("" + countModel.get(fromActivity, toActivity));
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					break;
-				}
-				case OFTENPREVIOUS: {
-					for (String toActivity : countModel.getActivities()) {
-						if (parameters.getActivities().contains(toActivity)) {
-							for (String fromActivity : countModel.getActivities()) {
-								if (parameters.getActivities().contains(fromActivity)) {
-									if (countModel.get(fromActivity, toActivity) > 0) {
-										if (!arcs.containsKey(fromActivity) || !arcs.get(fromActivity).contains(toActivity)) {
-											if (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity)) {
-												DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-												arc.setOption("dir", "both");
-												arc.setOption("arrowtail", "none");
-												arc.setOption("arrowhead", "dotnormal");
-												arc.setLabel("" + countModel.get(fromActivity, toActivity));
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					break;
-				}
-				case NEVERTOGETHER : {
-					for (String fromActivity : countModel.getActivities()) {
-						if (parameters.getActivities().contains(fromActivity)) {
-							for (String toActivity : countModel.getActivities()) {
-								if (parameters.getActivities().contains(toActivity)) {
-									if (fromActivity.compareTo(toActivity) >= 0
-											&& !anyPresets.get(fromActivity).contains(toActivity)
-											&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-										arc.setOption("dir", "both");
-										arc.setOption("arrowtail", "box");
-										arc.setOption("arrowhead", "box");
-									}
-								}
-							}
-						}
-					}
-					break;
-				}
-				//				case NEVERBEFORE : {
-				//					for (String toActivity : anyPresets.keySet()) {
-				//						if (parameters.getActivities().contains(toActivity)) {
-				//							for (String fromActivity : countModel.getActivities()) {
-				//								if (parameters.getActivities().contains(fromActivity)) {
-				//									if (!anyPresets.get(toActivity).contains(fromActivity)
-				//											&& anyPostsets.get(toActivity).contains(fromActivity)) {
-				//										DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
-				//										arc.setOption("dir", "both");
-				//										arc.setOption("arrowtail", "normal");
-				//										arc.setOption("arrowhead", "box");
-				//									}
-				//								}
-				//							}
-				//						}
-				//					}
-				//					break;
-				//				}
-				//				case NEVERAFTER : {
-				//					for (String toActivity : anyPostsets.keySet()) {
-				//						if (parameters.getActivities().contains(toActivity)) {
-				//							for (String fromActivity : countModel.getActivities()) {
-				//								if (parameters.getActivities().contains(fromActivity)) {
-				//									if (!anyPostsets.get(toActivity).contains(fromActivity)
-				//											&& anyPresets.get(toActivity).contains(fromActivity)) {
-				//										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-				//										arc.setOption("dir", "both");
-				//										arc.setOption("arrowtail", "boxnormal");
-				//										arc.setOption("arrowhead", "none");
-				//									}
-				//								}
-				//							}
-				//						}
-				//					}
-				//					break;
-				//				}
-				//				case SOMETIMESBEFORE : {
-				//					for (String toActivity : anyPresets.keySet()) {
-				//						if (parameters.getActivities().contains(toActivity)) {
-				//							for (String fromActivity : countModel.getActivities()) {
-				//								if (parameters.getActivities().contains(fromActivity)) {
-				//									if (anyPresets.get(toActivity).contains(fromActivity)) {
-				//										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-				//										arc.setOption("dir", "both");
-				//										arc.setOption("arrowtail", "none");
-				//										arc.setOption("arrowhead", "odiamondnormal");
-				//									}
-				//								}
-				//							}
-				//						}
-				//					}
-				//					break;
-				//				}
-				//				case SOMETIMESAFTER : {
-				//					for (String toActivity : anyPostsets.keySet()) {
-				//						if (parameters.getActivities().contains(toActivity)) {
-				//							for (String fromActivity : countModel.getActivities()) {
-				//								if (parameters.getActivities().contains(fromActivity)) {
-				//									if (anyPostsets.get(toActivity).contains(fromActivity)) {
-				//										DotEdge arc = graph.addEdge(map.get(toActivity), map.get(fromActivity));
-				//										arc.setOption("dir", "both");
-				//										arc.setOption("arrowtail", "odiamond");
-				//										arc.setOption("arrowhead", "normal");
-				//									}
-				//								}
-				//							}
-				//						}
-				//					}
-				//					break;
-				//				}
-				case NEXTONEWAY : {
-					for (String toActivity : countModel.getActivities()) {
-						if (parameters.getActivities().contains(toActivity)) {
-							for (String fromActivity : countModel.getActivities()) {
-								if (parameters.getActivities().contains(fromActivity)) {
-									if (countModel.get(fromActivity, toActivity) > 0
-											&& countModel.get(toActivity, fromActivity) == 0) {
-										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-										arc.setOption("dir", "both");
-										arc.setOption("arrowtail", "odot");
-										arc.setOption("arrowhead", "normal");
-										arc.setLabel("" + countModel.get(fromActivity, toActivity));
-									}
-								}
-							}
-						}
-					}
-					break;
-				}
-				case NEXTBOTHWAYS : {
-					for (String toActivity : countModel.getActivities()) {
-						if (parameters.getActivities().contains(toActivity)) {
-							for (String fromActivity : countModel.getActivities()) {
-								if (parameters.getActivities().contains(fromActivity)) {
-									if (fromActivity.compareTo(toActivity) >= 0
-											&& (countModel.get(fromActivity, toActivity) > 0 && countModel.get(
-													toActivity, fromActivity) > 0)) {
-										DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-										arc.setOption("dir", "both");
-										arc.setOption("arrowtail", "odotvee");
-										arc.setOption("arrowhead", "odotnormal");
-										arc.setLabel("" + countModel.get(fromActivity, toActivity) + "/"
-												+ countModel.get(toActivity, fromActivity));
-									}
-								}
-							}
-						}
-					}
-					break;
 				}
 			}
 		}
+
 		graph.setOption("labelloc", "b");
 		//		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
 		//		if (!required.isEmpty()) {

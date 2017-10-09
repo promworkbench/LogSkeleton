@@ -100,7 +100,7 @@ public class LogSkeletonBrowserPlugin {
 			public void valueChanged(ListSelectionEvent e) {
 				List<LogSkeletonBrowser> selectedVisualizers = visualizerList.getSelectedValuesList();
 				if (!selectedVisualizers.equals(parameters.getVisualizers())) {
-//					System.out.println("[PDC2017VisualizerPlugin] Selelected edges = " + selectedVisualizers);
+					System.out.println("[PDC2017VisualizerPlugin] Selected edges = " + selectedVisualizers);
 					parameters.getVisualizers().clear();
 					parameters.getVisualizers().addAll(selectedVisualizers);
 					updateRight();
@@ -143,7 +143,7 @@ public class LogSkeletonBrowserPlugin {
 		if (rightDotPanel != null) {
 			mainPanel.remove(rightDotPanel);
 		}
-		rightDotPanel = new DotPanel(model.createGraph(parameters));
+		rightDotPanel = new DotPanel(model.visualize(parameters));
 		mainPanel.add(rightDotPanel, "0, 0, 0, 3");
 		mainPanel.validate();
 		mainPanel.repaint();
