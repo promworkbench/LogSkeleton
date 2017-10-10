@@ -326,6 +326,8 @@ public class LogSkeleton implements HTMLToString {
 	public Dot visualize(LogSkeletonBrowserParameters parameters) {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
+		//		graph.setOption("concentrate", "true");
+		//		graph.setKeepOrderingOfChildren(true);
 		// Set312 color scheme, with white as last resort.
 		String[] set312Colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462",
 				"#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
@@ -373,6 +375,27 @@ public class LogSkeleton implements HTMLToString {
 			//			node.setLabel("<" + encodeHTML(activity) + ">");
 			map.put(activity, node);
 		}
+		//		for (String activity : parameters.getActivities()) {
+		//			String colorActivity = getSameCounts(activity).iterator().next();
+		//			String activityColor = colorMap.get(colorActivity);
+		//			if (activityColor == null) {
+		//				activityColor = colors[colorIndex];
+		//				colorMap.put(colorActivity, activityColor);
+		//				if (colorIndex < colors.length - 1) {
+		//					colorIndex++;
+		//				}
+		//			}
+		//			DotNode node = graph
+		//					.addNode("<<table align=\"center\" bgcolor=\""
+		//							+ activityColor
+		//							+ "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"2\"><font point-size=\"24\"><b>"
+		//							+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + colorActivity + "</td><td>"
+		//							+ countModel.get(activity) + "</td></tr></table>>");
+		//			node.setOption("shape", "none");
+		//			//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
+		//			//			node.setLabel("<" + encodeHTML(activity) + ">");
+		//			map.put(activity, node);
+		//		}
 
 		for (String fromActivity : parameters.getActivities()) {
 			if (parameters.getActivities().contains(fromActivity)) {
@@ -384,6 +407,7 @@ public class LogSkeleton implements HTMLToString {
 						String headLabel = null;
 						String tailArrow = null;
 						String headArrow = null;
+						boolean constraint = true;
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
 							if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
 								tailDecorator = "obox";
@@ -397,7 +421,7 @@ public class LogSkeleton implements HTMLToString {
 							}
 						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-							if (tailDecorator == null
+							if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
 									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
 								tailDecorator = "odot";
 								headArrow = "normal";
@@ -405,7 +429,7 @@ public class LogSkeleton implements HTMLToString {
 							}
 						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-							if (headDecorator == null
+							if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
 									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
 								headDecorator = "odot";
 								headArrow = "normal";
@@ -432,11 +456,13 @@ public class LogSkeleton implements HTMLToString {
 										&& !anyPresets.get(fromActivity).contains(toActivity)
 										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
 									headDecorator = "box";
+									constraint = false;
 								}
 								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
 										&& !anyPresets.get(fromActivity).contains(toActivity)
 										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
 									tailDecorator = "box";
+									constraint = false;
 								}
 							}
 						}
@@ -454,12 +480,14 @@ public class LogSkeleton implements HTMLToString {
 								tailDecorator = "odot";
 								headLabel = "" + countModel.get(fromActivity, toActivity);
 								headArrow = "normal";
+								constraint = false;
 							}
 							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
 									&& countModel.get(toActivity, fromActivity) > 0) {
 								headDecorator = "odot";
 								tailLabel = "" + countModel.get(toActivity, fromActivity);
 								tailArrow = "vee";
+								constraint = false;
 							}
 						}
 						if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
@@ -479,6 +507,10 @@ public class LogSkeleton implements HTMLToString {
 							}
 							arc.setOption("arrowtail", tailDecorator + tailArrow);
 							arc.setOption("arrowhead", headDecorator + headArrow);
+							//							if (!constraint) {
+							//								arc.setOption("constraint", "false");
+							//							}
+							//							arc.setOption("constraint", "true");
 							if (headLabel != null) {
 								if (tailLabel == null) {
 									arc.setLabel(headLabel);
@@ -489,6 +521,69 @@ public class LogSkeleton implements HTMLToString {
 						}
 					}
 				}
+			}
+		}
+
+		Set<DotEdge> candidateArcs = new HashSet<DotEdge>(graph.getEdges());
+
+		while (!candidateArcs.isEmpty()) {
+			DotEdge arc = candidateArcs.iterator().next();
+			Set<DotEdge> arcs = new HashSet<DotEdge>();
+			arcs.add(arc);
+			if (arc.getOption("arrowtail").contains("obox") || arc.getOption("arrowhead").contains("obox")) {
+				DotNode sourceNode = arc.getSource();
+				DotNode targetNode = arc.getTarget();
+				Set<DotNode> sourceNodes = new HashSet<DotNode>();
+				sourceNodes.add(sourceNode);
+				Set<DotNode> targetNodes = new HashSet<DotNode>();
+				targetNodes.add(targetNode);
+				boolean changed = true;
+				while (changed) {
+					changed = false;
+					for (DotEdge anotherArc : graph.getEdges()) {
+						if (arc != anotherArc
+								&& arc.getOption("arrowtail").equals(anotherArc.getOption("arrowtail"))
+								&& arc.getOption("arrowhead").equals(anotherArc.getOption("arrowhead"))
+								&& (arc.getLabel() == null ? anotherArc.getLabel() == null : arc.getLabel().equals(
+										anotherArc.getLabel()))) {
+							if (sourceNodes.contains(anotherArc.getSource())) {
+								changed = changed || targetNodes.add(anotherArc.getTarget());
+							}
+							if (targetNodes.contains(anotherArc.getTarget())) {
+								changed = changed || sourceNodes.add(anotherArc.getSource());
+							}
+						}
+					}
+				}
+
+				arcs = check(graph, sourceNodes, targetNodes, sourceNodes, targetNodes, arc.getOption("arrowtail"),
+						arc.getOption("arrowhead"), arc.getLabel(), new HashSet<List<Set<DotNode>>>());
+
+				if (arcs != null) {
+					System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
+					DotNode connector = graph.addNode("");
+					connector.setOption("shape", "point");
+					for (DotNode node : sourceNodes) {
+						DotEdge a = graph.addEdge(node, connector);
+						a.setOption("dir", "both");
+						a.setOption("arrowtail", arc.getOption("arrowtail"));
+						a.setOption("arrowhead", "none");
+					}
+					for (DotNode node : targetNodes) {
+						DotEdge a = graph.addEdge(connector, node);
+						a.setOption("dir", "both");
+						a.setOption("arrowtail", "none");
+						a.setOption("arrowhead", arc.getOption("arrowhead"));
+					}
+					for (DotEdge anotherArc : arcs) {
+						graph.removeEdge(anotherArc);
+					}
+				}
+			}
+			if (arcs == null) {
+				candidateArcs.remove(arc);
+			} else {
+				candidateArcs.removeAll(arcs);
 			}
 		}
 
@@ -526,6 +621,112 @@ public class LogSkeleton implements HTMLToString {
 		graph.setOption("label", "<" + label + ">");
 		//		graph.setOption("labeljust", "l");
 		return graph;
+	}
+
+	private Set<DotEdge> check(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes, Set<DotNode> srcNodes,
+			Set<DotNode> tgtNodes, String arrowtail, String arrowhead, String label,
+			Set<List<Set<DotNode>>> checkedNodes) {
+		if (srcNodes.size() < 2) {
+			return null;
+		}
+		if (tgtNodes.size() < 2) {
+			return null;
+		}
+		List<Set<DotNode>> checked = new ArrayList<Set<DotNode>>();
+		checked.add(new HashSet<DotNode>(srcNodes));
+		checked.add(new HashSet<DotNode>(tgtNodes));
+		checkedNodes.add(checked);
+		Set<DotEdge> arcs = new HashSet<DotEdge>();
+		for (DotEdge arc : graph.getEdges()) {
+			if (arc.getOption("arrowtail").equals(arrowtail) && arc.getOption("arrowhead").equals(arrowhead)
+					&& (arc.getLabel() == null ? label == null : arc.getLabel().equals(label))) {
+				if (srcNodes.contains(arc.getSource()) && tgtNodes.contains(arc.getTarget())) {
+					arcs.add(arc);
+				}
+			}
+		}
+
+		if (arcs.size() == srcNodes.size() * tgtNodes.size()) {
+			return arcs;
+		}
+
+		Set<DotEdge> bestArcs = null;
+		if (srcNodes.size() > tgtNodes.size()) {
+			if (srcNodes.size() > 2) {
+				for (DotNode srcNode : srcNodes) {
+					if (bestArcs == null || (srcNodes.size() - 1) * tgtNodes.size() > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(srcNodes);
+						nodes.remove(srcNode);
+						checked = new ArrayList<Set<DotNode>>();
+						checked.add(nodes);
+						checked.add(tgtNodes);
+						if (!checkedNodes.contains(checked)) {
+							arcs = check(graph, sourceNodes, targetNodes, nodes, tgtNodes, arrowtail, arrowhead, label,
+									checkedNodes);
+							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
+								bestArcs = arcs;
+							}
+						}
+					}
+				}
+			}
+			if (tgtNodes.size() > 2) {
+				for (DotNode tgtNode : tgtNodes) {
+					if (bestArcs == null || srcNodes.size() * (tgtNodes.size() - 1) > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(tgtNodes);
+						nodes.remove(tgtNode);
+						checked = new ArrayList<Set<DotNode>>();
+						checked.add(srcNodes);
+						checked.add(nodes);
+						if (!checkedNodes.contains(checked)) {
+							arcs = check(graph, sourceNodes, targetNodes, srcNodes, nodes, arrowtail, arrowhead, label,
+									checkedNodes);
+							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
+								bestArcs = arcs;
+							}
+						}
+					}
+				}
+			}
+		} else {
+			if (tgtNodes.size() > 2) {
+				for (DotNode tgtNode : tgtNodes) {
+					if (bestArcs == null || srcNodes.size() * (tgtNodes.size() - 1) > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(tgtNodes);
+						nodes.remove(tgtNode);
+						checked = new ArrayList<Set<DotNode>>();
+						checked.add(srcNodes);
+						checked.add(nodes);
+						if (!checkedNodes.contains(checked)) {
+							arcs = check(graph, sourceNodes, targetNodes, srcNodes, nodes, arrowtail, arrowhead, label,
+									checkedNodes);
+							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
+								bestArcs = arcs;
+							}
+						}
+					}
+				}
+			}
+			if (srcNodes.size() > 2) {
+				for (DotNode srcNode : srcNodes) {
+					if (bestArcs == null || (srcNodes.size() - 1) * tgtNodes.size() > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(srcNodes);
+						nodes.remove(srcNode);
+						checked = new ArrayList<Set<DotNode>>();
+						checked.add(nodes);
+						checked.add(tgtNodes);
+						if (!checkedNodes.contains(checked)) {
+							arcs = check(graph, sourceNodes, targetNodes, nodes, tgtNodes, arrowtail, arrowhead, label,
+									checkedNodes);
+							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
+								bestArcs = arcs;
+							}
+						}
+					}
+				}
+			}
+		}
+		return bestArcs;
 	}
 
 	private String encodeHeader(String title) {
