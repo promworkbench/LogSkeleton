@@ -528,8 +528,6 @@ public class LogSkeleton implements HTMLToString {
 
 		while (!candidateArcs.isEmpty()) {
 			DotEdge arc = candidateArcs.iterator().next();
-			Set<DotEdge> arcs = new HashSet<DotEdge>();
-			arcs.add(arc);
 			if (arc.getOption("arrowtail").contains("obox") || arc.getOption("arrowhead").contains("obox")) {
 				DotNode sourceNode = arc.getSource();
 				DotNode targetNode = arc.getTarget();
@@ -556,10 +554,16 @@ public class LogSkeleton implements HTMLToString {
 					}
 				}
 
-				arcs = check(graph, sourceNodes, targetNodes, sourceNodes, targetNodes, arc.getOption("arrowtail"),
+				Set<DotEdge> arcs = check(graph, sourceNodes, targetNodes, arc.getOption("arrowtail"),
 						arc.getOption("arrowhead"), arc.getLabel(), new HashSet<List<Set<DotNode>>>());
 
 				if (arcs != null) {
+					sourceNodes.clear();
+					targetNodes.clear();
+					for (DotEdge a : arcs) {
+						sourceNodes.add(a.getSource());
+						targetNodes.add(a.getTarget());
+					}
 					System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
 					DotNode connector = graph.addNode("");
 					connector.setOption("shape", "point");
@@ -568,22 +572,24 @@ public class LogSkeleton implements HTMLToString {
 						a.setOption("dir", "both");
 						a.setOption("arrowtail", arc.getOption("arrowtail"));
 						a.setOption("arrowhead", "none");
+						candidateArcs.add(a);
 					}
 					for (DotNode node : targetNodes) {
 						DotEdge a = graph.addEdge(connector, node);
 						a.setOption("dir", "both");
 						a.setOption("arrowtail", "none");
 						a.setOption("arrowhead", arc.getOption("arrowhead"));
+						candidateArcs.add(a);
 					}
 					for (DotEdge anotherArc : arcs) {
 						graph.removeEdge(anotherArc);
 					}
+					candidateArcs.removeAll(arcs);
+				} else {
+					candidateArcs.remove(arc);
 				}
-			}
-			if (arcs == null) {
-				candidateArcs.remove(arc);
 			} else {
-				candidateArcs.removeAll(arcs);
+				candidateArcs.remove(arc);
 			}
 		}
 
@@ -623,46 +629,44 @@ public class LogSkeleton implements HTMLToString {
 		return graph;
 	}
 
-	private Set<DotEdge> check(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes, Set<DotNode> srcNodes,
-			Set<DotNode> tgtNodes, String arrowtail, String arrowhead, String label,
-			Set<List<Set<DotNode>>> checkedNodes) {
-		if (srcNodes.size() < 2) {
+	private Set<DotEdge> check(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes, String arrowtail,
+			String arrowhead, String label, Set<List<Set<DotNode>>> checkedNodes) {
+		if (sourceNodes.size() < 2) {
 			return null;
 		}
-		if (tgtNodes.size() < 2) {
+		if (targetNodes.size() < 2) {
 			return null;
 		}
 		List<Set<DotNode>> checked = new ArrayList<Set<DotNode>>();
-		checked.add(new HashSet<DotNode>(srcNodes));
-		checked.add(new HashSet<DotNode>(tgtNodes));
+		checked.add(new HashSet<DotNode>(sourceNodes));
+		checked.add(new HashSet<DotNode>(targetNodes));
 		checkedNodes.add(checked);
 		Set<DotEdge> arcs = new HashSet<DotEdge>();
 		for (DotEdge arc : graph.getEdges()) {
 			if (arc.getOption("arrowtail").equals(arrowtail) && arc.getOption("arrowhead").equals(arrowhead)
 					&& (arc.getLabel() == null ? label == null : arc.getLabel().equals(label))) {
-				if (srcNodes.contains(arc.getSource()) && tgtNodes.contains(arc.getTarget())) {
+				if (sourceNodes.contains(arc.getSource()) && targetNodes.contains(arc.getTarget())) {
 					arcs.add(arc);
 				}
 			}
 		}
 
-		if (arcs.size() == srcNodes.size() * tgtNodes.size()) {
+		if (arcs.size() == sourceNodes.size() * targetNodes.size()) {
 			return arcs;
 		}
 
 		Set<DotEdge> bestArcs = null;
-		if (srcNodes.size() > tgtNodes.size()) {
-			if (srcNodes.size() > 2) {
-				for (DotNode srcNode : srcNodes) {
-					if (bestArcs == null || (srcNodes.size() - 1) * tgtNodes.size() > bestArcs.size()) {
-						Set<DotNode> nodes = new HashSet<DotNode>(srcNodes);
+		if (sourceNodes.size() > targetNodes.size()) {
+			if (sourceNodes.size() > 2) {
+				for (DotNode srcNode : sourceNodes) {
+					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(nodes);
-						checked.add(tgtNodes);
+						checked.add(targetNodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, sourceNodes, targetNodes, nodes, tgtNodes, arrowtail, arrowhead, label,
-									checkedNodes);
+							arcs = check(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -670,17 +674,16 @@ public class LogSkeleton implements HTMLToString {
 					}
 				}
 			}
-			if (tgtNodes.size() > 2) {
-				for (DotNode tgtNode : tgtNodes) {
-					if (bestArcs == null || srcNodes.size() * (tgtNodes.size() - 1) > bestArcs.size()) {
-						Set<DotNode> nodes = new HashSet<DotNode>(tgtNodes);
+			if (targetNodes.size() > 2) {
+				for (DotNode tgtNode : targetNodes) {
+					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(targetNodes);
 						nodes.remove(tgtNode);
 						checked = new ArrayList<Set<DotNode>>();
-						checked.add(srcNodes);
+						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, sourceNodes, targetNodes, srcNodes, nodes, arrowtail, arrowhead, label,
-									checkedNodes);
+							arcs = check(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -689,17 +692,16 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		} else {
-			if (tgtNodes.size() > 2) {
-				for (DotNode tgtNode : tgtNodes) {
-					if (bestArcs == null || srcNodes.size() * (tgtNodes.size() - 1) > bestArcs.size()) {
-						Set<DotNode> nodes = new HashSet<DotNode>(tgtNodes);
+			if (targetNodes.size() > 2) {
+				for (DotNode tgtNode : targetNodes) {
+					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(targetNodes);
 						nodes.remove(tgtNode);
 						checked = new ArrayList<Set<DotNode>>();
-						checked.add(srcNodes);
+						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, sourceNodes, targetNodes, srcNodes, nodes, arrowtail, arrowhead, label,
-									checkedNodes);
+							arcs = check(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -707,17 +709,16 @@ public class LogSkeleton implements HTMLToString {
 					}
 				}
 			}
-			if (srcNodes.size() > 2) {
-				for (DotNode srcNode : srcNodes) {
-					if (bestArcs == null || (srcNodes.size() - 1) * tgtNodes.size() > bestArcs.size()) {
-						Set<DotNode> nodes = new HashSet<DotNode>(srcNodes);
+			if (sourceNodes.size() > 2) {
+				for (DotNode srcNode : sourceNodes) {
+					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
+						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(nodes);
-						checked.add(tgtNodes);
+						checked.add(targetNodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, sourceNodes, targetNodes, nodes, tgtNodes, arrowtail, arrowhead, label,
-									checkedNodes);
+							arcs = check(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
