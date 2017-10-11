@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,6 +31,7 @@ import org.processmining.logskeleton.parameters.LogSkeletonBrowserParameters;
 import org.processmining.plugins.graphviz.visualisation.DotPanel;
 
 import com.fluxicon.slickerbox.components.SlickerButton;
+import com.fluxicon.slickerbox.factory.SlickerFactory;
 
 @Plugin(name = "Log Skeleton Browser", parameterLabels = { "Log Skeleton" }, returnLabels = { "Log Skeleton Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Browser")
 @Visualizer
@@ -49,7 +51,7 @@ public class LogSkeletonBrowserPlugin {
 
 		mainPanel = new JPanel();
 		double size[][] = { { TableLayoutConstants.FILL, 250 },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -110,6 +112,20 @@ public class LogSkeletonBrowserPlugin {
 		visualizerList.setPreferredSize(new Dimension(100, 100));
 		mainPanel.add(visualizerList, "1, 2");
 
+		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use hyperarcs", false);
+		checkBox.setSelected(parameters.isUseHyperArcs());
+		checkBox.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				parameters.setUseHyperArcs(checkBox.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBox.setOpaque(false);
+		checkBox.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBox, "1, 3");
+
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -117,7 +133,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 			
 		});
-		mainPanel.add(button, "1, 3");
+		mainPanel.add(button, "1, 4");
 		
 //		updateLeft();
 		updateRight();
@@ -144,7 +160,7 @@ public class LogSkeletonBrowserPlugin {
 			mainPanel.remove(rightDotPanel);
 		}
 		rightDotPanel = new DotPanel(model.visualize(parameters));
-		mainPanel.add(rightDotPanel, "0, 0, 0, 3");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 4");
 		mainPanel.validate();
 		mainPanel.repaint();
 

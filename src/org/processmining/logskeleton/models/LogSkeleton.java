@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -524,72 +525,96 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 
-		Set<DotEdge> candidateArcs = new HashSet<DotEdge>(graph.getEdges());
+		if (parameters.isUseHyperArcs()) {
+			List<DotEdge> candidateArcs = new ArrayList<DotEdge>(graph.getEdges());
+			Collections.sort(candidateArcs, new Comparator<DotEdge>() {
 
-		while (!candidateArcs.isEmpty()) {
-			DotEdge arc = candidateArcs.iterator().next();
-			if (arc.getOption("arrowtail").contains("obox") || arc.getOption("arrowhead").contains("obox")) {
-				DotNode sourceNode = arc.getSource();
-				DotNode targetNode = arc.getTarget();
-				Set<DotNode> sourceNodes = new HashSet<DotNode>();
-				sourceNodes.add(sourceNode);
-				Set<DotNode> targetNodes = new HashSet<DotNode>();
-				targetNodes.add(targetNode);
-				boolean changed = true;
-				while (changed) {
-					changed = false;
-					for (DotEdge anotherArc : graph.getEdges()) {
-						if (arc != anotherArc
-								&& arc.getOption("arrowtail").equals(anotherArc.getOption("arrowtail"))
-								&& arc.getOption("arrowhead").equals(anotherArc.getOption("arrowhead"))
-								&& (arc.getLabel() == null ? anotherArc.getLabel() == null : arc.getLabel().equals(
-										anotherArc.getLabel()))) {
-							if (sourceNodes.contains(anotherArc.getSource())) {
-								changed = changed || targetNodes.add(anotherArc.getTarget());
-							}
-							if (targetNodes.contains(anotherArc.getTarget())) {
-								changed = changed || sourceNodes.add(anotherArc.getSource());
+				public int compare(DotEdge o1, DotEdge o2) {
+					int c = o1.getSource().getLabel().compareTo(o2.getSource().getLabel());
+					if (c == 0) {
+						c = o1.getTarget().getLabel().compareTo(o2.getTarget().getLabel()); 
+					}
+					return c;
+				}
+				
+			});
+
+			while (!candidateArcs.isEmpty()) {
+				DotEdge arc = candidateArcs.iterator().next();
+				if (arc.getOption("arrowtail").contains("obox") || arc.getOption("arrowhead").contains("obox")) {
+					DotNode sourceNode = arc.getSource();
+					DotNode targetNode = arc.getTarget();
+					Set<DotNode> sourceNodes = new HashSet<DotNode>();
+					sourceNodes.add(sourceNode);
+					Set<DotNode> targetNodes = new HashSet<DotNode>();
+					targetNodes.add(targetNode);
+					boolean changed = true;
+					while (changed) {
+						changed = false;
+						for (DotEdge anotherArc : graph.getEdges()) {
+							if (arc != anotherArc
+									&& arc.getOption("arrowtail").equals(anotherArc.getOption("arrowtail"))
+									&& arc.getOption("arrowhead").equals(anotherArc.getOption("arrowhead"))
+									&& (arc.getLabel() == null ? anotherArc.getLabel() == null : arc.getLabel().equals(
+											anotherArc.getLabel()))) {
+								if (sourceNodes.contains(anotherArc.getSource())) {
+									changed = changed || targetNodes.add(anotherArc.getTarget());
+								}
+								if (targetNodes.contains(anotherArc.getTarget())) {
+									changed = changed || sourceNodes.add(anotherArc.getSource());
+								}
 							}
 						}
 					}
-				}
 
-				Set<DotEdge> arcs = check(graph, sourceNodes, targetNodes, arc.getOption("arrowtail"),
-						arc.getOption("arrowhead"), arc.getLabel(), new HashSet<List<Set<DotNode>>>());
+					Set<DotEdge> arcs = check(graph, sourceNodes, targetNodes, arc.getOption("arrowtail"),
+							arc.getOption("arrowhead"), arc.getLabel(), new HashSet<List<Set<DotNode>>>());
 
-				if (arcs != null) {
-					sourceNodes.clear();
-					targetNodes.clear();
-					for (DotEdge a : arcs) {
-						sourceNodes.add(a.getSource());
-						targetNodes.add(a.getTarget());
+					if (arcs != null) {
+						sourceNodes.clear();
+						targetNodes.clear();
+						for (DotEdge a : arcs) {
+							sourceNodes.add(a.getSource());
+							targetNodes.add(a.getTarget());
+						}
+						System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
+						DotNode connector = graph.addNode("");
+						connector.setOption("shape", "point");
+						for (DotNode node : sourceNodes) {
+							DotEdge a = graph.addEdge(node, connector);
+							a.setOption("dir", "both");
+							a.setOption("arrowtail", arc.getOption("arrowtail"));
+							a.setOption("arrowhead", "none");
+							candidateArcs.add(a);
+						}
+						for (DotNode node : targetNodes) {
+							DotEdge a = graph.addEdge(connector, node);
+							a.setOption("dir", "both");
+							a.setOption("arrowtail", "none");
+							a.setOption("arrowhead", arc.getOption("arrowhead"));
+							candidateArcs.add(a);
+						}
+						for (DotEdge anotherArc : arcs) {
+							graph.removeEdge(anotherArc);
+						}
+						candidateArcs.removeAll(arcs);
+						Collections.sort(candidateArcs, new Comparator<DotEdge>() {
+
+							public int compare(DotEdge o1, DotEdge o2) {
+								int c = o1.getSource().getLabel().compareTo(o2.getSource().getLabel());
+								if (c == 0) {
+									c = o1.getTarget().getLabel().compareTo(o2.getTarget().getLabel()); 
+								}
+								return c;
+							}
+							
+						});
+					} else {
+						candidateArcs.remove(arc);
 					}
-					System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
-					DotNode connector = graph.addNode("");
-					connector.setOption("shape", "point");
-					for (DotNode node : sourceNodes) {
-						DotEdge a = graph.addEdge(node, connector);
-						a.setOption("dir", "both");
-						a.setOption("arrowtail", arc.getOption("arrowtail"));
-						a.setOption("arrowhead", "none");
-						candidateArcs.add(a);
-					}
-					for (DotNode node : targetNodes) {
-						DotEdge a = graph.addEdge(connector, node);
-						a.setOption("dir", "both");
-						a.setOption("arrowtail", "none");
-						a.setOption("arrowhead", arc.getOption("arrowhead"));
-						candidateArcs.add(a);
-					}
-					for (DotEdge anotherArc : arcs) {
-						graph.removeEdge(anotherArc);
-					}
-					candidateArcs.removeAll(arcs);
 				} else {
 					candidateArcs.remove(arc);
 				}
-			} else {
-				candidateArcs.remove(arc);
 			}
 		}
 
