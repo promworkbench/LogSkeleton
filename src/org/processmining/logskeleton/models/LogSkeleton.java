@@ -753,8 +753,17 @@ public class LogSkeleton implements HTMLToString {
 			if (sourceNodes.size() > 2) {
 				/*
 				 * Try to find a maximal clique with one source removed.
+				 * Sort the source nodes first to get a (more) deterministic result.
 				 */
-				for (DotNode srcNode : sourceNodes) {
+				List<DotNode> sortedSourceNodes = new ArrayList<DotNode>(sourceNodes);
+				Collections.sort(sortedSourceNodes, new Comparator<DotNode>() {
+
+					public int compare(DotNode o1, DotNode o2) {
+						return o1.getLabel().compareTo(o2.getLabel());
+					}
+					
+				});
+				for (DotNode srcNode : sortedSourceNodes) {
 					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
 						/*
 						 * May result in a bigger clique than the best found so far.
@@ -784,7 +793,15 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 			if (targetNodes.size() > 2) {
-				for (DotNode tgtNode : targetNodes) {
+				List<DotNode> sortedTargetNodes = new ArrayList<DotNode>(targetNodes);
+				Collections.sort(sortedTargetNodes, new Comparator<DotNode>() {
+
+					public int compare(DotNode o1, DotNode o2) {
+						return o1.getLabel().compareTo(o2.getLabel());
+					}
+					
+				});
+				for (DotNode tgtNode : sortedTargetNodes) {
 					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
 						Set<DotNode> nodes = new HashSet<DotNode>(targetNodes);
 						nodes.remove(tgtNode);
@@ -805,7 +822,15 @@ public class LogSkeleton implements HTMLToString {
 			 * The other way around.
 			 */
 			if (targetNodes.size() > 2) {
-				for (DotNode tgtNode : targetNodes) {
+				List<DotNode> sortedTargetNodes = new ArrayList<DotNode>(targetNodes);
+				Collections.sort(sortedTargetNodes, new Comparator<DotNode>() {
+
+					public int compare(DotNode o1, DotNode o2) {
+						return o1.getLabel().compareTo(o2.getLabel());
+					}
+					
+				});
+				for (DotNode tgtNode : sortedTargetNodes) {
 					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
 						Set<DotNode> nodes = new HashSet<DotNode>(targetNodes);
 						nodes.remove(tgtNode);
@@ -822,7 +847,15 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 			if (sourceNodes.size() > 2) {
-				for (DotNode srcNode : sourceNodes) {
+				List<DotNode> sortedSourceNodes = new ArrayList<DotNode>(sourceNodes);
+				Collections.sort(sortedSourceNodes, new Comparator<DotNode>() {
+
+					public int compare(DotNode o1, DotNode o2) {
+						return o1.getLabel().compareTo(o2.getLabel());
+					}
+					
+				});
+				for (DotNode srcNode : sortedSourceNodes) {
 					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
 						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
