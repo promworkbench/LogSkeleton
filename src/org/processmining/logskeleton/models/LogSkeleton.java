@@ -526,6 +526,9 @@ public class LogSkeleton implements HTMLToString {
 		}
 
 		if (parameters.isUseHyperArcs()) {
+			/*
+			 * Sort the arcs to get a (more) deterministic result.
+			 */
 			List<DotEdge> candidateArcs = new ArrayList<DotEdge>(graph.getEdges());
 			Collections.sort(candidateArcs, new Comparator<DotEdge>() {
 
@@ -539,9 +542,23 @@ public class LogSkeleton implements HTMLToString {
 				
 			});
 
+			/*
+			 * Iterate over all arcs in the (current!) graph.
+			 * 
+			 * Note that the graph may change in the process.
+			 */
 			while (!candidateArcs.isEmpty()) {
+				/*
+				 * Get the next arc.
+				 */
 				DotEdge arc = candidateArcs.iterator().next();
+				/*
+				 * For now, only do this for always-arcs.
+				 */
 				if (arc.getOption("arrowtail").contains("obox") || arc.getOption("arrowhead").contains("obox")) {
+					/*
+					 * Get the cluster for this arc.
+					 */
 					DotNode sourceNode = arc.getSource();
 					DotNode targetNode = arc.getTarget();
 					Set<DotNode> sourceNodes = new HashSet<DotNode>();
@@ -567,19 +584,31 @@ public class LogSkeleton implements HTMLToString {
 						}
 					}
 
-					Set<DotEdge> arcs = check(graph, sourceNodes, targetNodes, arc.getOption("arrowtail"),
+					/*
+					 * Get a biggest maximal clique in the cluster.
+					 */
+					Set<DotEdge> arcs = getMaximalClique(graph, sourceNodes, targetNodes, arc.getOption("arrowtail"),
 							arc.getOption("arrowhead"), arc.getLabel(), new HashSet<List<Set<DotNode>>>());
 
 					if (arcs != null) {
+						/*
+						 * A maximal clique was found. Update the sources and targets to this clique.
+						 */
 						sourceNodes.clear();
 						targetNodes.clear();
 						for (DotEdge a : arcs) {
 							sourceNodes.add(a.getSource());
 							targetNodes.add(a.getTarget());
 						}
-						System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
+//						System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
+						/*
+						 * Add a connector node to the graph.
+						 */
 						DotNode connector = graph.addNode("");
 						connector.setOption("shape", "point");
+						/*
+						 * Add arcs from and to the new connector node.
+						 */
 						for (DotNode node : sourceNodes) {
 							DotEdge a = graph.addEdge(node, connector);
 							a.setOption("dir", "both");
@@ -594,10 +623,16 @@ public class LogSkeleton implements HTMLToString {
 							a.setOption("arrowhead", arc.getOption("arrowhead"));
 							candidateArcs.add(a);
 						}
+						/*
+						 * Remove the old arcs, they have now been replaced with the newly added connector node and arcs.
+						 */
 						for (DotEdge anotherArc : arcs) {
 							graph.removeEdge(anotherArc);
 						}
 						candidateArcs.removeAll(arcs);
+						/*
+						 * Sort the arcs again, as some have been added.
+						 */
 						Collections.sort(candidateArcs, new Comparator<DotEdge>() {
 
 							public int compare(DotEdge o1, DotEdge o2) {
@@ -610,9 +645,15 @@ public class LogSkeleton implements HTMLToString {
 							
 						});
 					} else {
+						/*
+						 * No maximal clique was found, leave the arc as-is.
+						 */
 						candidateArcs.remove(arc);
 					}
 				} else {
+					/*
+					 * Not an always-arc, leave the arc as-is.
+					 */
 					candidateArcs.remove(arc);
 				}
 			}
@@ -654,18 +695,34 @@ public class LogSkeleton implements HTMLToString {
 		return graph;
 	}
 
-	private Set<DotEdge> check(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes, String arrowtail,
+	private Set<DotEdge> getMaximalClique(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes, String arrowtail,
 			String arrowhead, String label, Set<List<Set<DotNode>>> checkedNodes) {
+		/*
+		 * Make sure a clique is not too small.  
+		 */
 		if (sourceNodes.size() < 2) {
+			/*
+			 * A single source. Do not look for a maximal clique.
+			 */
 			return null;
 		}
 		if (targetNodes.size() < 2) {
+			/*
+			 * A single target. Do not look for a maximal clique.
+			 */
 			return null;
 		}
+		/*
+		 * Keep track of which combinations of sources and targets have already been checked. 
+		 * This prevents checking the same combinations many times over.
+		 */
 		List<Set<DotNode>> checked = new ArrayList<Set<DotNode>>();
 		checked.add(new HashSet<DotNode>(sourceNodes));
 		checked.add(new HashSet<DotNode>(targetNodes));
 		checkedNodes.add(checked);
+		/*
+		 * Collect all matching arcs that go from some source to some target.
+		 */
 		Set<DotEdge> arcs = new HashSet<DotEdge>();
 		for (DotEdge arc : graph.getEdges()) {
 			if (arc.getOption("arrowtail").equals(arrowtail) && arc.getOption("arrowhead").equals(arrowhead)
@@ -675,24 +732,51 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
-
+		/*
+		 * Check whether a maximal clique.
+		 */
 		if (arcs.size() == sourceNodes.size() * targetNodes.size()) {
+			/*
+			 * Yes.
+			 */
 			return arcs;
 		}
-
-		Set<DotEdge> bestArcs = null;
+		/*
+		 * No, look for maximal cliques that have one node (source or target) less.
+		 */
+		Set<DotEdge> bestArcs = null; // Best solution so far.
 		if (sourceNodes.size() > targetNodes.size()) {
+			/*
+			 * More sources than targets. Removing a source yields a possible bigger clique than removing a target.
+			 * So, first try to remove a source, and only then try to remove a target.
+			 */
 			if (sourceNodes.size() > 2) {
+				/*
+				 * Try to find a maximal clique with one source removed.
+				 */
 				for (DotNode srcNode : sourceNodes) {
 					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
+						/*
+						 * May result in a bigger clique than the best found so far.
+						 * First, remove the node from the sources.
+						 */
 						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
+						/*
+						 * Check whether this combination of sources and targets was checked before.
+						 */
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(nodes);
 						checked.add(targetNodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
+							/*
+							 * No, it was not. Check now.
+							 */
+							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
+								/*
+								 * Found a bigger maximal clique than the best found so far. Update.
+								 */
 								bestArcs = arcs;
 							}
 						}
@@ -708,7 +792,7 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
+							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -717,6 +801,9 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		} else {
+			/*
+			 * The other way around.
+			 */
 			if (targetNodes.size() > 2) {
 				for (DotNode tgtNode : targetNodes) {
 					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
@@ -726,7 +813,7 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
+							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -743,7 +830,7 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(nodes);
 						checked.add(targetNodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = check(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
+							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -752,6 +839,9 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
+		/*
+		 * Return the biggest maximal clique found. Equals null if none found.
+		 */
 		return bestArcs;
 	}
 

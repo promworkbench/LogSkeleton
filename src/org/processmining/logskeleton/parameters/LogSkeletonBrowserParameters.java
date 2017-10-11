@@ -14,6 +14,9 @@ public class LogSkeletonBrowserParameters {
 	public LogSkeletonBrowserParameters() {
 		activities = new HashSet<String>();
 		visualizers = new ArrayList<LogSkeletonBrowser>();
+		/* 
+		 * By default, do not use hyper arcs as finding the hyper arcs may take considerable time. 
+		 */
 		setUseHyperArcs(false);
 	}
 	

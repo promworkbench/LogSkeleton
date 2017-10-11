@@ -112,7 +112,7 @@ public class LogSkeletonBrowserPlugin {
 		visualizerList.setPreferredSize(new Dimension(100, 100));
 		mainPanel.add(visualizerList, "1, 2");
 
-		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use hyperarcs", false);
+		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use hyper arcs (may be slow)", false);
 		checkBox.setSelected(parameters.isUseHyperArcs());
 		checkBox.addActionListener(new ActionListener() {
 
