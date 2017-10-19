@@ -476,19 +476,21 @@ public class LogSkeleton implements HTMLToString {
 							}
 						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-									&& countModel.get(toActivity, fromActivity) > 0) {
-								tailDecorator = "odot";
-								headLabel = "" + countModel.get(fromActivity, toActivity);
-								headArrow = "normal";
-								constraint = false;
-							}
-							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
-									&& countModel.get(toActivity, fromActivity) > 0) {
-								headDecorator = "odot";
-								tailLabel = "" + countModel.get(toActivity, fromActivity);
-								tailArrow = "vee";
-								constraint = false;
+							if (fromActivity.compareTo(toActivity) <= 0) {
+								if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+										&& countModel.get(toActivity, fromActivity) > 0) {
+									tailDecorator = "odot";
+									headLabel = "" + countModel.get(fromActivity, toActivity);
+									headArrow = "normal";
+									constraint = false;
+								}
+								if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
+										&& countModel.get(toActivity, fromActivity) > 0) {
+									headDecorator = "odot";
+									tailLabel = "" + countModel.get(toActivity, fromActivity);
+									tailArrow = "vee";
+									constraint = false;
+								}
 							}
 						}
 						if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
@@ -535,11 +537,11 @@ public class LogSkeleton implements HTMLToString {
 				public int compare(DotEdge o1, DotEdge o2) {
 					int c = o1.getSource().getLabel().compareTo(o2.getSource().getLabel());
 					if (c == 0) {
-						c = o1.getTarget().getLabel().compareTo(o2.getTarget().getLabel()); 
+						c = o1.getTarget().getLabel().compareTo(o2.getTarget().getLabel());
 					}
 					return c;
 				}
-				
+
 			});
 
 			/*
@@ -592,7 +594,8 @@ public class LogSkeleton implements HTMLToString {
 
 					if (arcs != null) {
 						/*
-						 * A maximal clique was found. Update the sources and targets to this clique.
+						 * A maximal clique was found. Update the sources and
+						 * targets to this clique.
 						 */
 						sourceNodes.clear();
 						targetNodes.clear();
@@ -600,7 +603,7 @@ public class LogSkeleton implements HTMLToString {
 							sourceNodes.add(a.getSource());
 							targetNodes.add(a.getTarget());
 						}
-//						System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
+						//						System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
 						/*
 						 * Add a connector node to the graph.
 						 */
@@ -624,7 +627,8 @@ public class LogSkeleton implements HTMLToString {
 							candidateArcs.add(a);
 						}
 						/*
-						 * Remove the old arcs, they have now been replaced with the newly added connector node and arcs.
+						 * Remove the old arcs, they have now been replaced with
+						 * the newly added connector node and arcs.
 						 */
 						for (DotEdge anotherArc : arcs) {
 							graph.removeEdge(anotherArc);
@@ -638,11 +642,11 @@ public class LogSkeleton implements HTMLToString {
 							public int compare(DotEdge o1, DotEdge o2) {
 								int c = o1.getSource().getLabel().compareTo(o2.getSource().getLabel());
 								if (c == 0) {
-									c = o1.getTarget().getLabel().compareTo(o2.getTarget().getLabel()); 
+									c = o1.getTarget().getLabel().compareTo(o2.getTarget().getLabel());
 								}
 								return c;
 							}
-							
+
 						});
 					} else {
 						/*
@@ -695,10 +699,10 @@ public class LogSkeleton implements HTMLToString {
 		return graph;
 	}
 
-	private Set<DotEdge> getMaximalClique(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes, String arrowtail,
-			String arrowhead, String label, Set<List<Set<DotNode>>> checkedNodes) {
+	private Set<DotEdge> getMaximalClique(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes,
+			String arrowtail, String arrowhead, String label, Set<List<Set<DotNode>>> checkedNodes) {
 		/*
-		 * Make sure a clique is not too small.  
+		 * Make sure a clique is not too small.
 		 */
 		if (sourceNodes.size() < 2) {
 			/*
@@ -713,8 +717,9 @@ public class LogSkeleton implements HTMLToString {
 			return null;
 		}
 		/*
-		 * Keep track of which combinations of sources and targets have already been checked. 
-		 * This prevents checking the same combinations many times over.
+		 * Keep track of which combinations of sources and targets have already
+		 * been checked. This prevents checking the same combinations many times
+		 * over.
 		 */
 		List<Set<DotNode>> checked = new ArrayList<Set<DotNode>>();
 		checked.add(new HashSet<DotNode>(sourceNodes));
@@ -742,18 +747,20 @@ public class LogSkeleton implements HTMLToString {
 			return arcs;
 		}
 		/*
-		 * No, look for maximal cliques that have one node (source or target) less.
+		 * No, look for maximal cliques that have one node (source or target)
+		 * less.
 		 */
 		Set<DotEdge> bestArcs = null; // Best solution so far.
 		if (sourceNodes.size() > targetNodes.size()) {
 			/*
-			 * More sources than targets. Removing a source yields a possible bigger clique than removing a target.
-			 * So, first try to remove a source, and only then try to remove a target.
+			 * More sources than targets. Removing a source yields a possible
+			 * bigger clique than removing a target. So, first try to remove a
+			 * source, and only then try to remove a target.
 			 */
 			if (sourceNodes.size() > 2) {
 				/*
-				 * Try to find a maximal clique with one source removed.
-				 * Sort the source nodes first to get a (more) deterministic result.
+				 * Try to find a maximal clique with one source removed. Sort
+				 * the source nodes first to get a (more) deterministic result.
 				 */
 				List<DotNode> sortedSourceNodes = new ArrayList<DotNode>(sourceNodes);
 				Collections.sort(sortedSourceNodes, new Comparator<DotNode>() {
@@ -761,18 +768,19 @@ public class LogSkeleton implements HTMLToString {
 					public int compare(DotNode o1, DotNode o2) {
 						return o1.getLabel().compareTo(o2.getLabel());
 					}
-					
+
 				});
 				for (DotNode srcNode : sortedSourceNodes) {
 					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
 						/*
-						 * May result in a bigger clique than the best found so far.
-						 * First, remove the node from the sources.
+						 * May result in a bigger clique than the best found so
+						 * far. First, remove the node from the sources.
 						 */
 						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
 						/*
-						 * Check whether this combination of sources and targets was checked before.
+						 * Check whether this combination of sources and targets
+						 * was checked before.
 						 */
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(nodes);
@@ -781,10 +789,12 @@ public class LogSkeleton implements HTMLToString {
 							/*
 							 * No, it was not. Check now.
 							 */
-							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
+							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label,
+									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								/*
-								 * Found a bigger maximal clique than the best found so far. Update.
+								 * Found a bigger maximal clique than the best
+								 * found so far. Update.
 								 */
 								bestArcs = arcs;
 							}
@@ -799,7 +809,7 @@ public class LogSkeleton implements HTMLToString {
 					public int compare(DotNode o1, DotNode o2) {
 						return o1.getLabel().compareTo(o2.getLabel());
 					}
-					
+
 				});
 				for (DotNode tgtNode : sortedTargetNodes) {
 					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
@@ -809,7 +819,8 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
+							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label,
+									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -828,7 +839,7 @@ public class LogSkeleton implements HTMLToString {
 					public int compare(DotNode o1, DotNode o2) {
 						return o1.getLabel().compareTo(o2.getLabel());
 					}
-					
+
 				});
 				for (DotNode tgtNode : sortedTargetNodes) {
 					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
@@ -838,7 +849,8 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, checkedNodes);
+							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label,
+									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
@@ -853,7 +865,7 @@ public class LogSkeleton implements HTMLToString {
 					public int compare(DotNode o1, DotNode o2) {
 						return o1.getLabel().compareTo(o2.getLabel());
 					}
-					
+
 				});
 				for (DotNode srcNode : sortedSourceNodes) {
 					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
@@ -863,7 +875,8 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(nodes);
 						checked.add(targetNodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, checkedNodes);
+							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label,
+									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
 							}
