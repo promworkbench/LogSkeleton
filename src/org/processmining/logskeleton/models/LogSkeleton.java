@@ -441,20 +441,20 @@ public class LogSkeleton implements HTMLToString {
 								headLabel = "" + countModel.get(fromActivity, toActivity);
 							}
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHERSELF)) {
-							if (fromActivity.equals(toActivity)) {
-								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
-										&& !anyPresets.get(fromActivity).contains(toActivity)
-										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-									headDecorator = "box";
-								}
-								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
-										&& !anyPresets.get(fromActivity).contains(toActivity)
-										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-									tailDecorator = "box";
-								}
-							}
-						}
+//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHERSELF)) {
+//							if (fromActivity.equals(toActivity)) {
+//								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
+//										&& !anyPresets.get(fromActivity).contains(toActivity)
+//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+//									headDecorator = "box";
+//								}
+//								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
+//										&& !anyPresets.get(fromActivity).contains(toActivity)
+//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+//									tailDecorator = "box";
+//								}
+//							}
+//						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
