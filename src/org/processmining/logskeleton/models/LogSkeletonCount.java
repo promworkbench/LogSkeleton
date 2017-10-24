@@ -17,15 +17,19 @@ public class LogSkeletonCount {
 
 	public final static String STARTEVENT = "|>";
 	public final static String ENDEVENT = "[]";
-	
+
 	private Map<String, Integer> activityCounts;
+	private Map<String, Integer> activityMinCounts;
+	private Map<String, Integer> activityMaxCounts;
 	private Map<List<String>, Integer> transitionCounts;
-	
+
 	public LogSkeletonCount() {
 		activityCounts = new HashMap<String, Integer>();
+		activityMinCounts = new HashMap<String, Integer>();
+		activityMaxCounts = new HashMap<String, Integer>();
 		transitionCounts = new HashMap<List<String>, Integer>();
 	}
-	
+
 	public boolean checkTransitionCounts(LogSkeletonCount model, Set<String> messages, String caseId) {
 		for (List<String> transition : model.transitionCounts.keySet()) {
 			if (!transitionCounts.keySet().contains(transition)) {
@@ -39,15 +43,24 @@ public class LogSkeletonCount {
 		}
 		return true;
 	}
+
 	public Integer get(String activity) {
 		return activityCounts.containsKey(activity) ? activityCounts.get(activity) : 0;
 	}
-	
+
+	public Integer getMin(String activity) {
+		return activityMinCounts.containsKey(activity) ? activityMinCounts.get(activity) : 0;
+	}
+
+	public Integer getMax(String activity) {
+		return activityMaxCounts.containsKey(activity) ? activityMaxCounts.get(activity) : 0;
+	}
+
 	public Integer get(String fromActivity, String toActivity) {
 		List<String> transition = getTransition(fromActivity, toActivity);
 		return transitionCounts.containsKey(transition) ? transitionCounts.get(transition) : 0;
 	}
-	
+
 	public Collection<String> getTo(String fromActivity) {
 		Collection<String> toActivities = new HashSet<String>();
 		for (List<String> transition : transitionCounts.keySet()) {
@@ -57,7 +70,7 @@ public class LogSkeletonCount {
 		}
 		return toActivities;
 	}
-	
+
 	public Collection<String> getFrom(String toActivity) {
 		Collection<String> fromActivities = new HashSet<String>();
 		for (List<String> transition : transitionCounts.keySet()) {
@@ -67,8 +80,7 @@ public class LogSkeletonCount {
 		}
 		return fromActivities;
 	}
-	
-	
+
 	public void add(String activity, Integer number) {
 		if (activityCounts.containsKey(activity)) {
 			activityCounts.put(activity, activityCounts.get(activity) + number);
@@ -86,8 +98,49 @@ public class LogSkeletonCount {
 		}
 	}
 
+	private Map<String, Integer> traceActivities = new HashMap<String, Integer>();
+
+	private void updateMinMax() {
+		if (!activityMinCounts.isEmpty()) {
+			for (String activity : traceActivities.keySet()) {
+				if (!activityMinCounts.containsKey(activity)) {
+					activityMinCounts.put(activity, 0);
+				}
+			}
+			for (String activity : activityMinCounts.keySet()) {
+				if (!traceActivities.containsKey(activity)) {
+					activityMinCounts.put(activity, 0);
+				}
+			}
+		}
+		for (String activity : traceActivities.keySet()) {
+			if (activityMinCounts.containsKey(activity)) {
+				activityMinCounts.put(activity,
+						Math.min(activityMinCounts.get(activity), traceActivities.get(activity)));
+			} else {
+				activityMinCounts.put(activity, traceActivities.get(activity));
+			}
+			if (activityMaxCounts.containsKey(activity)) {
+				activityMaxCounts.put(activity,
+						Math.max(activityMaxCounts.get(activity), traceActivities.get(activity)));
+			} else {
+				activityMaxCounts.put(activity, traceActivities.get(activity));
+
+			}
+		}
+		traceActivities.clear();
+	}
+
 	public void inc(String activity) {
 		add(activity, 1);
+		if (traceActivities.containsKey(activity)) {
+			traceActivities.put(activity, traceActivities.get(activity) + 1);
+		} else {
+			traceActivities.put(activity, 1);
+		}
+		if (activity.equals(ENDEVENT)) {
+			updateMinMax();
+		}
 	}
 
 	public void inc(String fromActivity, String toActivity) {
@@ -99,25 +152,25 @@ public class LogSkeletonCount {
 		Collections.sort(ordered);
 		return ordered;
 	}
-	
+
 	private List<String> getTransition(String fromActivity, String toActivity) {
 		List<String> transition = new ArrayList<String>(2);
 		transition.add(0, fromActivity);
 		transition.add(1, toActivity);
 		return transition;
 	}
-	
+
 	public void print(String name) {
-//		System.out.println("[PDC2017CountModel] Activity counts for " + name);
+		//		System.out.println("[PDC2017CountModel] Activity counts for " + name);
 		for (String activity : activityCounts.keySet()) {
-//			System.out.println("[LogSkeletonCount] " + activity + ": " + activityCounts.get(activity));
+			//			System.out.println("[LogSkeletonCount] " + activity + ": " + activityCounts.get(activity));
 		}
-//		System.out.println("[PC2017CountModel] Transitions counts for " + name);
+		//		System.out.println("[PC2017CountModel] Transitions counts for " + name);
 		for (List<String> transition : transitionCounts.keySet()) {
-//			System.out.println("[LogSkeletonCount] " + transition + ": " + transitionCounts.get(transition));
+			//			System.out.println("[LogSkeletonCount] " + transition + ": " + transitionCounts.get(transition));
 		}
 	}
-	
+
 	public void exportToFile(CsvWriter writer) throws IOException {
 		writer.write("activity counts");
 		writer.write("" + activityCounts.keySet().size());
@@ -138,7 +191,7 @@ public class LogSkeletonCount {
 			writer.endRecord();
 		}
 	}
-	
+
 	public void importFromStream(CsvReader reader) throws IOException {
 		activityCounts = new HashMap<String, Integer>();
 		if (reader.readRecord()) {

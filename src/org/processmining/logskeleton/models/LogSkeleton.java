@@ -365,12 +365,16 @@ public class LogSkeleton implements HTMLToString {
 					colorIndex++;
 				}
 			}
+			String interval = "" + countModel.getMin(activity);
+			if (countModel.getMax(activity) > countModel.getMin(activity)) {
+				interval += ".." + countModel.getMax(activity);
+			}
 			DotNode node = graph
 					.addNode("<<table align=\"center\" bgcolor=\""
 							+ activityColor
-							+ "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"2\"><font point-size=\"24\"><b>"
+							+ "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
 							+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + colorActivity + "</td><td>"
-							+ countModel.get(activity) + "</td></tr></table>>");
+							+ countModel.get(activity) + "</td>" + "<td>" + interval + "</td>" + "</tr></table>>");
 			node.setOption("shape", "none");
 			//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
 			//			node.setLabel("<" + encodeHTML(activity) + ">");
