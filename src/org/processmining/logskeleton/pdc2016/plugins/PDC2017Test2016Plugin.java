@@ -1,4 +1,4 @@
-package org.processmining.logskeleton.plugins;
+package org.processmining.logskeleton.pdc2016.plugins;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -7,10 +7,13 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.models.LogSkeleton;
-import org.processmining.logskeleton.models.PDC2017Test;
+import org.processmining.logskeleton.pdc2017.models.PDC2017TestModel;
+import org.processmining.logskeleton.pdc2017.parameters.PDC2017TestParameters;
+import org.processmining.logskeleton.plugins.LogSkeletonBuilderPlugin;
+import org.processmining.logskeleton.plugins.LogSkeletonCheckerPlugin;
 import org.processmining.plugins.log.OpenLogFilePlugin;
 
-@Plugin(name = "PDC 2017 Test 2016", parameterLabels = { }, returnLabels = { "Results" }, returnTypes = { PDC2017Test.class })
+@Plugin(name = "PDC 2017 Test 2016", parameterLabels = { }, returnLabels = { "Results" }, returnTypes = { PDC2017TestModel.class })
 public class PDC2017Test2016Plugin {
 
 
@@ -18,11 +21,11 @@ public class PDC2017Test2016Plugin {
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { })
-	public static PDC2017Test run(final PluginContext context) {
+	public static PDC2017TestModel run(final PluginContext context) {
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		
-		PDC2017Test testModel = new PDC2017Test();
+		PDC2017TestModel testModel = new PDC2017TestModel(new PDC2017TestParameters());
 		String Path = "D:\\Dropbox\\Projects\\";
 //		String Path = "C:\\Users\\eric\\Dropbox\\Projects\\";
 		

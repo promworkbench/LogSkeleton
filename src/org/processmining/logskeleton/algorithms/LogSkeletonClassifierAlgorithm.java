@@ -1,7 +1,5 @@
 package org.processmining.logskeleton.algorithms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,102 +11,26 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.framework.plugin.PluginContext;
+import org.processmining.logskeleton.models.ClassificationProblem;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.models.LogSkeletonCount;
 import org.processmining.logskeleton.plugins.LogSkeletonBuilderPlugin;
 import org.processmining.logskeleton.plugins.LogSkeletonCheckerPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log10FilterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log10SplitterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log1FilterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log2FilterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log2SplitterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log4SplitterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log5FilterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log5SplitterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log7SplitterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log9FilterPlugin;
-import org.processmining.logskeleton.plugins.PDC2017Log9SplitterPlugin;
 
 public class LogSkeletonClassifierAlgorithm {
 
-	public XLog apply(PluginContext context, XLog trainingLog, XLog testLog) {
+	public XLog apply(PluginContext context, XLog trainingLog, XLog testLog, LogPreprocessorAlgorithm preprocessor) {
 		String name = XConceptExtension.instance().extractName(trainingLog);
 
-		XLog filteredTrainingLog = trainingLog;
-		XLog filteredTestLog = testLog;
+		ClassificationProblem problem = new ClassificationProblem(trainingLog, testLog);
 
 		/*
-		 * Filter out the assumed noise.
+		 * Preprocess the logs.
 		 */
-		System.out.println("====== Filter " + name + " ======");
-		if (name.equals("log1")) {
-			filteredTrainingLog = (new PDC2017Log1FilterPlugin()).run(context, trainingLog);
-		} else if (name.equals("log2")) {
-			filteredTrainingLog = (new PDC2017Log2FilterPlugin()).run(context, trainingLog);
-		} else if (name.equals("log5")) {
-			filteredTrainingLog = (new PDC2017Log5FilterPlugin()).run(context, trainingLog);
-		} else if (name.equals("log9")) {
-			filteredTrainingLog = (new PDC2017Log9FilterPlugin()).run(context, trainingLog);
-		} else if (name.equals("log10")) {
-			filteredTrainingLog = (new PDC2017Log10FilterPlugin()).run(context, trainingLog);
-		}
-
-		/*
-		 * Extend log with assumed false negatives from test log. Assumption is
-		 * here that the test log is not that complete :-(.
-		 */
-		if (name.equals("log1")) {
-			// June 4
-			addTrace(
-					filteredTrainingLog,
-					new ArrayList<String>(Arrays.asList("g", "w", "p", "c", "v", "m", "b", "u", "t", "s", "f", "r",
-							"l", "k", "j")));
-			// June 9
-//			addTrace(
-//					filteredTrainingLog,
-//					new ArrayList<String>(Arrays.asList("c", "s", "m", "a", "p", "w", "v", "g", "e", "t", "u", "n",
-//							"d", "o")));
-			// June 18
-//			addTrace(
-//					filteredTrainingLog,
-//					new ArrayList<String>(Arrays.asList("p", "v", "g", "e", "t", "c", "a", "w", "u", "m", "n", "s",
-//							"h", "o")));
-		} else if (name.equals("log6")) {
-			// June 11
-			addTrace(filteredTrainingLog, new ArrayList<String>(Arrays.asList("d", "n", "a", "f", "k")));
-			// June 4
-			addTrace(filteredTrainingLog, new ArrayList<String>(Arrays.asList("c", "t", "q", "c", "a", "t", "r")));
-		}
-
-		/*
-		 * Split the assumed reoccurring activities.
-		 */
-		System.out.println("====== Split " + name + " ======");
-		if (name.equals("log2")) {
-			PDC2017Log2SplitterPlugin splitter = new PDC2017Log2SplitterPlugin();
-			filteredTrainingLog = splitter.run(context, filteredTrainingLog);
-			filteredTestLog = splitter.run(context, filteredTestLog);
-		} else if (name.equals("log4")) {
-			PDC2017Log4SplitterPlugin splitter = new PDC2017Log4SplitterPlugin();
-			filteredTrainingLog = splitter.run(context, filteredTrainingLog);
-			filteredTestLog = splitter.run(context, filteredTestLog);
-		} else if (name.equals("log5")) {
-			PDC2017Log5SplitterPlugin splitter = new PDC2017Log5SplitterPlugin();
-			filteredTrainingLog = splitter.run(context, filteredTrainingLog);
-			filteredTestLog = splitter.run(context, filteredTestLog);
-		} else if (name.equals("log7")) {
-			PDC2017Log7SplitterPlugin splitter = new PDC2017Log7SplitterPlugin();
-			filteredTrainingLog = splitter.run(context, filteredTrainingLog);
-			filteredTestLog = splitter.run(context, filteredTestLog);
-		} else if (name.equals("log9")) {
-			PDC2017Log9SplitterPlugin splitter = new PDC2017Log9SplitterPlugin();
-			filteredTrainingLog = splitter.run(context, filteredTrainingLog);
-			filteredTestLog = splitter.run(context, filteredTestLog);
-		} else if (name.equals("log10")) {
-			PDC2017Log10SplitterPlugin splitter = new PDC2017Log10SplitterPlugin();
-			filteredTrainingLog = splitter.run(context, filteredTrainingLog);
-			filteredTestLog = splitter.run(context, filteredTestLog);
-		}
+		problem = preprocessor.preprocess(context, problem);
+		XLog filteredTrainingLog = problem.getTrainingLog();
+		XLog filteredTestLog = problem.getTestLog();
+		
 
 		/*
 		 * Build the log skeleton.

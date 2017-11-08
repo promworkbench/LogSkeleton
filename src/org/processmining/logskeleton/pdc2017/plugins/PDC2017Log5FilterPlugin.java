@@ -1,4 +1,4 @@
-package org.processmining.logskeleton.plugins;
+package org.processmining.logskeleton.pdc2017.plugins;
 
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;

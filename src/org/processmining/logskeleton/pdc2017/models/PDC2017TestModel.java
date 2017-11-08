@@ -1,4 +1,4 @@
-package org.processmining.logskeleton.models;
+package org.processmining.logskeleton.pdc2017.models;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,26 +9,35 @@ import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.framework.util.HTMLToString;
+import org.processmining.logskeleton.pdc2017.parameters.PDC2017TestParameters;
 
-public class PDC2017Test implements HTMLToString {
+public class PDC2017TestModel implements HTMLToString {
 
 	private List<Integer> numbers;
-	private List<XLog> aprilLogs;
-	private List<XLog> mayLogs;
-	private List<XLog> juneLogs;
+	private List<XLog> cal1Logs;
+	private List<XLog> cal2Logs;
+	private List<XLog> testLogs;
+	private PDC2017TestParameters parameters;
 
-	public PDC2017Test() {
+	public PDC2017TestModel(PDC2017TestParameters parameters) {
 		numbers = new ArrayList<Integer>();
-		aprilLogs = new ArrayList<XLog>();
-		mayLogs = new ArrayList<XLog>();
-		juneLogs = new ArrayList<XLog>();
+		cal1Logs = new ArrayList<XLog>();
+		cal2Logs = new ArrayList<XLog>();
+		testLogs = new ArrayList<XLog>();
+		this.parameters = parameters;
 	}
 
-	public void add(int i, XLog aprilLog, XLog mayLog, XLog juneLog) {
+	public void add(int i, XLog cal1Log, XLog cal2Log, XLog testLog) {
 		numbers.add(i);
-		aprilLogs.add(aprilLog);
-		mayLogs.add(mayLog);
-		juneLogs.add(juneLog);
+		if (cal1Log != null) {
+			cal1Logs.add(cal1Log);
+		}
+		if (cal2Log != null) {
+			cal2Logs.add(cal2Log);
+		}
+		if (testLog != null) {
+			testLogs.add(testLog);
+		}
 	}
 
 	public String toHTMLString(boolean includeHTMLTags) {
@@ -37,16 +46,25 @@ public class PDC2017Test implements HTMLToString {
 			buf.append("<html>");
 		}
 		List<XLog> logs;
-		for (int l = 0 ; l < 3; l++) {
+		for (int l = 0; l < 3; l++) {
+			if (l == 0 && cal1Logs.isEmpty()) {
+				continue;
+			}
+			if (l == 1 && cal2Logs.isEmpty()) {
+				continue;
+			}
+			if (l == 2 && testLogs.isEmpty()) {
+				continue;
+			}
 			if (l == 0) {
-				buf.append("<h1>April</h1>");
-				logs = aprilLogs;
+				buf.append("<h1>"+ PDC2017TestParameters.CAL1 + " using " + parameters.getPreprocessor() + "</h1>");
+				logs = cal1Logs;
 			} else if (l == 1) {
-				buf.append("<h1>May</h1>");
-				logs = mayLogs;
+				buf.append("<h1>"+ PDC2017TestParameters.CAL2 + " using " + parameters.getPreprocessor() + "</h1>");
+				logs = cal2Logs;
 			} else {
-				buf.append("<h1>June</h1>");
-				logs = juneLogs;
+				buf.append("<h1>"+ PDC2017TestParameters.TEST + " using " + parameters.getPreprocessor() + "</h1>");
+				logs = testLogs;
 			}
 			buf.append("<table><tr><th></th>");
 			for (int n = 1; n < 21; n++) {
