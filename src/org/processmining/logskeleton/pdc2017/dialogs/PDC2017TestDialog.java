@@ -4,8 +4,7 @@ import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -17,6 +16,7 @@ import javax.swing.event.ListSelectionListener;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
 import org.processmining.logskeleton.pdc2017.parameters.PDC2017TestParameters;
+import org.processmining.pdc2017.algorithms.PDC2017Set;
 
 public class PDC2017TestDialog extends JComponent {
 
@@ -30,57 +30,51 @@ public class PDC2017TestDialog extends JComponent {
 		setLayout(new TableLayout(size));
 		setOpaque(false);
 
-		DefaultListModel<String> logNames = new DefaultListModel<String>();
-		int[] selectedIndices = new int[parameters.getLogNames().size()];
+		DefaultListModel<PDC2017Set> setListModel = new DefaultListModel<PDC2017Set>();
+		int[] selectedIndices = new int[parameters.getAllSets().size()];
 		int i = 0;
 		int j = 0;
-		List<String> orderedLogNames = new ArrayList<String>(parameters.getAllLogNames());
-		Collections.sort(orderedLogNames);
-		for (String logName : orderedLogNames) {
-			logNames.addElement(logName);
-			if (parameters.getLogNames().contains(logName)) {
+		for (PDC2017Set set : parameters.getAllSets()) {
+			setListModel.addElement(set);
+			if (parameters.getSets().contains(set)) {
 				selectedIndices[j++] = i;
 			}
 			i++;
 		}
-		final ProMList<String> logNameList = new ProMList<String>("Select log names", logNames);
-		logNameList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		logNameList.setSelectedIndices(selectedIndices);
-		logNameList.addListSelectionListener(new ListSelectionListener() {
+		final ProMList<PDC2017Set> setList = new ProMList<PDC2017Set>("Select log set(s)", setListModel);
+		setList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		setList.setSelectedIndices(selectedIndices);
+		setList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				List<String> selectedLogNames = logNameList.getSelectedValuesList();
-				parameters.getLogNames().clear();
-				parameters.getLogNames().addAll(selectedLogNames);
+				List<PDC2017Set> selectedSets = setList.getSelectedValuesList();
+				parameters.setSets(new HashSet<PDC2017Set>(selectedSets));
 			}
 		});
-		logNameList.setPreferredSize(new Dimension(100, 100));
-		add(logNameList, "0, 0");
-		
-		DefaultListModel<String> collectionNames = new DefaultListModel<String>();
-		selectedIndices = new int[parameters.getCollectionNames().size()];
+		setList.setPreferredSize(new Dimension(100, 100));
+		add(setList, "0, 0");
+
+		DefaultListModel<Integer> nrListModel = new DefaultListModel<Integer>();
+		selectedIndices = new int[parameters.getAllNrs().size()];
 		i = 0;
 		j = 0;
-		List<String> orderedCollectionNames = new ArrayList<String>(parameters.getAllCollectionNames());
-		Collections.sort(orderedCollectionNames);
-		for (String collectionName : orderedCollectionNames) {
-			collectionNames.addElement(collectionName);
-			if (parameters.getCollectionNames().contains(collectionName)) {
+		for (int nr : parameters.getAllNrs()) {
+			nrListModel.addElement(nr);
+			if (parameters.getNrs().contains(nr)) {
 				selectedIndices[j++] = i;
 			}
 			i++;
 		}
-		final ProMList<String> collectionNameList = new ProMList<String>("Select collections", collectionNames);
-		collectionNameList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		collectionNameList.setSelectedIndices(selectedIndices);
-		collectionNameList.addListSelectionListener(new ListSelectionListener() {
+		final ProMList<Integer> nrList = new ProMList<Integer>("Select log number(s)", nrListModel);
+		nrList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		nrList.setSelectedIndices(selectedIndices);
+		nrList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				List<String> selectedCollectionNames = collectionNameList.getSelectedValuesList();
-				parameters.getCollectionNames().clear();
-				parameters.getCollectionNames().addAll(selectedCollectionNames);
+				List<Integer> selectedNrs = nrList.getSelectedValuesList();
+				parameters.setNrs(new HashSet<Integer>(selectedNrs));
 			}
 		});
-		collectionNameList.setPreferredSize(new Dimension(100, 100));
-		add(collectionNameList, "1, 0");
+		nrList.setPreferredSize(new Dimension(100, 100));
+		add(nrList, "1, 0");
 		
 		DefaultListModel<LogPreprocessorAlgorithm> preprocessors = new DefaultListModel<LogPreprocessorAlgorithm>();
 		selectedIndices = new int[1];

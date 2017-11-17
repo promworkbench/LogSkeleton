@@ -1,51 +1,50 @@
 package org.processmining.logskeleton.pdc2017.parameters;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
 import org.processmining.logskeleton.pdc2017.algorithms.PDC2017LogPreprocessorAlgorithm;
+import org.processmining.pdc2017.algorithms.PDC2017Set;
 
 public class PDC2017TestParameters {
 
-	private Set<String> logNames;
-	private Set<String> allLogNames;
+	private Set<PDC2017Set> sets;
+	private Set<PDC2017Set> allSets;
 	private LogPreprocessorAlgorithm preprocessor;
 	private Set<LogPreprocessorAlgorithm> allPreprocessors;
-	private Set<String> collectionNames;
-	private Set<String> allCollectionNames;
-	
-	public final static String CAL1 = "Calibration set 1";
-	public final static String CAL2 = "Calibration set 2";
-	public final static String TEST = "Test set";
+	private Set<Integer> nrs;
+	private Set<Integer> allNrs;
+
 	public PDC2017TestParameters() {
+
+		sets = new HashSet<PDC2017Set>();
+		allSets = new HashSet<PDC2017Set>();
+		sets.addAll(Arrays.asList(PDC2017Set.values()));
+		allSets.addAll(Arrays.asList(PDC2017Set.values()));
+		sets.remove(PDC2017Set.TRAIN);
+		allSets.remove(PDC2017Set.TRAIN);
 		
-		logNames = new HashSet<String>();
-		allLogNames = new HashSet<String>();
-		for (int i = 1; i < 11; i++) {
-			logNames.add("log"+ i);
-			allLogNames.add("log"+ i);
+		nrs = new HashSet<Integer>();
+		allNrs = new HashSet<Integer>();
+		for(int i = 1; i < 11; i++) {
+			nrs.add(i);
+			allNrs.add(i);
 		}
-		
+
 		preprocessor = new PDC2017LogPreprocessorAlgorithm();
 		allPreprocessors = new HashSet<LogPreprocessorAlgorithm>();
 		allPreprocessors.add(new LogPreprocessorAlgorithm());
 		allPreprocessors.add(preprocessor);
-		
-		collectionNames = new HashSet<String>();
-		collectionNames.add(TEST);
-		allCollectionNames = new HashSet<String>();
-		allCollectionNames.add(CAL1);
-		allCollectionNames.add(CAL2);
-		allCollectionNames.add(TEST);
 	}
-	
-	public Set<String> getLogNames() {
-		return logNames;
+
+	public Set<PDC2017Set> getSets() {
+		return sets;
 	}
-	
-	public void setLogNames(Set<String> logNames) {
-		this.logNames = logNames;
+
+	public void setSets(Set<PDC2017Set> sets) {
+		this.sets = sets;
 	}
 
 	public LogPreprocessorAlgorithm getPreprocessor() {
@@ -56,12 +55,12 @@ public class PDC2017TestParameters {
 		this.preprocessor = preprocessor;
 	}
 
-	public Set<String> getAllLogNames() {
-		return allLogNames;
+	public Set<PDC2017Set> getAllSets() {
+		return allSets;
 	}
 
-	public void setAllLogNames(Set<String> allLogNames) {
-		this.allLogNames = allLogNames;
+	public void setAllSets(Set<PDC2017Set> allSets) {
+		this.allSets = allSets;
 	}
 
 	public Set<LogPreprocessorAlgorithm> getAllPreprocessors() {
@@ -72,20 +71,20 @@ public class PDC2017TestParameters {
 		this.allPreprocessors = allPreprocessors;
 	}
 
-	public Set<String> getCollectionNames() {
-		return collectionNames;
+	public Set<Integer> getNrs() {
+		return nrs;
 	}
 
-	public void setCollectionNames(Set<String> collectionNames) {
-		this.collectionNames = collectionNames;
+	public void setNrs(Set<Integer> nrs) {
+		this.nrs = nrs;
 	}
 
-	public Set<String> getAllCollectionNames() {
-		return allCollectionNames;
+	public Set<Integer> getAllNrs() {
+		return allNrs;
 	}
 
-	public void setAllCollectionNames(Set<String> allCollectionNames) {
-		this.allCollectionNames = allCollectionNames;
+	public void setAllNrs(Set<Integer> allNrs) {
+		this.allNrs = allNrs;
 	}
-	
+
 }

@@ -1,4 +1,4 @@
-package org.processmining.logskeleton.pdc2017.models;
+package org.processmining.logskeleton.pdc2016.models;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,18 +9,18 @@ import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.framework.util.HTMLToString;
-import org.processmining.logskeleton.pdc2017.parameters.PDC2017TestParameters;
-import org.processmining.pdc2017.algorithms.PDC2017Set;
+import org.processmining.logskeleton.pdc2016.parameters.PDC2016TestParameters;
+import org.processmining.pdc2016.algorithms.PDC2016Set;
 
-public class PDC2017TestModel implements HTMLToString {
+public class PDC2016TestModel implements HTMLToString {
 
 	private List<Integer> numbers;
 	private List<XLog> cal1Logs;
 	private List<XLog> cal2Logs;
 	private List<XLog> testLogs;
-	private PDC2017TestParameters parameters;
+	private PDC2016TestParameters parameters;
 
-	public PDC2017TestModel(PDC2017TestParameters parameters) {
+	public PDC2016TestModel(PDC2016TestParameters parameters) {
 		numbers = new ArrayList<Integer>();
 		cal1Logs = new ArrayList<XLog>();
 		cal2Logs = new ArrayList<XLog>();
@@ -58,13 +58,13 @@ public class PDC2017TestModel implements HTMLToString {
 				continue;
 			}
 			if (l == 0) {
-				buf.append("<h1>"+ PDC2017Set.CAL1 + "? using " + parameters.getPreprocessor() + "</h1>");
+				buf.append("<h1>"+ PDC2016Set.CAL1 + "?</h1>");
 				logs = cal1Logs;
 			} else if (l == 1) {
-				buf.append("<h1>"+ PDC2017Set.CAL2 + "? using " + parameters.getPreprocessor() + "</h1>");
+				buf.append("<h1>"+ PDC2016Set.CAL2 + "?</h1>");
 				logs = cal2Logs;
 			} else {
-				buf.append("<h1>"+ PDC2017Set.TEST + "? using " + parameters.getPreprocessor() + "</h1>");
+				buf.append("<h1>"+ PDC2016Set.TEST + "?</h1>");
 				logs = testLogs;
 			}
 			buf.append("<table><tr><th></th>");
