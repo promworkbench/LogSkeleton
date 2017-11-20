@@ -42,7 +42,7 @@ public class LogSkeletonClassifierAlgorithm {
 		/*
 		 * Use the log skeleton to classify the test traces.
 		 */
-		System.out.println("====== Classify " + name + " ======");
+		System.out.println("[LogSkeletonClassifierAlgorithm] Classify " + name + " ======");
 		XLog classifiedTestLog = classify(context, model, filteredTrainingLog, filteredTestLog, name);
 		context.getProvidedObjectManager().createProvidedObject("Classified Log " + name, classifiedTestLog,
 				XLog.class, context);
@@ -66,7 +66,7 @@ public class LogSkeletonClassifierAlgorithm {
 			positiveTestTraces.add(XConceptExtension.instance().extractName(trace));
 		}
 		for (String message : messages) {
-			System.out.println("[PDC2017TestPlugin]" + message);
+			System.out.println("[LogSkeletonClassifierAlgorithm] " + message);
 		}
 		for (int i = 0; i < 3; i++) {
 			checks[0] = (i == 0);
@@ -112,12 +112,12 @@ public class LogSkeletonClassifierAlgorithm {
 						if (!classifiedFilteredTestLog.contains(subTrace)) {
 							String caseId = XConceptExtension.instance().extractName(subTrace);
 							if (positiveTestTraces.remove(caseId)) {
-								System.out.println("[PDC2017TestPlugin] Case "
+								System.out.println("[LogSkeletonClassifierAlgoritmm] Case "
 										+ XConceptExtension.instance().extractName(subTrace)
 										+ " excluded by positive filter " + positiveFilters + " and negative filter "
 										+ negativeFilters + ", support = " + filteredTrainingLog.size());
 								for (String message : messages) {
-									System.out.println("[PDC2017TestPlugin]" + message);
+									System.out.println("[LogSkeletonClassifierAlgoritmm] " + message);
 								}
 							}
 						}
@@ -182,13 +182,13 @@ public class LogSkeletonClassifierAlgorithm {
 							if (!classifiedFilteredTestLog.contains(subTrace)) {
 								String caseId = XConceptExtension.instance().extractName(subTrace);
 								if (positiveTestTraces.remove(caseId)) {
-									System.out.println("[PDC2017TestPlugin] Case "
+									System.out.println("[LogSkeletonClassifierAlgoritmm] Case "
 											+ XConceptExtension.instance().extractName(subTrace)
 											+ " excluded by positive filter " + positiveFilters
 											+ " and negative filter " + negativeFilters + ", support = "
 											+ filteredTrainingLog.size());
 									for (String message : messages) {
-										System.out.println("[PDC2017TestPlugin]" + message);
+										System.out.println("[LogSkeletonClassifierAlgoritmm] " + message);
 									}
 								}
 							}
@@ -275,13 +275,13 @@ public class LogSkeletonClassifierAlgorithm {
 								if (!classifiedFilteredTestLog.contains(subTrace)) {
 									String caseId = XConceptExtension.instance().extractName(subTrace);
 									if (positiveTestTraces.remove(caseId)) {
-										System.out.println("[PDC2017TestPlugin] Case "
+										System.out.println("[LogSkeletonClassifierAlgoritmm] Case "
 												+ XConceptExtension.instance().extractName(subTrace)
 												+ " excluded by positive filter " + positiveFilters
 												+ " and negative filter " + negativeFilters + ", support = "
 												+ filteredTrainingLog.size());
 										for (String message : messages) {
-											System.out.println("[PDC2017TestPlugin]" + message);
+											System.out.println("[LogSkeletonClassifierAlgoritmm] " + message);
 										}
 									}
 								}

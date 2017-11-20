@@ -71,7 +71,7 @@ public class LogSkeletonBrowserPlugin {
 			public void valueChanged(ListSelectionEvent e) {
 				List<String> selectedActivities = activityList.getSelectedValuesList();
 				if (!selectedActivities.equals(parameters.getActivities())) {
-//					System.out.println("[PDC2017VisualizerPlugin] Selelected nodes = " + selectedActivities);
+					System.out.println("[LogSkeletonBrowserPlugin] Selected nodes = " + selectedActivities);
 					parameters.getActivities().clear();
 					parameters.getActivities().addAll(selectedActivities);
 					updateRight();
@@ -102,7 +102,7 @@ public class LogSkeletonBrowserPlugin {
 			public void valueChanged(ListSelectionEvent e) {
 				List<LogSkeletonBrowser> selectedVisualizers = visualizerList.getSelectedValuesList();
 				if (!selectedVisualizers.equals(parameters.getVisualizers())) {
-					System.out.println("[PDC2017VisualizerPlugin] Selected edges = " + selectedVisualizers);
+					System.out.println("[LogSkeletonBrowserPlugin] Selected edges = " + selectedVisualizers);
 					parameters.getVisualizers().clear();
 					parameters.getVisualizers().addAll(selectedVisualizers);
 					updateRight();

@@ -4,6 +4,9 @@ import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -20,21 +23,29 @@ import org.processmining.pdc2017.algorithms.PDC2017Set;
 
 public class PDC2017TestDialog extends JComponent {
 
-	private PDC2017TestParameters parameters;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 378756044807568628L;
 	
 	public PDC2017TestDialog(final PDC2017TestParameters parameters) {
-		this.parameters = parameters;
-		
 		double size[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL },
 				{ TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(size));
 		setOpaque(false);
 
 		DefaultListModel<PDC2017Set> setListModel = new DefaultListModel<PDC2017Set>();
-		int[] selectedIndices = new int[parameters.getAllSets().size()];
+		int[] selectedIndices = new int[parameters.getSets().size()];
 		int i = 0;
 		int j = 0;
-		for (PDC2017Set set : parameters.getAllSets()) {
+		List<PDC2017Set> sortedSets = new ArrayList<PDC2017Set>();
+		sortedSets.addAll(parameters.getAllSets());
+		Collections.sort(sortedSets, new Comparator<PDC2017Set>() {
+			public int compare(PDC2017Set set1, PDC2017Set set2) {
+				return set1.toString().compareTo(set2.toString());
+			}
+		});
+		for (PDC2017Set set : sortedSets) {
 			setListModel.addElement(set);
 			if (parameters.getSets().contains(set)) {
 				selectedIndices[j++] = i;
@@ -80,7 +91,14 @@ public class PDC2017TestDialog extends JComponent {
 		selectedIndices = new int[1];
 		i = 0;
 		j = 0;
-		for (LogPreprocessorAlgorithm preprocessor : parameters.getAllPreprocessors()) {
+		List<LogPreprocessorAlgorithm> sortedPreprocessors = new ArrayList<LogPreprocessorAlgorithm>();
+		sortedPreprocessors.addAll(parameters.getAllPreprocessors());
+		Collections.sort(sortedPreprocessors, new Comparator<LogPreprocessorAlgorithm>() {
+			public int compare(LogPreprocessorAlgorithm prep1, LogPreprocessorAlgorithm prep2) {
+				return prep1.toString().compareTo(prep2.toString());
+			}
+		});
+		for (LogPreprocessorAlgorithm preprocessor : sortedPreprocessors) {
 			preprocessors.addElement(preprocessor);
 			if (parameters.getPreprocessor().equals(preprocessor)) {
 				selectedIndices[j++] = i;

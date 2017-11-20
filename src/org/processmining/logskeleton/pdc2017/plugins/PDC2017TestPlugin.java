@@ -13,6 +13,7 @@ import org.processmining.logskeleton.pdc2017.models.PDC2017TestModel;
 import org.processmining.logskeleton.pdc2017.parameters.PDC2017TestParameters;
 import org.processmining.pdc2017.algorithms.PDC2017LogAlgorithm;
 import org.processmining.pdc2017.algorithms.PDC2017Set;
+import org.processmining.pdc2017.parameters.PDC2017Parameters;
 
 @Plugin(name = "PDC 2017 Test", parameterLabels = {}, returnLabels = { "Results" }, returnTypes = { PDC2017TestModel.class })
 public class PDC2017TestPlugin {
@@ -28,51 +29,52 @@ public class PDC2017TestPlugin {
 			return null;
 		}
 		PDC2017TestModel testModel = new PDC2017TestModel(testParameters);
+		PDC2017Parameters parameters = new PDC2017Parameters();
+		PDC2017LogAlgorithm logAlgorithm = new PDC2017LogAlgorithm();
 
 		try {
 			for (int i : testParameters.getNrs()) {
-					XLog trainingLog = (new PDC2017LogAlgorithm(PDC2017Set.TRAIN, i)).apply(context);
-					XLog testLogMay = testParameters.getSets().contains(PDC2017Set.CAL1) ? (new PDC2017LogAlgorithm(
-							PDC2017Set.CAL1, i)).apply(context) : null;
-					XLog testLogJune = testParameters.getSets().contains(PDC2017Set.CAL2) ? (new PDC2017LogAlgorithm(
-							PDC2017Set.CAL2, i)).apply(context) : null;
-					XLog testLogFinal = testParameters.getSets().contains(PDC2017Set.TEST) ? (new PDC2017LogAlgorithm(
-							PDC2017Set.TEST, i)).apply(context) : null;
+				parameters.setNr(i);
+				parameters.setSet(PDC2017Set.TRAIN);
+				XLog trainingLog = logAlgorithm.apply(context, parameters);
+				parameters.setSet(PDC2017Set.CAL1);
+				XLog testLogMay = testParameters.getSets().contains(PDC2017Set.CAL1) ? logAlgorithm.apply(context,
+						parameters) : null;
+				parameters.setSet(PDC2017Set.CAL2);
+				XLog testLogJune = testParameters.getSets().contains(PDC2017Set.CAL2) ? logAlgorithm.apply(context,
+						parameters) : null;
+				parameters.setSet(PDC2017Set.TEST);
+				XLog testLogFinal = testParameters.getSets().contains(PDC2017Set.TEST) ? logAlgorithm.apply(context,
+						parameters) : null;
 
-					LogSkeletonClassifierAlgorithm classifierAlgorithm = new LogSkeletonClassifierAlgorithm();
-					LogPreprocessorAlgorithm preprocessor = testParameters.getPreprocessor();
+				LogSkeletonClassifierAlgorithm classifierAlgorithm = new LogSkeletonClassifierAlgorithm();
+				LogPreprocessorAlgorithm preprocessor = testParameters.getPreprocessor();
 
-					XLog classifiedTestLogCal1 = null;
-					XLog classifiedTestLogCal2 = null;
-					XLog classifiedTestLogTest = null;
+				XLog classifiedTestLogCal1 = null;
+				XLog classifiedTestLogCal2 = null;
+				XLog classifiedTestLogTest = null;
 
-					// Classify the logs
-					if (testParameters.getSets().contains(PDC2017Set.CAL1)) {
-						System.out.println("====== Classify " + PDC2017Set.CAL1 + i + " ======");
-						classifiedTestLogCal1 = classifierAlgorithm.apply(context, trainingLog, testLogMay,
-								preprocessor);
-						context.getProvidedObjectManager().createProvidedObject(
-								"Test Log " + PDC2017Set.CAL1 + i, classifiedTestLogCal1, XLog.class,
-								context);
-					}
-					if (testParameters.getSets().contains(PDC2017Set.CAL2)) {
-						System.out.println("====== Classify " + PDC2017Set.CAL2 + i + " ======");
-						classifiedTestLogCal2 = classifierAlgorithm.apply(context, trainingLog, testLogJune,
-								preprocessor);
-						context.getProvidedObjectManager().createProvidedObject(
-								"Test Log " + PDC2017Set.CAL2 + i, classifiedTestLogCal2, XLog.class,
-								context);
-					}
-					if (testParameters.getSets().contains(PDC2017Set.TEST)) {
-						System.out.println("====== Classify " + PDC2017Set.TEST + i + " ======");
-						classifiedTestLogTest = classifierAlgorithm.apply(context, trainingLog, testLogFinal,
-								preprocessor);
-						context.getProvidedObjectManager().createProvidedObject(
-								"Test Log " + PDC2017Set.TEST + i, classifiedTestLogTest, XLog.class,
-								context);
-					}
-					testModel.add(i, classifiedTestLogCal1, classifiedTestLogCal2, classifiedTestLogTest);
+				// Classify the logs
+				if (testParameters.getSets().contains(PDC2017Set.CAL1)) {
+					System.out.println("[PDC2017TestPlugin] Classify PDC2017 " + PDC2017Set.CAL1 + " number " + i);
+					classifiedTestLogCal1 = classifierAlgorithm.apply(context, trainingLog, testLogMay, preprocessor);
+					context.getProvidedObjectManager().createProvidedObject("PDC2017 " + PDC2017Set.CAL1 + " number " + i,
+							classifiedTestLogCal1, XLog.class, context);
 				}
+				if (testParameters.getSets().contains(PDC2017Set.CAL2)) {
+					System.out.println("[PDC2017TestPlugin] Classify PDC2017 " + PDC2017Set.CAL2 + " number " + i);
+					classifiedTestLogCal2 = classifierAlgorithm.apply(context, trainingLog, testLogJune, preprocessor);
+					context.getProvidedObjectManager().createProvidedObject("PDC2017 " + PDC2017Set.CAL2 + " number " + i,
+							classifiedTestLogCal2, XLog.class, context);
+				}
+				if (testParameters.getSets().contains(PDC2017Set.TEST)) {
+					System.out.println("[PDC2017TestPlugin] Classify PDC2017 " + PDC2017Set.TEST + " number " + i);
+					classifiedTestLogTest = classifierAlgorithm.apply(context, trainingLog, testLogFinal, preprocessor);
+					context.getProvidedObjectManager().createProvidedObject("PDC2017 " + PDC2017Set.TEST + " number " + i,
+							classifiedTestLogTest, XLog.class, context);
+				}
+				testModel.add(i, classifiedTestLogCal1, classifiedTestLogCal2, classifiedTestLogTest);
+			}
 			return testModel;
 		} catch (Exception e) {
 			e.printStackTrace();

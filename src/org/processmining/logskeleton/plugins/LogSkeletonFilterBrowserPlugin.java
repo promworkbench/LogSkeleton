@@ -224,7 +224,7 @@ public class LogSkeletonFilterBrowserPlugin {
 						filter.add(inputs[col][row].getText());
 					}
 					if (!filter.get(0).isEmpty() && !filter.get(1).isEmpty()) {
-						System.out.println("[PDC2017LogVisualizerPlugin] Filter added: " + filter);
+						System.out.println("[LogSkeletonFilterBrowserPlugin] Filter added: " + filter);
 						splitters.add(filter);
 					}
 				}

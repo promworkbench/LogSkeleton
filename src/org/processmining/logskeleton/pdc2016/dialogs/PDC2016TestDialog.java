@@ -4,6 +4,9 @@ import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -23,21 +26,25 @@ public class PDC2016TestDialog extends JComponent {
 	 * 
 	 */
 	private static final long serialVersionUID = -4347149448035402690L;
-	private PDC2016TestParameters parameters;
 	
 	public PDC2016TestDialog(final PDC2016TestParameters parameters) {
-		this.parameters = parameters;
-		
 		double size[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL },
 				{ TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(size));
 		setOpaque(false);
 
 		DefaultListModel<PDC2016Set> setListModel = new DefaultListModel<PDC2016Set>();
-		int[] selectedIndices = new int[parameters.getAllSets().size()];
+		int[] selectedIndices = new int[parameters.getSets().size()];
 		int i = 0;
 		int j = 0;
-		for (PDC2016Set set : parameters.getAllSets()) {
+		List<PDC2016Set> sortedSets = new ArrayList<PDC2016Set>();
+		sortedSets.addAll(parameters.getAllSets());
+		Collections.sort(sortedSets, new Comparator<PDC2016Set>() {
+			public int compare(PDC2016Set set1, PDC2016Set set2) {
+				return set1.toString().compareTo(set2.toString());
+			}
+		});
+		for (PDC2016Set set : sortedSets) {
 			setListModel.addElement(set);
 			if (parameters.getSets().contains(set)) {
 				selectedIndices[j++] = i;

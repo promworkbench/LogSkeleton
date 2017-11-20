@@ -13,6 +13,7 @@ import org.processmining.logskeleton.pdc2016.models.PDC2016TestModel;
 import org.processmining.logskeleton.pdc2016.parameters.PDC2016TestParameters;
 import org.processmining.pdc2016.algorithms.PDC2016LogAlgorithm;
 import org.processmining.pdc2016.algorithms.PDC2016Set;
+import org.processmining.pdc2016.parameters.PDC2016Parameters;
 
 @Plugin(name = "PDC 2016 Test", parameterLabels = {}, returnLabels = { "Results" }, returnTypes = { PDC2016TestModel.class })
 public class PDC2016TestPlugin {
@@ -28,16 +29,20 @@ public class PDC2016TestPlugin {
 			return null;
 		}
 		PDC2016TestModel testModel = new PDC2016TestModel(testParameters);
+		PDC2016Parameters parameters = new PDC2016Parameters();
+		PDC2016LogAlgorithm logAlgorithm = new PDC2016LogAlgorithm();
 
 		try {
 			for (int i : testParameters.getNrs()) {
-				XLog trainingLog = (new PDC2016LogAlgorithm(PDC2016Set.TRAIN, i)).apply(context);
-				XLog testLogMay = testParameters.getSets().contains(PDC2016Set.CAL1) ? (new PDC2016LogAlgorithm(
-						PDC2016Set.CAL1, i)).apply(context) : null;
-				XLog testLogJune = testParameters.getSets().contains(PDC2016Set.CAL2) ? (new PDC2016LogAlgorithm(
-						PDC2016Set.CAL2, i)).apply(context) : null;
-				XLog testLogFinal = testParameters.getSets().contains(PDC2016Set.TEST) ? (new PDC2016LogAlgorithm(
-						PDC2016Set.TEST, i)).apply(context) : null;
+				parameters.setNr(i);
+				parameters.setSet(PDC2016Set.TRAIN);
+				XLog trainingLog = logAlgorithm.apply(context, parameters);
+				parameters.setSet(PDC2016Set.CAL1);
+				XLog testLogMay = testParameters.getSets().contains(PDC2016Set.CAL1) ? logAlgorithm.apply(context, parameters) : null;
+				parameters.setSet(PDC2016Set.CAL2);
+				XLog testLogJune = testParameters.getSets().contains(PDC2016Set.CAL2) ? logAlgorithm.apply(context, parameters) : null;
+				parameters.setSet(PDC2016Set.TEST);
+				XLog testLogFinal = testParameters.getSets().contains(PDC2016Set.TEST) ? logAlgorithm.apply(context, parameters) : null;
 
 				LogSkeletonClassifierAlgorithm classifierAlgorithm = new LogSkeletonClassifierAlgorithm();
 
@@ -47,24 +52,24 @@ public class PDC2016TestPlugin {
 
 				// Classify the logs
 				if (testParameters.getSets().contains(PDC2016Set.CAL1)) {
-					System.out.println("====== Classify " + PDC2016Set.CAL1 + i + " ======");
+					System.out.println("[PDC2016TestPlugin] Classify PDC2016 " + PDC2016Set.CAL1 + " number " + i);
 					classifiedTestLogCal1 = classifierAlgorithm.apply(context, trainingLog, testLogMay,
 							new LogPreprocessorAlgorithm());
-					context.getProvidedObjectManager().createProvidedObject("Test Log " + PDC2016Set.CAL1 + i,
+					context.getProvidedObjectManager().createProvidedObject("PDC2016 " + PDC2016Set.CAL1 + " number " + i,
 							classifiedTestLogCal1, XLog.class, context);
 				}
 				if (testParameters.getSets().contains(PDC2016Set.CAL2)) {
-					System.out.println("====== Classify " + PDC2016Set.CAL2 + i + " ======");
+					System.out.println("[PDC2016TestPlugin] Classify PDC2016 " + PDC2016Set.CAL2 + " number " + i);
 					classifiedTestLogCal2 = classifierAlgorithm.apply(context, trainingLog, testLogJune,
 							new LogPreprocessorAlgorithm());
-					context.getProvidedObjectManager().createProvidedObject("Test Log " + PDC2016Set.CAL2 + i,
+					context.getProvidedObjectManager().createProvidedObject("PDC2016 " + PDC2016Set.CAL2 + " number " + i,
 							classifiedTestLogCal2, XLog.class, context);
 				}
 				if (testParameters.getSets().contains(PDC2016Set.TEST)) {
-					System.out.println("====== Classify " + PDC2016Set.TEST + i + " ======");
+					System.out.println("[PDC2016TestPlugin] Classify PDC2016 " + PDC2016Set.TEST + " number " + i);
 					classifiedTestLogTest = classifierAlgorithm.apply(context, trainingLog, testLogFinal,
 							new LogPreprocessorAlgorithm());
-					context.getProvidedObjectManager().createProvidedObject("Test Log " + PDC2016Set.TEST + i,
+					context.getProvidedObjectManager().createProvidedObject("PDC2016 " + PDC2016Set.TEST + " number " + i,
 							classifiedTestLogTest, XLog.class, context);
 				}
 				testModel.add(i, classifiedTestLogCal1, classifiedTestLogCal2, classifiedTestLogTest);
