@@ -14,6 +14,8 @@ import java.util.Set;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XTrace;
+import org.processmining.framework.annotations.AuthoredType;
+import org.processmining.framework.annotations.Icon;
 import org.processmining.framework.util.HTMLToString;
 import org.processmining.logskeleton.parameters.LogSkeletonBrowser;
 import org.processmining.logskeleton.parameters.LogSkeletonBrowserParameters;
@@ -24,6 +26,8 @@ import org.processmining.plugins.graphviz.dot.DotNode;
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
 
+@AuthoredType(typeName = "Log skeleton", affiliation = AuthoredType.TUE, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
+@Icon(icon = "rotule_30x35.png")
 public class LogSkeleton implements HTMLToString {
 
 	private LogSkeletonCount countModel;
