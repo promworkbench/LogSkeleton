@@ -178,6 +178,8 @@ public class LogSkeletonCount {
 		for (String activity : activityCounts.keySet()) {
 			writer.write(activity);
 			writer.write("" + activityCounts.get(activity));
+			writer.write("" + activityMinCounts.get(activity));
+			writer.write("" + activityMaxCounts.get(activity));
 			writer.endRecord();
 		}
 		writer.write("transition counts");
@@ -200,6 +202,8 @@ public class LogSkeletonCount {
 				for (int row = 0; row < rows; row++) {
 					if (reader.readRecord()) {
 						activityCounts.put(reader.get(0), Integer.valueOf(reader.get(1)));
+						activityMinCounts.put(reader.get(0), Integer.valueOf(reader.get(2)));
+						activityMaxCounts.put(reader.get(0), Integer.valueOf(reader.get(3)));
 					}
 				}
 			}
