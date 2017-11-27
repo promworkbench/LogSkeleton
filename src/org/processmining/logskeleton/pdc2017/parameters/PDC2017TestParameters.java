@@ -37,6 +37,12 @@ public class PDC2017TestParameters {
 		allPreprocessors = new HashSet<LogPreprocessorAlgorithm>();
 		allPreprocessors.add(new LogPreprocessorAlgorithm());
 		allPreprocessors.add(preprocessor);
+		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(false, false, true));
+		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(true, false, false));
+		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(true, false, true));
+		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(false, true, false));
+		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(false, true, true));
+		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(true, true, false));
 	}
 
 	public Set<PDC2017Set> getSets() {
