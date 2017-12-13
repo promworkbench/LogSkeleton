@@ -77,38 +77,20 @@ public class LogSkeleton implements HTMLToString {
 		return null;
 	}
 
-	public void addPrePost(String activity, List<String> pre, List<String> post) {
+	public void addPrePost(String activity, Collection<String> pre, Collection<String> post) {
 		Set<String> preset = new HashSet<String>(pre);
 		Set<String> postset = new HashSet<String>(post);
 		if (allPresets.containsKey(activity)) {
-			preset.retainAll(allPresets.get(activity));
+			allPresets.get(activity).retainAll(preset);
+			allPostsets.get(activity).retainAll(postset);
+			anyPresets.get(activity).addAll(preset);
+			anyPostsets.get(activity).addAll(postset);
+		} else {
+			allPresets.put(activity,  preset);
+			allPostsets.put(activity, postset);
+			anyPresets.put(activity, new HashSet<String>(preset));
+			anyPostsets.put(activity, new HashSet<String>(postset));
 		}
-		allPresets.put(activity, preset);
-		if (allPostsets.containsKey(activity)) {
-			postset.retainAll(allPostsets.get(activity));
-		}
-		allPostsets.put(activity, postset);
-		preset = new HashSet<String>(pre);
-		postset = new HashSet<String>(post);
-		if (anyPresets.containsKey(activity)) {
-			preset.addAll(anyPresets.get(activity));
-		}
-		anyPresets.put(activity, preset);
-		if (anyPostsets.containsKey(activity)) {
-			postset.addAll(anyPostsets.get(activity));
-		}
-		anyPostsets.put(activity, postset);
-		//		int distance = 1;
-		//		for (String postActivity : post) {
-		//			List<String> pair = new ArrayList<String>();
-		//			pair.add(activity);
-		//			pair.add(postActivity);
-		//			if (!distances.containsKey(pair)) {
-		//				distances.put(pair, new ArrayList<Integer>());
-		//			}
-		//			distances.get(pair).add(distance);
-		//			distance++;
-		//		}
 	}
 
 	public void cleanPrePost() {

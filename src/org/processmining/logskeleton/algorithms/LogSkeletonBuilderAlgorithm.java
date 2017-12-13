@@ -21,13 +21,13 @@ import org.processmining.logskeleton.models.LogSkeletonCount;
 public class LogSkeletonBuilderAlgorithm {
 
 	public LogSkeleton apply(XLog log) {
-		LogSkeletonCount countModel0 = count(log);
+		LogSkeletonCount countModel = count(log);
 		//		countModel0.print("Count model");
-		LogSkeletonCount countModel1 = correct(countModel0);
+//		LogSkeletonCount countModel1 = correct(countModel0);
 		//		countModel1.print("Par model");
-		LogSkeletonCount countModel2 = correct(log, countModel1);
-		LogSkeletonCount countModel = correct2(countModel2);
-		countModel = countModel0;
+//		LogSkeletonCount countModel2 = correct(log, countModel1);
+//		LogSkeletonCount countModel = correct2(countModel2);
+//		countModel = countModel0;
 		countModel.print("Count model");
 		EventLogArray logs = split(log);
 		Collection<LogSkeletonCount> counts = createCounts(logs);
@@ -181,7 +181,7 @@ public class LogSkeletonBuilderAlgorithm {
 				postset.add(XConceptExtension.instance().extractName(event));
 			}
 			postset.add(LogSkeletonCount.ENDEVENT);
-			List<String> preset = new ArrayList<String>();
+			Set<String> preset = new HashSet<String>();
 			String prevActivity = null;
 			while (!postset.isEmpty()) {
 				if (prevActivity != null) {
