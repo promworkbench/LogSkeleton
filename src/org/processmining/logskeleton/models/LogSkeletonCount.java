@@ -40,7 +40,7 @@ public class LogSkeletonCount {
 	private Map<String, Integer> activityMaxCounts;
 	
 	/*
-	 * The directly follows relation. If ab is a list containing first a and then b, and if transitionCounts.get(ab) = 5, 
+	 * The directly follows relation. If ab is a list containing first a and then b, and if transitionCounts.get(ab) == 5, 
 	 * then a was 5 times directly followed by b in the log. Note that the lists (like ab) have always length 2. 
 	 */
 	private Map<List<String>, Integer> transitionCounts;
