@@ -22,12 +22,6 @@ public class LogSkeletonBuilderAlgorithm {
 
 	public LogSkeleton apply(XLog log) {
 		LogSkeletonCount countModel = count(log);
-		//		countModel0.print("Count model");
-//		LogSkeletonCount countModel1 = correct(countModel0);
-		//		countModel1.print("Par model");
-//		LogSkeletonCount countModel2 = correct(log, countModel1);
-//		LogSkeletonCount countModel = correct2(countModel2);
-//		countModel = countModel0;
 		countModel.print("Count model");
 		EventLogArray logs = split(log);
 		Collection<LogSkeletonCount> counts = createCounts(logs);
@@ -57,70 +51,6 @@ public class LogSkeletonBuilderAlgorithm {
 			model.inc(prevActivity, activity);
 		}
 		return model;
-	}
-
-	public LogSkeletonCount correct(XLog log, LogSkeletonCount model) {
-		LogSkeletonCount correctedModel = new LogSkeletonCount();
-		for (XTrace trace : log) {
-			String activity;
-			List<String> prevActivities = new ArrayList<String>();
-			prevActivities.add(LogSkeletonCount.STARTEVENT);
-			correctedModel.inc(LogSkeletonCount.STARTEVENT);
-			for (XEvent event : trace) {
-				activity = XConceptExtension.instance().extractName(event);
-				correctedModel.inc(activity);
-				int n = prevActivities.size();
-				String prevActivity = prevActivities.get(--n);
-				while (n > 0 && prevActivity != null && model.get(prevActivity, activity) == 0) {
-					prevActivity = prevActivities.get(--n);
-				}
-				if (prevActivity != null) {
-					correctedModel.inc(prevActivity, activity);
-				}
-				prevActivity = activity;
-				prevActivities.add(prevActivity);
-			}
-			activity = LogSkeletonCount.ENDEVENT;
-			correctedModel.inc(activity);
-			int n = prevActivities.size();
-			String prevActivity = prevActivities.get(--n);
-			while (n > 0 && prevActivity != null && model.get(prevActivity, activity) == 0) {
-				prevActivity = prevActivities.get(--n);
-			}
-			if (prevActivity != null) {
-				correctedModel.inc(prevActivity, activity);
-			}
-		}
-		return correctedModel;
-	}
-
-	private LogSkeletonCount correct(LogSkeletonCount model) {
-		LogSkeletonCount correctedModel = new LogSkeletonCount();
-
-		for (String fromActivity : model.getActivities()) {
-			correctedModel.add(fromActivity, model.get(fromActivity));
-			for (String toActivity : model.getActivities()) {
-				if (model.get(fromActivity, toActivity) > 0 && model.get(toActivity, fromActivity) == 0) {
-					correctedModel.add(fromActivity, toActivity, model.get(fromActivity, toActivity));
-				}
-			}
-		}
-		return correctedModel;
-	}
-
-	private LogSkeletonCount correct2(LogSkeletonCount model) {
-		LogSkeletonCount correctedModel = new LogSkeletonCount();
-
-		for (String fromActivity : model.getActivities()) {
-			correctedModel.add(fromActivity, model.get(fromActivity));
-			for (String toActivity : model.getActivities()) {
-				int threshold = Math.min(model.get(fromActivity), model.get(toActivity)) / 5;
-				if (model.get(fromActivity, toActivity) > threshold) {
-					correctedModel.add(fromActivity, toActivity, model.get(fromActivity, toActivity));
-				}
-			}
-		}
-		return correctedModel;
 	}
 
 	private EventLogArray split(XLog log) {

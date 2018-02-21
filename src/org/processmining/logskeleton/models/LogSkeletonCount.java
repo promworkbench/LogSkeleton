@@ -15,12 +15,34 @@ import com.csvreader.CsvWriter;
 
 public class LogSkeletonCount {
 
+	/*
+	 * The names to use for the start and end events.
+	 */
 	public final static String STARTEVENT = "|>";
 	public final static String ENDEVENT = "[]";
 
+	/*
+	 * Counts how many times an activity occurred in the entire log. 
+	 * If activityCounts.get(a) == 4, then activity a occurred 4 times in the log.
+	 */
 	private Map<String, Integer> activityCounts;
+	
+	/*
+	 * Counts the minimal number of times an activity occurs in any trace. 
+	 * If activityMinCounts.get(a) == 1, then a occurs at least once in every trace in the log.
+	 */
 	private Map<String, Integer> activityMinCounts;
+	
+	/*
+	 * Counts the maximal number of times an activity occurs in any trace. 
+	 * If activityMinCounts.get(a) == 2, then a occurs at most twice in every trace in the log.
+	 */
 	private Map<String, Integer> activityMaxCounts;
+	
+	/*
+	 * The directly follows relation. If ab is a list containing first a and then b, and if transitionCounts.get(ab) = 5, 
+	 * then a was 5 times directly followed by b in the log. Note that the lists (like ab) have always length 2. 
+	 */
 	private Map<List<String>, Integer> transitionCounts;
 
 	public LogSkeletonCount() {

@@ -30,10 +30,32 @@ import com.csvreader.CsvWriter;
 @Icon(icon = "rotule_30x35.png")
 public class LogSkeleton implements HTMLToString {
 
+	/*
+	 * Holds the counters and the directly-follows relation.
+	 */
 	private LogSkeletonCount countModel;
+	
+	/*
+	 * The equivalence relation. If S is an element of sameCounts, then all elements of S are equivalent.
+	 */
 	private Collection<Collection<String>> sameCounts;
+	
+	/*
+	 * The always-before relation. If allPresets.get(a).contains(b), then b is always before a.
+	 */
 	private Map<String, Set<String>> allPresets;
+
+	/*
+	 * The always-after relation. If allPostsets.get(a).contains(b), then b is always after a.
+	 */
 	private Map<String, Set<String>> allPostsets;
+	
+	/*
+	 * The never-together relation. If !anyPresets.get(a).contains(b) and !anyPostsets.get(a).contains(b), then b
+	 * is never together with a. Of course, in that case, also !anyPresets.get(b).contains(b) and !anyPostsets.get(b).contains(a).
+	 * 
+	 * Basically, anyPresets.get(a).contains(b) indicates that in some trace there is a b before an a, etc.  
+	 */
 	private Map<String, Set<String>> anyPresets;
 	private Map<String, Set<String>> anyPostsets;
 
