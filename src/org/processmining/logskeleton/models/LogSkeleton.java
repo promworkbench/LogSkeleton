@@ -1190,4 +1190,18 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 	}
+	
+	public Set<String> getAlwaysBefore(String activity) {
+		if (allPresets.containsKey(activity)) {
+			return new HashSet<String>(allPresets.get(activity));
+		}
+		return new HashSet<String>();
+	}
+	
+	public Set<String> getAlwaysAfter(String activity) {
+		if (allPostsets.containsKey(activity)) {
+			return new HashSet<String>(allPostsets.get(activity));
+		}
+		return new HashSet<String>();
+	}
 }
