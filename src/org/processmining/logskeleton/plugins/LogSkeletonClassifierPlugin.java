@@ -8,7 +8,7 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
 import org.processmining.logskeleton.algorithms.LogSkeletonClassifierAlgorithm;
 
-@Plugin(name = "Classify Test Log using Log Skeleton", parameterLabels = { "Training Event log", "Test Event Log"}, returnLabels = { "Classified Event Log" }, returnTypes = { XLog.class }, userAccessible = true, help = "Filter Event Log on Log Skeleton")
+@Plugin(name = "Classify Test Log using Log Skeleton", icon = "prom_duck_300.png", url = "http://www.win.tue.nl/~hverbeek", parameterLabels = { "Training Event log", "Test Event Log"}, returnLabels = { "Classified Event Log" }, returnTypes = { XLog.class }, userAccessible = true, help = "Filter Event Log on Log Skeleton")
 public class LogSkeletonClassifierPlugin extends LogSkeletonClassifierAlgorithm {
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
