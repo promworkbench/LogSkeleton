@@ -8,7 +8,7 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.LogSkeletonBuilderAlgorithm;
 import org.processmining.logskeleton.models.LogSkeleton;
 
-@Plugin(name = "Build Log Skeleton from Event Log", icon = "http://www.promtools.org/lib/exe/fetch.php?media=prom_subtitle_hat_300.png", url = "http://www.promtools.org", parameterLabels = { "Event log"}, returnLabels = { "Log Skeleton" }, returnTypes = { LogSkeleton.class }, userAccessible = true, help = "Create Log Skeleton from Event Log")
+@Plugin(name = "Build Log Skeleton from Event Log", icon = "rotule_30x35.png", url = "http://www.win.tue.nl/~hverbeek/blog/category/log-skeletons/", parameterLabels = { "Event log"}, returnLabels = { "Log Skeleton" }, returnTypes = { LogSkeleton.class }, userAccessible = true, help = "Create Log Skeleton from Event Log")
 public class LogSkeletonBuilderPlugin extends LogSkeletonBuilderAlgorithm  {
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
