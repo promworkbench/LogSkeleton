@@ -34,27 +34,33 @@ public class LogSkeleton implements HTMLToString {
 	 * Holds the counters and the directly-follows relation.
 	 */
 	private LogSkeletonCount countModel;
-	
+
 	/*
-	 * The equivalence relation. If S is an element of sameCounts, then all elements of S are equivalent.
+	 * The equivalence relation. If S is an element of sameCounts, then all
+	 * elements of S are equivalent.
 	 */
 	private Collection<Collection<String>> sameCounts;
-	
+
 	/*
-	 * The always-before relation. If allPresets.get(a).contains(b), then b is always before a.
+	 * The always-before relation. If allPresets.get(a).contains(b), then b is
+	 * always before a.
 	 */
 	private Map<String, Set<String>> allPresets;
 
 	/*
-	 * The always-after relation. If allPostsets.get(a).contains(b), then b is always after a.
+	 * The always-after relation. If allPostsets.get(a).contains(b), then b is
+	 * always after a.
 	 */
 	private Map<String, Set<String>> allPostsets;
-	
+
 	/*
-	 * The never-together relation. If !anyPresets.get(a).contains(b) and !anyPostsets.get(a).contains(b), then b
-	 * is never together with a. Of course, in that case, also !anyPresets.get(b).contains(b) and !anyPostsets.get(b).contains(a).
+	 * The never-together relation. If !anyPresets.get(a).contains(b) and
+	 * !anyPostsets.get(a).contains(b), then b is never together with a. Of
+	 * course, in that case, also !anyPresets.get(b).contains(b) and
+	 * !anyPostsets.get(b).contains(a).
 	 * 
-	 * Basically, anyPresets.get(a).contains(b) indicates that in some trace there is a b before an a, etc.  
+	 * Basically, anyPresets.get(a).contains(b) indicates that in some trace
+	 * there is a b before an a, etc.
 	 */
 	private Map<String, Set<String>> anyPresets;
 	private Map<String, Set<String>> anyPostsets;
@@ -108,7 +114,7 @@ public class LogSkeleton implements HTMLToString {
 			anyPresets.get(activity).addAll(preset);
 			anyPostsets.get(activity).addAll(postset);
 		} else {
-			allPresets.put(activity,  preset);
+			allPresets.put(activity, preset);
 			allPostsets.put(activity, postset);
 			anyPresets.put(activity, new HashSet<String>(preset));
 			anyPostsets.put(activity, new HashSet<String>(postset));
@@ -204,8 +210,8 @@ public class LogSkeleton implements HTMLToString {
 			if (allPresets.containsKey(activity) && !preset.containsAll(allPresets.get(activity))) {
 				Set<String> missing = new HashSet<String>(allPresets.get(activity));
 				missing.removeAll(preset);
-				messages.add("[LogSkeleton] Case " + caseId + ": Always Before fails for " + activity
-						+ ", missing are " + missing);
+				messages.add("[LogSkeleton] Case " + caseId + ": Always Before fails for " + activity + ", missing are "
+						+ missing);
 				return false;
 			}
 			if (allPostsets.containsKey(activity) && !postset.containsAll(allPostsets.get(activity))) {
@@ -284,7 +290,8 @@ public class LogSkeleton implements HTMLToString {
 		//		}
 		//		buf.append("</table>");
 		buf.append("<h1>Causal relations</h1><table>");
-		buf.append("<tr><th>Activity</th><th>Sibling activities</th><th>Count</th><th>Always before</th><th>Always after</th><th>Never together</th><th>Never before</th><th>Never after</th></tr>");
+		buf.append(
+				"<tr><th>Activity</th><th>Sibling activities</th><th>Count</th><th>Always before</th><th>Always after</th><th>Never together</th><th>Never before</th><th>Never after</th></tr>");
 		for (String activity : countModel.getActivities()) {
 			// Activity
 			buf.append("<tr><td>" + activity + "</td>");
@@ -377,12 +384,10 @@ public class LogSkeleton implements HTMLToString {
 			if (countModel.getMax(activity) > countModel.getMin(activity)) {
 				interval += ".." + countModel.getMax(activity);
 			}
-			DotNode node = graph
-					.addNode("<<table align=\"center\" bgcolor=\""
-							+ activityColor
-							+ "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
-							+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + colorActivity + "</td><td>"
-							+ countModel.get(activity) + "</td>" + "<td>" + interval + "</td>" + "</tr></table>>");
+			DotNode node = graph.addNode("<<table align=\"center\" bgcolor=\"" + activityColor
+					+ "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
+					+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + colorActivity + "</td><td>"
+					+ countModel.get(activity) + "</td>" + "<td>" + interval + "</td>" + "</tr></table>>");
 			node.setOption("shape", "none");
 			//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
 			//			node.setLabel("<" + encodeHTML(activity) + ">");
@@ -423,13 +428,13 @@ public class LogSkeleton implements HTMLToString {
 						boolean constraint = true;
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
 							if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
-								tailDecorator = "obox";
+								tailDecorator = "dot";
 								headArrow = "normal";
 							}
 						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
 							if (headDecorator == null && allPresets.get(toActivity).contains(fromActivity)) {
-								headDecorator = "obox";
+								headDecorator = "dot";
 								headArrow = "normal";
 							}
 						}
@@ -449,32 +454,32 @@ public class LogSkeleton implements HTMLToString {
 								headLabel = "" + countModel.get(fromActivity, toActivity);
 							}
 						}
-//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHERSELF)) {
-//							if (fromActivity.equals(toActivity)) {
-//								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
-//										&& !anyPresets.get(fromActivity).contains(toActivity)
-//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-//									headDecorator = "box";
-//								}
-//								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
-//										&& !anyPresets.get(fromActivity).contains(toActivity)
-//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-//									tailDecorator = "box";
-//								}
-//							}
-//						}
+						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHERSELF)) {
+						//							if (fromActivity.equals(toActivity)) {
+						//								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
+						//										&& !anyPresets.get(fromActivity).contains(toActivity)
+						//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+						//									headDecorator = "box";
+						//								}
+						//								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
+						//										&& !anyPresets.get(fromActivity).contains(toActivity)
+						//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+						//									tailDecorator = "box";
+						//								}
+						//							}
+						//						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
 										&& !anyPresets.get(fromActivity).contains(toActivity)
 										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-									headDecorator = "box";
+									headDecorator = "dotnonetee";
 									constraint = false;
 								}
 								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
 										&& !anyPresets.get(fromActivity).contains(toActivity)
 										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-									tailDecorator = "box";
+									tailDecorator = "dotnonetee";
 									constraint = false;
 								}
 							}
@@ -569,7 +574,8 @@ public class LogSkeleton implements HTMLToString {
 				/*
 				 * For now, only do this for always-arcs.
 				 */
-				if (arc.getOption("arrowtail").contains("obox") || arc.getOption("arrowhead").contains("obox")) {
+				if (arc.getOption("arrowtail").equals("dotnone") || arc.getOption("arrowhead").equals("dotnone")
+						|| arc.getOption("arrowtail").equals("dotnormal") || arc.getOption("arrowhead").equals("dotnormal")) {
 					/*
 					 * Get the cluster for this arc.
 					 */
@@ -586,8 +592,8 @@ public class LogSkeleton implements HTMLToString {
 							if (arc != anotherArc
 									&& arc.getOption("arrowtail").equals(anotherArc.getOption("arrowtail"))
 									&& arc.getOption("arrowhead").equals(anotherArc.getOption("arrowhead"))
-									&& (arc.getLabel() == null ? anotherArc.getLabel() == null : arc.getLabel().equals(
-											anotherArc.getLabel()))) {
+									&& (arc.getLabel() == null ? anotherArc.getLabel() == null
+											: arc.getLabel().equals(anotherArc.getLabel()))) {
 								if (sourceNodes.contains(anotherArc.getSource())) {
 									changed = changed || targetNodes.add(anotherArc.getTarget());
 								}
@@ -1190,14 +1196,14 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 	}
-	
+
 	public Set<String> getAlwaysBefore(String activity) {
 		if (allPresets.containsKey(activity)) {
 			return new HashSet<String>(allPresets.get(activity));
 		}
 		return new HashSet<String>();
 	}
-	
+
 	public Set<String> getAlwaysAfter(String activity) {
 		if (allPostsets.containsKey(activity)) {
 			return new HashSet<String>(allPostsets.get(activity));
