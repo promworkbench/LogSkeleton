@@ -425,7 +425,7 @@ public class LogSkeleton implements HTMLToString {
 						String headLabel = null;
 						String tailArrow = null;
 						String headArrow = null;
-						boolean constraint = true;
+						//						boolean dummy = false;
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
 							if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
 								tailDecorator = "dot";
@@ -474,13 +474,13 @@ public class LogSkeleton implements HTMLToString {
 										&& !anyPresets.get(fromActivity).contains(toActivity)
 										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
 									headDecorator = "dotnonetee";
-									constraint = false;
+									//									dummy = true;
 								}
 								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
 										&& !anyPresets.get(fromActivity).contains(toActivity)
 										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
 									tailDecorator = "dotnonetee";
-									constraint = false;
+									//									dummy = true;
 								}
 							}
 						}
@@ -499,18 +499,42 @@ public class LogSkeleton implements HTMLToString {
 									tailDecorator = "odot";
 									headLabel = "" + countModel.get(fromActivity, toActivity);
 									headArrow = "normal";
-									constraint = false;
 								}
 								if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
 										&& countModel.get(toActivity, fromActivity) > 0) {
 									headDecorator = "odot";
 									tailLabel = "" + countModel.get(toActivity, fromActivity);
 									tailArrow = "vee";
-									constraint = false;
 								}
 							}
 						}
 						if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
+							//							if (dummy) {
+							//								DotNode connector = graph.addNode("");
+							//								connector.setOption("shape", "box");
+							//								connector.setOption("height", "0.001");
+							//								connector.setOption("width", "0.001");
+							//								if (tailDecorator == null) {
+							//									tailDecorator = "";
+							//								}
+							//								if (tailArrow == null) {
+							//									tailArrow = "none";
+							//								}
+							//								if (headDecorator == null) {
+							//									headDecorator = "";
+							//								}
+							//								if (headArrow == null) {
+							//									headArrow = "none";
+							//								}
+							//								DotEdge arc = graph.addEdge(map.get(fromActivity), connector);
+							//								arc.setOption("dir", "both");
+							//								arc.setOption("arrowhead", tailDecorator + tailArrow);
+							//								arc.setOption("arrowtail", headDecorator + headArrow);
+							//								arc = graph.addEdge(connector, map.get(toActivity));
+							//								arc.setOption("dir", "both");
+							//								arc.setOption("arrowtail", tailDecorator + tailArrow);
+							//								arc.setOption("arrowhead", headDecorator + headArrow);								
+							//							} else {
 							DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
 							arc.setOption("dir", "both");
 							if (tailDecorator == null) {
@@ -538,6 +562,7 @@ public class LogSkeleton implements HTMLToString {
 									arc.setLabel(headLabel + "/" + tailLabel);
 								}
 							}
+							//							}
 						}
 					}
 				}
@@ -575,7 +600,8 @@ public class LogSkeleton implements HTMLToString {
 				 * For now, only do this for always-arcs.
 				 */
 				if (arc.getOption("arrowtail").equals("dotnone") || arc.getOption("arrowhead").equals("dotnone")
-						|| arc.getOption("arrowtail").equals("dotnormal") || arc.getOption("arrowhead").equals("dotnormal")) {
+						|| arc.getOption("arrowtail").equals("dotnormal")
+						|| arc.getOption("arrowhead").equals("dotnormal")) {
 					/*
 					 * Get the cluster for this arc.
 					 */
