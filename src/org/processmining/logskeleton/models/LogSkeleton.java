@@ -370,7 +370,72 @@ public class LogSkeleton implements HTMLToString {
 		//		System.out.println("[PDC2017ConstrainModel] Activities = " + parameters.getActivities());
 		//		System.out.println("[PDC2017ConstrainModel] Visualizers = " + parameters.getVisualizers());
 		Map<String, String> colorMap = new HashMap<String, String>();
-		for (String activity : parameters.getActivities()) {
+
+		Set<String> activities = new HashSet<String>(parameters.getActivities());
+
+		if (parameters.isUseNeighbors()) {
+			for (String fromActivity : countModel.getActivities()) {
+				for (String toActivity : countModel.getActivities()) {
+					if (parameters.getActivities().contains(fromActivity)
+							|| parameters.getActivities().contains(toActivity)) {
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
+							if (allPostsets.get(fromActivity).contains(toActivity)) {
+								activities.add(fromActivity);
+								activities.add(toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
+							if (allPresets.get(toActivity).contains(fromActivity)) {
+								activities.add(fromActivity);
+								activities.add(toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
+							if (countModel.get(toActivity, fromActivity) == 0
+									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
+								activities.add(fromActivity);
+								activities.add(toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
+							if (countModel.get(toActivity, fromActivity) == 0
+									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
+								activities.add(fromActivity);
+								activities.add(toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
+							if (!fromActivity.equals(toActivity)) {
+								if (fromActivity.compareTo(toActivity) >= 0
+										&& !anyPresets.get(fromActivity).contains(toActivity)
+										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+									activities.add(fromActivity);
+									activities.add(toActivity);
+								}
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+							if (countModel.get(fromActivity, toActivity) > 0
+									&& countModel.get(toActivity, fromActivity) == 0) {
+								activities.add(fromActivity);
+								activities.add(toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
+							if (fromActivity.compareTo(toActivity) <= 0) {
+								if (countModel.get(fromActivity, toActivity) > 0
+										&& countModel.get(toActivity, fromActivity) > 0) {
+									activities.add(fromActivity);
+									activities.add(toActivity);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		for (String activity : activities) {
 			String colorActivity = getSameCounts(activity).iterator().next();
 			String activityColor = colorMap.get(colorActivity);
 			if (activityColor == null) {
@@ -384,8 +449,13 @@ public class LogSkeleton implements HTMLToString {
 			if (countModel.getMax(activity) > countModel.getMin(activity)) {
 				interval += ".." + countModel.getMax(activity);
 			}
-			DotNode node = graph.addNode("<<table align=\"center\" bgcolor=\"" + activityColor
-					+ "\" border=\"1\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
+			int border = 0;
+			if (parameters.getActivities().contains(activity)) {
+				border = 1;
+			}
+
+			DotNode node = graph.addNode("<<table align=\"center\" bgcolor=\"" + activityColor + "\" border=\"" + border
+					+ "\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
 					+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + colorActivity + "</td><td>"
 					+ countModel.get(activity) + "</td>" + "<td>" + interval + "</td>" + "</tr></table>>");
 			node.setOption("shape", "none");
@@ -415,154 +485,129 @@ public class LogSkeleton implements HTMLToString {
 		//			map.put(activity, node);
 		//		}
 
-		for (String fromActivity : parameters.getActivities()) {
-			if (parameters.getActivities().contains(fromActivity)) {
-				for (String toActivity : parameters.getActivities()) {
-					if (parameters.getActivities().contains(toActivity)) {
-						String tailDecorator = null;
-						String headDecorator = null;
-						String tailLabel = null;
-						String headLabel = null;
-						String tailArrow = null;
-						String headArrow = null;
-						//						boolean dummy = false;
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
-							if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
-								tailDecorator = "dot";
-								headArrow = "normal";
+		for (String fromActivity : activities) {
+			for (String toActivity : activities) {
+				if (parameters.getActivities().contains(fromActivity)
+						|| parameters.getActivities().contains(toActivity)) {
+					String tailDecorator = null;
+					String headDecorator = null;
+					String tailLabel = null;
+					String headLabel = null;
+					String tailArrow = null;
+					String headArrow = null;
+					boolean constraint = true;
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
+						if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
+							tailDecorator = "dot";
+							headArrow = "normal";
+						}
+					}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
+						if (headDecorator == null && allPresets.get(toActivity).contains(fromActivity)) {
+							headDecorator = "dot";
+							headArrow = "normal";
+						}
+					}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
+						if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
+								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
+							tailDecorator = "odot";
+							headArrow = "normal";
+							headLabel = "" + countModel.get(fromActivity, toActivity);
+						}
+					}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
+						if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
+								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
+							headDecorator = "odot";
+							headArrow = "normal";
+							headLabel = "" + countModel.get(fromActivity, toActivity);
+						}
+					}
+					//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHERSELF)) {
+					//							if (fromActivity.equals(toActivity)) {
+					//								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
+					//										&& !anyPresets.get(fromActivity).contains(toActivity)
+					//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+					//									headDecorator = "box";
+					//								}
+					//								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
+					//										&& !anyPresets.get(fromActivity).contains(toActivity)
+					//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+					//									tailDecorator = "box";
+					//								}
+					//							}
+					//						}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
+						if (!fromActivity.equals(toActivity)) {
+							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
+									&& !anyPresets.get(fromActivity).contains(toActivity)
+									&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+								headDecorator = "dotnonetee";
+								//								dummy = true;
+								constraint = false;
+							}
+							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
+									&& !anyPresets.get(fromActivity).contains(toActivity)
+									&& !anyPostsets.get(fromActivity).contains(toActivity)) {
+								tailDecorator = "dotnonetee";
+								//								dummy = true;
+								constraint = false;
 							}
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
-							if (headDecorator == null && allPresets.get(toActivity).contains(fromActivity)) {
-								headDecorator = "dot";
-								headArrow = "normal";
-							}
+					}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+						if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+								&& countModel.get(toActivity, fromActivity) == 0) {
+							tailDecorator = "odot";
+							headLabel = "" + countModel.get(fromActivity, toActivity);
+							headArrow = "normal";
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-							if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
-									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
-								tailDecorator = "odot";
-								headArrow = "normal";
-								headLabel = "" + countModel.get(fromActivity, toActivity);
-							}
-						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-							if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
-									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
-								headDecorator = "odot";
-								headArrow = "normal";
-								headLabel = "" + countModel.get(fromActivity, toActivity);
-							}
-						}
-						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHERSELF)) {
-						//							if (fromActivity.equals(toActivity)) {
-						//								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
-						//										&& !anyPresets.get(fromActivity).contains(toActivity)
-						//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-						//									headDecorator = "box";
-						//								}
-						//								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
-						//										&& !anyPresets.get(fromActivity).contains(toActivity)
-						//										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-						//									tailDecorator = "box";
-						//								}
-						//							}
-						//						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
-							if (!fromActivity.equals(toActivity)) {
-								if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
-										&& !anyPresets.get(fromActivity).contains(toActivity)
-										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-									headDecorator = "dotnonetee";
-									//									dummy = true;
-								}
-								if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
-										&& !anyPresets.get(fromActivity).contains(toActivity)
-										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
-									tailDecorator = "dotnonetee";
-									//									dummy = true;
-								}
-							}
-						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+					}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
+						if (fromActivity.compareTo(toActivity) <= 0) {
 							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-									&& countModel.get(toActivity, fromActivity) == 0) {
+									&& countModel.get(toActivity, fromActivity) > 0) {
 								tailDecorator = "odot";
 								headLabel = "" + countModel.get(fromActivity, toActivity);
 								headArrow = "normal";
 							}
-						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-							if (fromActivity.compareTo(toActivity) <= 0) {
-								if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-										&& countModel.get(toActivity, fromActivity) > 0) {
-									tailDecorator = "odot";
-									headLabel = "" + countModel.get(fromActivity, toActivity);
-									headArrow = "normal";
-								}
-								if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
-										&& countModel.get(toActivity, fromActivity) > 0) {
-									headDecorator = "odot";
-									tailLabel = "" + countModel.get(toActivity, fromActivity);
-									tailArrow = "vee";
-								}
+							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
+									&& countModel.get(toActivity, fromActivity) > 0) {
+								headDecorator = "odot";
+								tailLabel = "" + countModel.get(toActivity, fromActivity);
+								tailArrow = "vee";
 							}
 						}
-						if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
-							//							if (dummy) {
-							//								DotNode connector = graph.addNode("");
-							//								connector.setOption("shape", "box");
-							//								connector.setOption("height", "0.001");
-							//								connector.setOption("width", "0.001");
-							//								if (tailDecorator == null) {
-							//									tailDecorator = "";
-							//								}
-							//								if (tailArrow == null) {
-							//									tailArrow = "none";
-							//								}
-							//								if (headDecorator == null) {
-							//									headDecorator = "";
-							//								}
-							//								if (headArrow == null) {
-							//									headArrow = "none";
-							//								}
-							//								DotEdge arc = graph.addEdge(map.get(fromActivity), connector);
-							//								arc.setOption("dir", "both");
-							//								arc.setOption("arrowhead", tailDecorator + tailArrow);
-							//								arc.setOption("arrowtail", headDecorator + headArrow);
-							//								arc = graph.addEdge(connector, map.get(toActivity));
-							//								arc.setOption("dir", "both");
-							//								arc.setOption("arrowtail", tailDecorator + tailArrow);
-							//								arc.setOption("arrowhead", headDecorator + headArrow);								
-							//							} else {
-							DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
-							arc.setOption("dir", "both");
-							if (tailDecorator == null) {
-								tailDecorator = "";
+					}
+					if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
+						DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
+						arc.setOption("dir", "both");
+						if (tailDecorator == null) {
+							tailDecorator = "";
+						}
+						if (tailArrow == null) {
+							tailArrow = "none";
+						}
+						if (headDecorator == null) {
+							headDecorator = "";
+						}
+						if (headArrow == null) {
+							headArrow = "none";
+						}
+						arc.setOption("arrowtail", tailDecorator + tailArrow);
+						arc.setOption("arrowhead", headDecorator + headArrow);
+						if (parameters.isUseFalseConstraints() && !constraint) {
+							arc.setOption("constraint", "false");
+							arc.setOption("color", "darkred");
+						}
+						//						arc.setOption("constraint", "true");
+						if (headLabel != null) {
+							if (tailLabel == null) {
+								arc.setLabel(headLabel);
+							} else {
+								arc.setLabel(headLabel + "/" + tailLabel);
 							}
-							if (tailArrow == null) {
-								tailArrow = "none";
-							}
-							if (headDecorator == null) {
-								headDecorator = "";
-							}
-							if (headArrow == null) {
-								headArrow = "none";
-							}
-							arc.setOption("arrowtail", tailDecorator + tailArrow);
-							arc.setOption("arrowhead", headDecorator + headArrow);
-							//							if (!constraint) {
-							//								arc.setOption("constraint", "false");
-							//							}
-							//							arc.setOption("constraint", "true");
-							if (headLabel != null) {
-								if (tailLabel == null) {
-									arc.setLabel(headLabel);
-								} else {
-									arc.setLabel(headLabel + "/" + tailLabel);
-								}
-							}
-							//							}
 						}
 					}
 				}
@@ -708,6 +753,7 @@ public class LogSkeleton implements HTMLToString {
 		}
 
 		graph.setOption("labelloc", "b");
+		graph.setOption("nodesep", "0.5");
 		//		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
 		//		if (!required.isEmpty()) {
 		//			label += "Required Activities Filters: " + required + "\\l";
@@ -718,8 +764,8 @@ public class LogSkeleton implements HTMLToString {
 		//		if (!splitters.isEmpty()) {
 		//			label += "Activity Splitters: " + splitters + "\\l";
 		//		}
-		List<String> activities = new ArrayList<String>(parameters.getActivities());
-		Collections.sort(activities);
+		List<String> selectedActivities = new ArrayList<String>(parameters.getActivities());
+		Collections.sort(selectedActivities);
 		//		label += "Show Activities: " + activities + "\\l";
 		//		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
 		String label = "<table bgcolor=\"gold\" cellborder=\"0\" cellpadding=\"0\" columns=\"3\" style=\"rounded\">";
@@ -734,7 +780,7 @@ public class LogSkeleton implements HTMLToString {
 		if (!splitters.isEmpty()) {
 			label += encodeRow("Activity Splitters", splitters.toString());
 		}
-		label += encodeRow("View Activities", activities.toString());
+		label += encodeRow("View Activities", selectedActivities.toString());
 		label += encodeRow("View Constraints", parameters.getVisualizers().toString());
 		label += "</table>";
 		graph.setOption("fontsize", "8.0");
@@ -971,8 +1017,6 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	public Dot createGraph(LogSkeletonBrowserParameters parameters) {
-		parameters.getActivities().addAll(parameters.getActivities());
-		parameters.getVisualizers().addAll(parameters.getVisualizers());
 		return visualize(parameters);
 	}
 

@@ -1,8 +1,5 @@
 package org.processmining.logskeleton.plugins;
 
-import info.clearthought.layout.TableLayout;
-import info.clearthought.layout.TableLayoutConstants;
-
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,6 +30,9 @@ import org.processmining.plugins.graphviz.visualisation.DotPanel;
 import com.fluxicon.slickerbox.components.SlickerButton;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
+
 @Plugin(name = "Log Skeleton Browser", parameterLabels = { "Log Skeleton" }, returnLabels = { "Log Skeleton Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Browser")
 @Visualizer
 public class LogSkeletonBrowserPlugin {
@@ -51,7 +51,7 @@ public class LogSkeletonBrowserPlugin {
 
 		mainPanel = new JPanel();
 		double size[][] = { { TableLayoutConstants.FILL, 250 },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -112,7 +112,7 @@ public class LogSkeletonBrowserPlugin {
 		visualizerList.setPreferredSize(new Dimension(100, 100));
 		mainPanel.add(visualizerList, "1, 2");
 
-		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use hyper arcs (may be slow)", false);
+		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use hyper Arcs (may be slow...)", false);
 		checkBox.setSelected(parameters.isUseHyperArcs());
 		checkBox.addActionListener(new ActionListener() {
 
@@ -126,6 +126,34 @@ public class LogSkeletonBrowserPlugin {
 		checkBox.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBox, "1, 3");
 
+		final JCheckBox checkBox2 = SlickerFactory.instance().createCheckBox("Turn Not-Co-existence Dark-Red", false);
+		checkBox2.setSelected(parameters.isUseFalseConstraints());
+		checkBox2.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				parameters.setUseFalseConstraints(checkBox2.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBox2.setOpaque(false);
+		checkBox2.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBox2, "1, 4");
+
+		final JCheckBox checkBox3 = SlickerFactory.instance().createCheckBox("Show Neighborhood", false);
+		checkBox3.setSelected(parameters.isUseNeighbors());
+		checkBox3.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				parameters.setUseNeighbors(checkBox3.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBox3.setOpaque(false);
+		checkBox3.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBox3, "1, 5");
+
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -133,7 +161,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 			
 		});
-		mainPanel.add(button, "1, 4");
+		mainPanel.add(button, "1, 6");
 		
 //		updateLeft();
 		updateRight();
@@ -160,7 +188,7 @@ public class LogSkeletonBrowserPlugin {
 			mainPanel.remove(rightDotPanel);
 		}
 		rightDotPanel = new DotPanel(model.visualize(parameters));
-		mainPanel.add(rightDotPanel, "0, 0, 0, 4");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 6");
 		mainPanel.validate();
 		mainPanel.repaint();
 

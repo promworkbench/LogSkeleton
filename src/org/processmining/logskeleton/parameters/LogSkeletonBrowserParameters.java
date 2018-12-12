@@ -10,6 +10,8 @@ public class LogSkeletonBrowserParameters {
 	private Set<String> activities;
 	private List<LogSkeletonBrowser> visualizers;
 	private boolean useHyperArcs;
+	private boolean useFalseConstraints;
+	private boolean useNeighbors;
 
 	public LogSkeletonBrowserParameters() {
 		activities = new HashSet<String>();
@@ -18,6 +20,8 @@ public class LogSkeletonBrowserParameters {
 		 * By default, do not use hyper arcs as finding the hyper arcs may take considerable time. 
 		 */
 		setUseHyperArcs(false);
+		setUseFalseConstraints(false);
+		setUseNeighbors(false);
 	}
 	
 	public Set<String> getActivities() {
@@ -34,5 +38,21 @@ public class LogSkeletonBrowserParameters {
 
 	public void setUseHyperArcs(boolean useHyperArcs) {
 		this.useHyperArcs = useHyperArcs;
+	}
+
+	public boolean isUseFalseConstraints() {
+		return useFalseConstraints;
+	}
+
+	public void setUseFalseConstraints(boolean useFalseConstraints) {
+		this.useFalseConstraints = useFalseConstraints;
+	}
+
+	public boolean isUseNeighbors() {
+		return useNeighbors;
+	}
+
+	public void setUseNeighbors(boolean useNeighbors) {
+		this.useNeighbors = useNeighbors;
 	}
 }
