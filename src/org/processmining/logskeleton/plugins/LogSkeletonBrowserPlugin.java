@@ -89,13 +89,15 @@ public class LogSkeletonBrowserPlugin {
 		final ProMList<LogSkeletonBrowser> visualizerList = new ProMList<LogSkeletonBrowser>("View Constraints", visualizers);
 		visualizerList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		List<LogSkeletonBrowser> selectedVisualizers = new ArrayList<LogSkeletonBrowser>();
-		selectedIndices = new int[2];
+		selectedIndices = new int[3];
 //		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSTOGETHER);
 //		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSTOGETHER);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSBEFORE);
 		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSBEFORE);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSAFTER);
 		selectedIndices[1] = list.indexOf(LogSkeletonBrowser.ALWAYSAFTER);
+		selectedVisualizers.add(LogSkeletonBrowser.NEVERTOGETHER);
+		selectedIndices[2] = list.indexOf(LogSkeletonBrowser.NEVERTOGETHER);
 		visualizerList.setSelectedIndices(selectedIndices);
 		parameters.getVisualizers().addAll(selectedVisualizers);
 		visualizerList.addListSelectionListener(new ListSelectionListener() {

@@ -22,8 +22,10 @@ public class LogSkeletonBrowserParameters {
 		 * By default, do not use hyper arcs as finding the hyper arcs may take considerable time. 
 		 */
 		setUseHyperArcs(false);
-		setUseFalseConstraints(false);
-		setUseNeighbors(false);
+		setUseFalseConstraints(true);
+		setUseEdgeColors(true);
+		setUseEquivalenceClass(true);
+		setUseNeighbors(true);
 	}
 	
 	public Set<String> getActivities() {
