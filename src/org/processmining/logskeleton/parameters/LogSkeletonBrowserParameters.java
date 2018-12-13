@@ -14,6 +14,7 @@ public class LogSkeletonBrowserParameters {
 	private boolean useEdgeColors;
 	private boolean useEquivalenceClass;
 	private boolean useNeighbors;
+	private int threshold;
 
 	public LogSkeletonBrowserParameters() {
 		activities = new HashSet<String>();
@@ -26,6 +27,7 @@ public class LogSkeletonBrowserParameters {
 		setUseEdgeColors(true);
 		setUseEquivalenceClass(true);
 		setUseNeighbors(true);
+		setThreshold(100);
 	}
 	
 	public Set<String> getActivities() {
@@ -74,5 +76,13 @@ public class LogSkeletonBrowserParameters {
 
 	public void setUseEquivalenceClass(boolean useEquivalenceClass) {
 		this.useEquivalenceClass = useEquivalenceClass;
+	}
+
+	public int getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
 	}
 }

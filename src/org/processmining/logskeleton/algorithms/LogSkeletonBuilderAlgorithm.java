@@ -20,12 +20,13 @@ import org.processmining.logskeleton.models.LogSkeletonCount;
 
 public class LogSkeletonBuilderAlgorithm {
 
-	public LogSkeleton apply(XLog log) {
+	public LogSkeleton apply(XLog log, int threshold) {
 		LogSkeletonCount countModel = count(log);
 		countModel.print("Count model");
 		EventLogArray logs = split(log);
 		Collection<LogSkeletonCount> counts = createCounts(logs);
 		LogSkeleton constraintModel = new LogSkeleton(countModel);
+		constraintModel.setThreshold(threshold);
 		addSameCounts(counts, constraintModel);
 		createCausalDependencies(log, countModel, constraintModel);
 		String label = XConceptExtension.instance().extractName(log);

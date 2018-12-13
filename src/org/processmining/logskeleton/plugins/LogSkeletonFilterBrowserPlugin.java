@@ -1,8 +1,5 @@
 package org.processmining.logskeleton.plugins;
 
-import info.clearthought.layout.TableLayout;
-import info.clearthought.layout.TableLayoutConstants;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -19,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -40,8 +39,14 @@ import org.processmining.logskeleton.algorithms.SplitterAlgorithm;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 
+import com.fluxicon.slickerbox.components.NiceSlider;
+import com.fluxicon.slickerbox.components.NiceSlider.Orientation;
 import com.fluxicon.slickerbox.components.RoundedPanel;
 import com.fluxicon.slickerbox.components.SlickerButton;
+import com.fluxicon.slickerbox.factory.SlickerFactory;
+
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
 
 @Plugin(name = "Log Skeleton Filter and Browser", parameterLabels = { "Event Log" }, returnLabels = { "Log Skeleton Filter and Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Filter and Browser")
 @Visualizer
@@ -54,6 +59,7 @@ public class LogSkeletonFilterBrowserPlugin {
 	private List<List<String>> splitters;
 	private Set<String> positiveFilters;
 	private Set<String> negativeFilters;
+	private int threshold;
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
@@ -70,6 +76,8 @@ public class LogSkeletonFilterBrowserPlugin {
 		positiveFilters = new HashSet<String>();
 		negativeFilters = new HashSet<String>();
 
+		threshold = 100;
+		
 		mainPanel.add(getControlPanel(), "0, 0");
 
 		update();
@@ -93,7 +101,7 @@ public class LogSkeletonFilterBrowserPlugin {
 			filteredLog = splitterAlgorithm.apply(filteredLog, splitterParameters);
 		}
 		LogSkeletonBuilderAlgorithm discoveryAlgorithm = new LogSkeletonBuilderAlgorithm();
-		LogSkeleton model = discoveryAlgorithm.apply(filteredLog);
+		LogSkeleton model = discoveryAlgorithm.apply(filteredLog, threshold);
 		model.setRequired(positiveFilters);
 		model.setForbidden(negativeFilters);
 		model.setSplitters(splitters);
@@ -144,7 +152,7 @@ public class LogSkeletonFilterBrowserPlugin {
 		JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log);
 		double size[][] = { { TableLayoutConstants.FILL },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30 } };
 		controlPanel.setLayout(new TableLayout(size));
 		controlPanel.setOpaque(false);
 		controlPanel.setBackground(WidgetColors.COLOR_LIST_BG);
@@ -214,7 +222,18 @@ public class LogSkeletonFilterBrowserPlugin {
 		}
 		controlPanel.add(splitterPanel, "0, 2");
 
-		final SlickerButton button = new SlickerButton("Apply Filters and Splitters");
+		final NiceSlider thresholdSlider = SlickerFactory.instance().createNiceIntegerSlider("R/P Percentage", 80, 100,
+				threshold, Orientation.HORIZONTAL);
+		thresholdSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				threshold = thresholdSlider.getSlider().getValue();
+			}
+		});
+		thresholdSlider.setPreferredSize(new Dimension(100,30));
+		controlPanel.add(thresholdSlider, "0, 3");
+
+		final SlickerButton button = new SlickerButton("Apply Settings");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				splitters = new ArrayList<List<String>>();
@@ -232,7 +251,7 @@ public class LogSkeletonFilterBrowserPlugin {
 			}
 
 		});
-		controlPanel.add(button, "0, 3");
+		controlPanel.add(button, "0, 4");
 
 		return controlPanel;
 	}

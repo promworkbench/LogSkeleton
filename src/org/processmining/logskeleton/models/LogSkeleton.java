@@ -69,7 +69,9 @@ public class LogSkeleton implements HTMLToString {
 	private Set<String> forbidden;
 	private List<List<String>> splitters;
 	private String label;
-
+	
+	private int threshold;
+	
 	//	private Map<List<String>, List<Integer>> distances;
 
 	public LogSkeleton() {
@@ -88,6 +90,7 @@ public class LogSkeleton implements HTMLToString {
 		forbidden = new HashSet<String>();
 		splitters = new ArrayList<List<String>>();
 		label = null;
+		setThreshold(100);
 	}
 
 	public void addSameCount(Collection<String> activities) {
@@ -114,8 +117,12 @@ public class LogSkeleton implements HTMLToString {
 			anyPresets.get(activity).addAll(preset);
 			anyPostsets.get(activity).addAll(postset);
 		} else {
-			allPresets.put(activity, preset);
-			allPostsets.put(activity, postset);
+			Set <String> allPreset = new AllSet<String>(countModel.getActivities(), threshold);
+			Set <String> allPostset = new AllSet<String>(countModel.getActivities(), threshold);
+			allPreset.addAll(preset);
+			allPostset.addAll(postset);
+			allPresets.put(activity, allPreset);
+			allPostsets.put(activity, allPostset);
 			anyPresets.put(activity, new HashSet<String>(preset));
 			anyPostsets.put(activity, new HashSet<String>(postset));
 		}
@@ -1293,5 +1300,13 @@ public class LogSkeleton implements HTMLToString {
 			return new HashSet<String>(allPostsets.get(activity));
 		}
 		return new HashSet<String>();
+	}
+
+	public int getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
 	}
 }

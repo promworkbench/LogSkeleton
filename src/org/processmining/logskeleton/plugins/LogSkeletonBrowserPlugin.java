@@ -184,6 +184,7 @@ public class LogSkeletonBrowserPlugin {
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBoxNeighbors, "1, 7");
 
+
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -202,6 +203,7 @@ public class LogSkeletonBrowserPlugin {
 //		if (leftDotPanel != null) {
 //			mainPanel.remove(leftDotPanel);
 //		}
+		model.setThreshold(parameters.getThreshold());
 		leftDotPanel = new DotPanel(model.createGraph(parameters));
 //		mainPanel.add(leftDotPanel, "0, 0, 0, 3");
 //		mainPanel.validate();
