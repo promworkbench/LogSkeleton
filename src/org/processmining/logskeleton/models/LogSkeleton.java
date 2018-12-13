@@ -407,6 +407,10 @@ public class LogSkeleton implements HTMLToString {
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
+										&& (!parameters.isUseEquivalenceClass()
+												|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+										&& (!parameters.isUseEquivalenceClass()
+												|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 										&& !anyPresets.get(fromActivity).contains(toActivity)
 										&& !anyPostsets.get(fromActivity).contains(toActivity)) {
 									activities.add(fromActivity);
@@ -495,7 +499,7 @@ public class LogSkeleton implements HTMLToString {
 					String headLabel = null;
 					String tailArrow = null;
 					String headArrow = null;
-					boolean constraint = true;
+					boolean isAsymmetric = true;
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
 						if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
 							tailDecorator = "dot";
@@ -541,18 +545,26 @@ public class LogSkeleton implements HTMLToString {
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 						if (!fromActivity.equals(toActivity)) {
 							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
+									&& (!parameters.isUseEquivalenceClass()
+											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+									&& (!parameters.isUseEquivalenceClass()
+											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 									&& !anyPresets.get(fromActivity).contains(toActivity)
 									&& !anyPostsets.get(fromActivity).contains(toActivity)) {
 								headDecorator = "dotnonetee";
 								//								dummy = true;
-								constraint = false;
+								isAsymmetric = false;
 							}
 							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
+									&& (!parameters.isUseEquivalenceClass()
+											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+									&& (!parameters.isUseEquivalenceClass()
+											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 									&& !anyPresets.get(fromActivity).contains(toActivity)
 									&& !anyPostsets.get(fromActivity).contains(toActivity)) {
 								tailDecorator = "dotnonetee";
 								//								dummy = true;
-								constraint = false;
+								isAsymmetric = false;
 							}
 						}
 					}
@@ -597,8 +609,10 @@ public class LogSkeleton implements HTMLToString {
 						}
 						arc.setOption("arrowtail", tailDecorator + tailArrow);
 						arc.setOption("arrowhead", headDecorator + headArrow);
-						if (parameters.isUseFalseConstraints() && !constraint) {
+						if (parameters.isUseFalseConstraints() && !isAsymmetric) {
 							arc.setOption("constraint", "false");
+						}
+						if (parameters.isUseEdgeColors() && !isAsymmetric) {
 							arc.setOption("color", "darkred");
 						}
 						//						arc.setOption("constraint", "true");

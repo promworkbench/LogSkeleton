@@ -11,6 +11,8 @@ public class LogSkeletonBrowserParameters {
 	private List<LogSkeletonBrowser> visualizers;
 	private boolean useHyperArcs;
 	private boolean useFalseConstraints;
+	private boolean useEdgeColors;
+	private boolean useEquivalenceClass;
 	private boolean useNeighbors;
 
 	public LogSkeletonBrowserParameters() {
@@ -54,5 +56,21 @@ public class LogSkeletonBrowserParameters {
 
 	public void setUseNeighbors(boolean useNeighbors) {
 		this.useNeighbors = useNeighbors;
+	}
+
+	public boolean isUseEdgeColors() {
+		return useEdgeColors;
+	}
+
+	public void setUseEdgeColors(boolean useEdgeColors) {
+		this.useEdgeColors = useEdgeColors;
+	}
+
+	public boolean isUseEquivalenceClass() {
+		return useEquivalenceClass;
+	}
+
+	public void setUseEquivalenceClass(boolean useEquivalenceClass) {
+		this.useEquivalenceClass = useEquivalenceClass;
 	}
 }

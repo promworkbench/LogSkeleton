@@ -51,7 +51,7 @@ public class LogSkeletonBrowserPlugin {
 
 		mainPanel = new JPanel();
 		double size[][] = { { TableLayoutConstants.FILL, 250 },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -112,7 +112,7 @@ public class LogSkeletonBrowserPlugin {
 		visualizerList.setPreferredSize(new Dimension(100, 100));
 		mainPanel.add(visualizerList, "1, 2");
 
-		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use hyper Arcs (may be slow...)", false);
+		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use Hyper Arcs (may be slow...)", false);
 		checkBox.setSelected(parameters.isUseHyperArcs());
 		checkBox.addActionListener(new ActionListener() {
 
@@ -126,33 +126,61 @@ public class LogSkeletonBrowserPlugin {
 		checkBox.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBox, "1, 3");
 
-		final JCheckBox checkBox2 = SlickerFactory.instance().createCheckBox("Turn Not-Co-existence Dark-Red", false);
-		checkBox2.setSelected(parameters.isUseFalseConstraints());
-		checkBox2.addActionListener(new ActionListener() {
+		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("Use False Constraints", false);
+		checkBoxFalseConstraints.setSelected(parameters.isUseFalseConstraints());
+		checkBoxFalseConstraints.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				parameters.setUseFalseConstraints(checkBox2.isSelected());
+				parameters.setUseFalseConstraints(checkBoxFalseConstraints.isSelected());
 				updateRight();
 			}
 
 		});
-		checkBox2.setOpaque(false);
-		checkBox2.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBox2, "1, 4");
+		checkBoxFalseConstraints.setOpaque(false);
+		checkBoxFalseConstraints.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBoxFalseConstraints, "1, 4");
 
-		final JCheckBox checkBox3 = SlickerFactory.instance().createCheckBox("Show Neighborhood", false);
-		checkBox3.setSelected(parameters.isUseNeighbors());
-		checkBox3.addActionListener(new ActionListener() {
+		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("Use Edge Colors", false);
+		checkBoxEdgeColors.setSelected(parameters.isUseEdgeColors());
+		checkBoxEdgeColors.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				parameters.setUseNeighbors(checkBox3.isSelected());
+				parameters.setUseEdgeColors(checkBoxEdgeColors.isSelected());
 				updateRight();
 			}
 
 		});
-		checkBox3.setOpaque(false);
-		checkBox3.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBox3, "1, 5");
+		checkBoxEdgeColors.setOpaque(false);
+		checkBoxEdgeColors.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBoxEdgeColors, "1, 5");
+
+		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("Use Equivalence Class", false);
+		checkBoxEquivalenceClass.setSelected(parameters.isUseEquivalenceClass());
+		checkBoxEquivalenceClass.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				parameters.setUseEquivalenceClass(checkBoxEquivalenceClass.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBoxEquivalenceClass.setOpaque(false);
+		checkBoxEquivalenceClass.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBoxEquivalenceClass, "1, 6");
+
+		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("Show Neighbors", false);
+		checkBoxNeighbors.setSelected(parameters.isUseNeighbors());
+		checkBoxNeighbors.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				parameters.setUseNeighbors(checkBoxNeighbors.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBoxNeighbors.setOpaque(false);
+		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBoxNeighbors, "1, 7");
 
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
@@ -161,7 +189,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 			
 		});
-		mainPanel.add(button, "1, 6");
+		mainPanel.add(button, "1, 8");
 		
 //		updateLeft();
 		updateRight();
@@ -188,7 +216,7 @@ public class LogSkeletonBrowserPlugin {
 			mainPanel.remove(rightDotPanel);
 		}
 		rightDotPanel = new DotPanel(model.visualize(parameters));
-		mainPanel.add(rightDotPanel, "0, 0, 0, 6");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 8");
 		mainPanel.validate();
 		mainPanel.repaint();
 
