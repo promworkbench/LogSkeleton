@@ -515,7 +515,8 @@ public class LogSkeleton implements HTMLToString {
 						if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
 							tailDecorator = "dot";
 							headArrow = "normal";
-							int threshold = ((AllSet<String>) allPostsets.get(fromActivity)).getMaxThreshold(toActivity);
+							int threshold = ((AllSet<String>) allPostsets.get(fromActivity))
+									.getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
 								color = "darkblue";
@@ -597,8 +598,12 @@ public class LogSkeleton implements HTMLToString {
 						if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
 								&& countModel.get(toActivity, fromActivity) == 0) {
 							tailDecorator = "odot";
-							headLabel = "" + countModel.get(fromActivity, toActivity);
-							headArrow = "normal";
+							if (headLabel == null) {
+								headLabel = "" + countModel.get(fromActivity, toActivity);
+							}
+							if (headArrow == null) {
+								headArrow = "normal";
+							}
 						}
 					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
@@ -606,14 +611,22 @@ public class LogSkeleton implements HTMLToString {
 							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
 									&& countModel.get(toActivity, fromActivity) > 0) {
 								tailDecorator = "odot";
-								headLabel = "" + countModel.get(fromActivity, toActivity);
-								headArrow = "normal";
+								if (headLabel == null) {
+									headLabel = "" + countModel.get(fromActivity, toActivity);
+								}
+								if (headArrow == null) {
+									headArrow = "normal";
+								}
 							}
 							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
 									&& countModel.get(toActivity, fromActivity) > 0) {
 								headDecorator = "odot";
-								tailLabel = "" + countModel.get(toActivity, fromActivity);
-								tailArrow = "vee";
+								if (tailLabel == null) {
+									tailLabel = "" + countModel.get(toActivity, fromActivity);
+								}
+								if (tailArrow == null) {
+									tailArrow = "vee";
+								}
 							}
 						}
 					}
@@ -641,11 +654,23 @@ public class LogSkeleton implements HTMLToString {
 							arc.setOption("color", color);
 						}
 						//						arc.setOption("constraint", "true");
-						if (headLabel != null) {
-							arc.setOption("headlabel", headLabel);
-						}
-						if (tailLabel != null) {
-							arc.setOption("taillabel", tailLabel);
+						if (parameters.isUseHeadTailLabels()) {
+							if (headLabel != null) {
+								arc.setOption("headlabel", headLabel);
+							}
+							if (tailLabel != null) {
+								arc.setOption("taillabel", tailLabel);
+							}
+						} else if (headLabel != null || tailLabel != null) {
+							String label = "";
+							if (tailLabel != null) {
+								label += tailLabel;
+							}
+							label += "&rarr;";
+							if (headLabel != null) {
+								label += headLabel;
+							}
+							arc.setLabel(label);
 						}
 					}
 				}

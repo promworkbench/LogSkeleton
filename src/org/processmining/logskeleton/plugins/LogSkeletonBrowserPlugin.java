@@ -55,7 +55,7 @@ public class LogSkeletonBrowserPlugin {
 
 		mainPanel = new JPanel();
 		double size[][] = { { TableLayoutConstants.FILL, 250 },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -174,6 +174,20 @@ public class LogSkeletonBrowserPlugin {
 		checkBoxEquivalenceClass.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBoxEquivalenceClass, "1, 6");
 
+		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("Use Head/Tail Labels", false);
+		checkBoxLabels.setSelected(parameters.isUseHeadTailLabels());
+		checkBoxLabels.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				parameters.setUseHeadTailLabels(checkBoxLabels.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBoxLabels.setOpaque(false);
+		checkBoxLabels.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(checkBoxLabels, "1, 7");
+
 		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("Show Neighbors", false);
 		checkBoxNeighbors.setSelected(parameters.isUseNeighbors());
 		checkBoxNeighbors.addActionListener(new ActionListener() {
@@ -186,7 +200,7 @@ public class LogSkeletonBrowserPlugin {
 		});
 		checkBoxNeighbors.setOpaque(false);
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxNeighbors, "1, 7");
+		mainPanel.add(checkBoxNeighbors, "1, 8");
 
 		final NiceSlider thresholdSlider = SlickerFactory.instance().createNiceIntegerSlider("R/P Percentage", 80, 100,
 				parameters.getThreshold(), Orientation.HORIZONTAL);
@@ -198,7 +212,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 		});
 		thresholdSlider.setPreferredSize(new Dimension(100,30));
-		mainPanel.add(thresholdSlider, "1, 8");
+		mainPanel.add(thresholdSlider, "1, 9");
 
 
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
@@ -208,7 +222,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 			
 		});
-		mainPanel.add(button, "1, 9");
+		mainPanel.add(button, "1, 10");
 		
 //		updateLeft();
 		updateRight();
@@ -236,7 +250,7 @@ public class LogSkeletonBrowserPlugin {
 			mainPanel.remove(rightDotPanel);
 		}
 		rightDotPanel = new DotPanel(model.visualize(parameters));
-		mainPanel.add(rightDotPanel, "0, 0, 0, 9");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 10");
 		mainPanel.validate();
 		mainPanel.repaint();
 

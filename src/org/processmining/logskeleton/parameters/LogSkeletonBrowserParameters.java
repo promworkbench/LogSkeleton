@@ -14,6 +14,7 @@ public class LogSkeletonBrowserParameters {
 	private boolean useEdgeColors;
 	private boolean useEquivalenceClass;
 	private boolean useNeighbors;
+	private boolean useHeadTailLabels;
 	private int threshold;
 
 	public LogSkeletonBrowserParameters() {
@@ -27,6 +28,7 @@ public class LogSkeletonBrowserParameters {
 		setUseEdgeColors(true);
 		setUseEquivalenceClass(true);
 		setUseNeighbors(true);
+		setUseHeadTailLabels(true);
 		setThreshold(100);
 	}
 	
@@ -84,5 +86,13 @@ public class LogSkeletonBrowserParameters {
 
 	public void setThreshold(int threshold) {
 		this.threshold = threshold;
+	}
+
+	public boolean isUseHeadTailLabels() {
+		return useHeadTailLabels;
+	}
+
+	public void setUseHeadTailLabels(boolean useHeadTailLabels) {
+		this.useHeadTailLabels = useHeadTailLabels;
 	}
 }
