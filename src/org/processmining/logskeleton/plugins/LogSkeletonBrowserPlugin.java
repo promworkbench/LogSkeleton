@@ -49,7 +49,7 @@ public class LogSkeletonBrowserPlugin {
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
-	public JComponent run(UIPluginContext context, LogSkeleton model) {
+	public JComponent run(UIPluginContext context, final LogSkeleton model) {
 
 		this.model = model;
 
@@ -208,6 +208,8 @@ public class LogSkeletonBrowserPlugin {
 
 			public void stateChanged(ChangeEvent e) {
 				parameters.setThreshold(thresholdSlider.getSlider().getValue());
+				model.setThreshold(thresholdSlider.getSlider().getValue());
+				model.cleanPrePost();
 				updateRight();
 			}
 		});

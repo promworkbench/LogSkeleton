@@ -129,7 +129,13 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	public void cleanPrePost() {
-		System.out.println("[LogSkeleton] clean pre and post");
+//		System.out.println("[LogSkeleton] clean pre and post");
+		for (String key : allPresets.keySet()) {
+			((AllSet<String>) allPresets.get(key)).reset();
+		}
+		for (String key : allPostsets.keySet()) {
+			((AllSet<String>) allPostsets.get(key)).reset();
+		}
 		for (String activity : countModel.getActivities()) {
 			cleanPrePost(activity, allPresets);
 			cleanPrePost(activity, allPostsets);
@@ -143,11 +149,13 @@ public class LogSkeleton implements HTMLToString {
 		Set<String> mappedMappedActivities = new HashSet<String>();
 		for (String mappedActivity : mappedActivities) {
 			for (String mappedMappedActivity : map.get(mappedActivity)) {
+//				System.out.println("[LogSkeleton] activity " + mappedMappedActivity + " " + mappedActivity);
 				if (!map.get(mappedMappedActivity).contains(mappedActivity)) {
 					mappedMappedActivities.add(mappedMappedActivity);
 				}
 			}
 		}
+//		System.out.println("[LogSkeleton] removeAll " + activity + " " + mappedMappedActivities);
 		mappedActivities.removeAll(mappedMappedActivities);
 		map.put(activity, mappedActivities);
 	}
@@ -521,7 +529,7 @@ public class LogSkeleton implements HTMLToString {
 								tailLabel = "." + threshold;
 								color = "darkblue";
 							}
-							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
+//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
 					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
@@ -533,7 +541,7 @@ public class LogSkeleton implements HTMLToString {
 								headLabel = "." + threshold;
 								color = "darkblue";
 							}
-							System.out.println("[LogSkeleton] headLabel = " + headLabel);
+//							System.out.println("[LogSkeleton] headLabel = " + headLabel);
 						}
 					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
