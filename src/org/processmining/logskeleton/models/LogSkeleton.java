@@ -69,9 +69,9 @@ public class LogSkeleton implements HTMLToString {
 	private Set<String> forbidden;
 	private List<List<String>> splitters;
 	private String label;
-	
+
 	private int threshold;
-	
+
 	//	private Map<List<String>, List<Integer>> distances;
 
 	public LogSkeleton() {
@@ -117,8 +117,8 @@ public class LogSkeleton implements HTMLToString {
 			anyPresets.get(activity).addAll(preset);
 			anyPostsets.get(activity).addAll(postset);
 		} else {
-			Set <String> allPreset = new AllSet<String>(countModel.getActivities(), threshold);
-			Set <String> allPostset = new AllSet<String>(countModel.getActivities(), threshold);
+			Set<String> allPreset = new AllSet<String>(countModel.getActivities(), threshold);
+			Set<String> allPostset = new AllSet<String>(countModel.getActivities(), threshold);
 			allPreset.addAll(preset);
 			allPostset.addAll(postset);
 			allPresets.put(activity, allPreset);
@@ -129,6 +129,7 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	public void cleanPrePost() {
+		System.out.println("[LogSkeleton] clean pre and post");
 		for (String activity : countModel.getActivities()) {
 			cleanPrePost(activity, allPresets);
 			cleanPrePost(activity, allPostsets);
@@ -380,6 +381,8 @@ public class LogSkeleton implements HTMLToString {
 
 		Set<String> activities = new HashSet<String>(parameters.getActivities());
 
+		setThreshold(parameters.getThreshold());
+
 		if (parameters.isUseNeighbors()) {
 			for (String fromActivity : countModel.getActivities()) {
 				for (String toActivity : countModel.getActivities()) {
@@ -506,17 +509,30 @@ public class LogSkeleton implements HTMLToString {
 					String headLabel = null;
 					String tailArrow = null;
 					String headArrow = null;
+					String color = null;
 					boolean isAsymmetric = true;
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
 						if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
 							tailDecorator = "dot";
 							headArrow = "normal";
+							int threshold = ((AllSet<String>) allPostsets.get(fromActivity)).getMaxThreshold(toActivity);
+							if (threshold < 100) {
+								tailLabel = "." + threshold;
+								color = "darkblue";
+							}
+							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
 					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
 						if (headDecorator == null && allPresets.get(toActivity).contains(fromActivity)) {
 							headDecorator = "dot";
 							headArrow = "normal";
+							int threshold = ((AllSet<String>) allPresets.get(toActivity)).getMaxThreshold(fromActivity);
+							if (threshold < 100) {
+								headLabel = "." + threshold;
+								color = "darkblue";
+							}
+							System.out.println("[LogSkeleton] headLabel = " + headLabel);
 						}
 					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
@@ -561,6 +577,7 @@ public class LogSkeleton implements HTMLToString {
 								headDecorator = "dotnonetee";
 								//								dummy = true;
 								isAsymmetric = false;
+								color = "darkred";
 							}
 							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
 									&& (!parameters.isUseEquivalenceClass()
@@ -572,6 +589,7 @@ public class LogSkeleton implements HTMLToString {
 								tailDecorator = "dotnonetee";
 								//								dummy = true;
 								isAsymmetric = false;
+								color = "darkred";
 							}
 						}
 					}
@@ -619,23 +637,24 @@ public class LogSkeleton implements HTMLToString {
 						if (parameters.isUseFalseConstraints() && !isAsymmetric) {
 							arc.setOption("constraint", "false");
 						}
-						if (parameters.isUseEdgeColors() && !isAsymmetric) {
-							arc.setOption("color", "darkred");
+						if (parameters.isUseEdgeColors() && color != null) {
+							arc.setOption("color", color);
 						}
 						//						arc.setOption("constraint", "true");
 						if (headLabel != null) {
-							if (tailLabel == null) {
-								arc.setLabel(headLabel);
-							} else {
-								arc.setLabel(headLabel + "/" + tailLabel);
-							}
+							arc.setOption("headlabel", headLabel);
+						}
+						if (tailLabel != null) {
+							arc.setOption("taillabel", tailLabel);
 						}
 					}
 				}
 			}
 		}
 
-		if (parameters.isUseHyperArcs()) {
+		if (parameters.isUseHyperArcs())
+
+		{
 			/*
 			 * Sort the arcs to get a (more) deterministic result.
 			 */
@@ -790,7 +809,9 @@ public class LogSkeleton implements HTMLToString {
 		//		label += "Show Activities: " + activities + "\\l";
 		//		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
 		String label = "<table bgcolor=\"gold\" cellborder=\"0\" cellpadding=\"0\" columns=\"3\" style=\"rounded\">";
-		label += encodeHeader("Skeleton Configuration");
+		label +=
+
+				encodeHeader("Skeleton Configuration");
 		label += encodeRow("Event Log", this.label == null ? "<not specified>" : this.label);
 		if (!required.isEmpty()) {
 			label += encodeRow("Required Activities Filter", required.toString());
@@ -1302,11 +1323,14 @@ public class LogSkeleton implements HTMLToString {
 		return new HashSet<String>();
 	}
 
-	public int getThreshold() {
-		return threshold;
-	}
-
 	public void setThreshold(int threshold) {
-		this.threshold = threshold;
+		this.threshold = 100;
+		for (String activity : allPresets.keySet()) {
+			((AllSet<String>) allPresets.get(activity)).setThreshold(threshold);
+		}
+		for (String activity : allPostsets.keySet()) {
+			((AllSet<String>) allPostsets.get(activity)).setThreshold(threshold);
+		}
+
 	}
 }

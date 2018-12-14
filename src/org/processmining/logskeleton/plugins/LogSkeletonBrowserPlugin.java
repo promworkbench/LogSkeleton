@@ -13,6 +13,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -27,6 +29,8 @@ import org.processmining.logskeleton.parameters.LogSkeletonBrowser;
 import org.processmining.logskeleton.parameters.LogSkeletonBrowserParameters;
 import org.processmining.plugins.graphviz.visualisation.DotPanel;
 
+import com.fluxicon.slickerbox.components.NiceSlider;
+import com.fluxicon.slickerbox.components.NiceSlider.Orientation;
 import com.fluxicon.slickerbox.components.SlickerButton;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
@@ -51,7 +55,7 @@ public class LogSkeletonBrowserPlugin {
 
 		mainPanel = new JPanel();
 		double size[][] = { { TableLayoutConstants.FILL, 250 },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -184,6 +188,18 @@ public class LogSkeletonBrowserPlugin {
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBoxNeighbors, "1, 7");
 
+		final NiceSlider thresholdSlider = SlickerFactory.instance().createNiceIntegerSlider("R/P Percentage", 80, 100,
+				parameters.getThreshold(), Orientation.HORIZONTAL);
+		thresholdSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				parameters.setThreshold(thresholdSlider.getSlider().getValue());
+				updateRight();
+			}
+		});
+		thresholdSlider.setPreferredSize(new Dimension(100,30));
+		mainPanel.add(thresholdSlider, "1, 8");
+
 
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
@@ -192,7 +208,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 			
 		});
-		mainPanel.add(button, "1, 8");
+		mainPanel.add(button, "1, 9");
 		
 //		updateLeft();
 		updateRight();
@@ -220,7 +236,7 @@ public class LogSkeletonBrowserPlugin {
 			mainPanel.remove(rightDotPanel);
 		}
 		rightDotPanel = new DotPanel(model.visualize(parameters));
-		mainPanel.add(rightDotPanel, "0, 0, 0, 8");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 9");
 		mainPanel.validate();
 		mainPanel.repaint();
 

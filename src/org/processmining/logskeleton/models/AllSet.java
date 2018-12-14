@@ -38,6 +38,7 @@ public class AllSet<T> implements Set<T> {
 	}
 
 	public boolean contains(Object o) {
+		System.out.println("[AllSet] threshold = " + threshold);
 		return (posMap.get(o) * 100 >= ttlMap.get(o) * threshold);
 	}
 
@@ -107,4 +108,15 @@ public class AllSet<T> implements Set<T> {
 		}
 	}
 
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
+	}
+	
+	public int getThreshold() {
+		return threshold;
+	}
+	
+	public int getMaxThreshold(Object o) {
+		return posMap.get(o) * 100 / ttlMap.get(o);
+	}
 }
