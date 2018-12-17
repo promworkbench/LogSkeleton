@@ -517,7 +517,8 @@ public class LogSkeleton implements HTMLToString {
 					String headLabel = null;
 					String tailArrow = null;
 					String headArrow = null;
-					String color = null;
+					String headColor = null;
+					String tailColor = null;
 					boolean isAsymmetric = true;
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
 						if (tailDecorator == null && allPostsets.get(fromActivity).contains(toActivity)) {
@@ -527,7 +528,7 @@ public class LogSkeleton implements HTMLToString {
 									.getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
-								color = "darkblue";
+								tailColor = "darkblue";
 							}
 //							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
@@ -539,7 +540,7 @@ public class LogSkeleton implements HTMLToString {
 							int threshold = ((AllSet<String>) allPresets.get(toActivity)).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
 								headLabel = "." + threshold;
-								color = "darkblue";
+								headColor = "darkblue";
 							}
 //							System.out.println("[LogSkeleton] headLabel = " + headLabel);
 						}
@@ -586,7 +587,8 @@ public class LogSkeleton implements HTMLToString {
 								headDecorator = "dotnonetee";
 								//								dummy = true;
 								isAsymmetric = false;
-								color = "darkred";
+								headColor = "darkred";
+								tailColor = "darkred";
 							}
 							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
 									&& (!parameters.isUseEquivalenceClass()
@@ -598,7 +600,8 @@ public class LogSkeleton implements HTMLToString {
 								tailDecorator = "dotnonetee";
 								//								dummy = true;
 								isAsymmetric = false;
-								color = "darkred";
+								headColor = "darkred";
+								tailColor = "darkred";
 							}
 						}
 					}
@@ -658,7 +661,8 @@ public class LogSkeleton implements HTMLToString {
 						if (parameters.isUseFalseConstraints() && !isAsymmetric) {
 							arc.setOption("constraint", "false");
 						}
-						if (parameters.isUseEdgeColors() && color != null) {
+						if (parameters.isUseEdgeColors() && (headColor != null || tailColor != null)) {
+							String color = (tailColor == null ? "black" : tailColor) + ";0.5:" + (headColor == null ? "black" : headColor) + ";0.5";
 							arc.setOption("color", color);
 						}
 						//						arc.setOption("constraint", "true");
@@ -733,11 +737,7 @@ public class LogSkeleton implements HTMLToString {
 					while (changed) {
 						changed = false;
 						for (DotEdge anotherArc : graph.getEdges()) {
-							if (arc != anotherArc
-									&& arc.getOption("arrowtail").equals(anotherArc.getOption("arrowtail"))
-									&& arc.getOption("arrowhead").equals(anotherArc.getOption("arrowhead"))
-									&& (arc.getLabel() == null ? anotherArc.getLabel() == null
-											: arc.getLabel().equals(anotherArc.getLabel()))) {
+							if (isEqual(arc, anotherArc)) {
 								if (sourceNodes.contains(anotherArc.getSource())) {
 									changed = changed || targetNodes.add(anotherArc.getTarget());
 								}
@@ -752,7 +752,7 @@ public class LogSkeleton implements HTMLToString {
 					 * Get a biggest maximal clique in the cluster.
 					 */
 					Set<DotEdge> arcs = getMaximalClique(graph, sourceNodes, targetNodes, arc.getOption("arrowtail"),
-							arc.getOption("arrowhead"), arc.getLabel(), new HashSet<List<Set<DotNode>>>());
+							arc.getOption("arrowhead"), arc.getLabel(), arc, new HashSet<List<Set<DotNode>>>());
 
 					if (arcs != null) {
 						/*
@@ -779,6 +779,27 @@ public class LogSkeleton implements HTMLToString {
 							a.setOption("dir", "both");
 							a.setOption("arrowtail", arc.getOption("arrowtail"));
 							a.setOption("arrowhead", "none");
+							if (arc.getOption("taillabel") != null) {
+								a.setOption("taillabel", arc.getOption("taillabel"));
+							}
+							if (arc.getLabel() != null) {
+								String[] labels2 = arc.getLabel().split("&rarr;");
+								if (labels2.length == 2) {
+									System.out.println("[LogSkeleton] set label1 " + labels2[0]);
+									a.setLabel(labels2[0]);
+								} else {
+									a.setLabel(arc.getLabel());
+								}
+							}
+							if (arc.getOption("color") != null) {
+								String[] colors2 = arc.getOption("color").split("[;:]");
+								if (colors2.length == 4) {
+									System.out.println("[LogSkeleton] set color1 " + colors[0]);
+									a.setOption("color", colors2[0]);
+								} else {
+									a.setOption("color",  arc.getOption("color"));
+								}
+							}
 							candidateArcs.add(a);
 						}
 						for (DotNode node : targetNodes) {
@@ -786,6 +807,27 @@ public class LogSkeleton implements HTMLToString {
 							a.setOption("dir", "both");
 							a.setOption("arrowtail", "none");
 							a.setOption("arrowhead", arc.getOption("arrowhead"));
+							if (arc.getOption("headlabel") != null) {
+								a.setOption("headlabel", arc.getOption("headlabel"));
+							}
+							if (arc.getLabel() != null) {
+								String[] labels2 = arc.getLabel().split("&rarr;");
+								if (labels2.length == 2) {
+									System.out.println("[LogSkeleton] set label2 " + labels2[1]);
+									a.setLabel(labels2[1]);
+								} else {
+									a.setLabel(arc.getLabel());
+								}
+							}
+							if (arc.getOption("color") != null) {
+								String[] colors2 = arc.getOption("color").split("[;:]");
+								if (colors2.length == 4) {
+									System.out.println("[LogSkeleton] set color2 " + colors[2]);
+									a.setOption("color", colors2[2]);
+								} else {
+									a.setOption("color",  arc.getOption("color"));
+								}
+							}
 							candidateArcs.add(a);
 						}
 						/*
@@ -864,8 +906,34 @@ public class LogSkeleton implements HTMLToString {
 		return graph;
 	}
 
+	private boolean isEqual(DotEdge e1, DotEdge e2) {
+		if (!isEqual(e1.getOption("arrowtail"),e2.getOption("arrowtail"))) {
+			return false;
+		}
+		if (!isEqual(e1.getOption("arrowhead"),e2.getOption("arrowhead"))) {
+			return false;
+		}
+		if (!isEqual(e1.getOption("headlabel"),e2.getOption("headlabel"))) {
+			return false;
+		}
+		if (!isEqual(e1.getOption("taillabel"),e2.getOption("taillabel"))) {
+			return false;
+		}
+		if (!isEqual(e1.getLabel(),e2.getLabel())) {
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean isEqual(String s1, String s2) {
+		if (s1 == null) {
+			return s2 == null;
+		} 
+		return s1.equals(s2);
+	}
+	
 	private Set<DotEdge> getMaximalClique(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes,
-			String arrowtail, String arrowhead, String label, Set<List<Set<DotNode>>> checkedNodes) {
+			String arrowtail, String arrowhead, String label, DotEdge baseArc, Set<List<Set<DotNode>>> checkedNodes) {
 		/*
 		 * Make sure a clique is not too small.
 		 */
@@ -895,8 +963,7 @@ public class LogSkeleton implements HTMLToString {
 		 */
 		Set<DotEdge> arcs = new HashSet<DotEdge>();
 		for (DotEdge arc : graph.getEdges()) {
-			if (arc.getOption("arrowtail").equals(arrowtail) && arc.getOption("arrowhead").equals(arrowhead)
-					&& (arc.getLabel() == null ? label == null : arc.getLabel().equals(label))) {
+			if (isEqual(arc, baseArc)) {
 				if (sourceNodes.contains(arc.getSource()) && targetNodes.contains(arc.getTarget())) {
 					arcs.add(arc);
 				}
@@ -954,7 +1021,7 @@ public class LogSkeleton implements HTMLToString {
 							/*
 							 * No, it was not. Check now.
 							 */
-							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label,
+							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, baseArc,
 									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								/*
@@ -984,7 +1051,7 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label,
+							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, baseArc, 
 									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
@@ -1014,7 +1081,7 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label,
+							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, baseArc, 
 									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
@@ -1040,7 +1107,7 @@ public class LogSkeleton implements HTMLToString {
 						checked.add(nodes);
 						checked.add(targetNodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label,
+							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, baseArc, 
 									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								bestArcs = arcs;
