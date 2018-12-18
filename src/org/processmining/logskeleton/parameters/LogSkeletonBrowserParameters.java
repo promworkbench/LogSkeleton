@@ -15,7 +15,9 @@ public class LogSkeletonBrowserParameters {
 	private boolean useEquivalenceClass;
 	private boolean useNeighbors;
 	private boolean useHeadTailLabels;
-	private int threshold;
+	private int precedenceThreshold;
+	private int responseThreshold;
+	private int notCoExistenceThreshold;
 
 	public LogSkeletonBrowserParameters() {
 		activities = new HashSet<String>();
@@ -29,7 +31,9 @@ public class LogSkeletonBrowserParameters {
 		setUseEquivalenceClass(true);
 		setUseNeighbors(true);
 		setUseHeadTailLabels(true);
-		setThreshold(100);
+		setPrecedenceThreshold(100);
+		setResponseThreshold(100);
+		setNotCoExistenceThreshold(100);
 	}
 	
 	public Set<String> getActivities() {
@@ -80,12 +84,28 @@ public class LogSkeletonBrowserParameters {
 		this.useEquivalenceClass = useEquivalenceClass;
 	}
 
-	public int getThreshold() {
-		return threshold;
+	public int getPrecedenceThreshold() {
+		return precedenceThreshold;
 	}
 
-	public void setThreshold(int threshold) {
-		this.threshold = threshold;
+	public void setPrecedenceThreshold(int threshold) {
+		this.precedenceThreshold = threshold;
+	}
+
+	public int getResponseThreshold() {
+		return responseThreshold;
+	}
+
+	public void setResponseThreshold(int threshold) {
+		this.responseThreshold = threshold;
+	}
+
+	public int getNotCoExistenceThreshold() {
+		return notCoExistenceThreshold;
+	}
+
+	public void setNotCoExistenceThreshold(int threshold) {
+		this.notCoExistenceThreshold = threshold;
 	}
 
 	public boolean isUseHeadTailLabels() {

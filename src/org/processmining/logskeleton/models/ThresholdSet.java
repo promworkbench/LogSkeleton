@@ -126,9 +126,6 @@ public class ThresholdSet implements Set<String> {
 	}
 	
 	public int getMaxThreshold(Object o) {
-		if (totalMap.get(o) == 0) {
-			System.out.println("[ThresholdSet] " + o);
-		}
 		return countMap.get(o) * 100 / totalMap.get(o);
 	}
 	

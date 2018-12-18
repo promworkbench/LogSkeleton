@@ -52,16 +52,18 @@ public class LogSkeleton implements HTMLToString {
 	private Map<String, ThresholdSet> responses;
 
 	/*
-	 * The not co-occurrence relation. If notCoOccurrence.get(a).contains(b), then if a occurs, b may not occur.
+	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then if a occurs, b may not occur (before or after).
 	 */
-	private Map<String, ThresholdSet> notCoOccurrences;
+	private Map<String, ThresholdSet> notCoExistences;
 
 	private Set<String> required;
 	private Set<String> forbidden;
 	private List<List<String>> splitters;
 	private String label;
 
-	private int threshold;
+	private int precedenceThreshold;
+	private int responseThreshold;
+	private int notCoExistenceeThreshold;
 
 	//	private Map<List<String>, List<Integer>> distances;
 
@@ -74,12 +76,14 @@ public class LogSkeleton implements HTMLToString {
 		sameCounts = new HashSet<Collection<String>>();
 		precedences = new HashMap<String, ThresholdSet>();
 		responses = new HashMap<String, ThresholdSet>();
-		notCoOccurrences = new HashMap<String, ThresholdSet>();
+		notCoExistences = new HashMap<String, ThresholdSet>();
 		required = new HashSet<String>();
 		forbidden = new HashSet<String>();
 		splitters = new ArrayList<List<String>>();
 		label = null;
-		setThreshold(100);
+		setPrecedenceThreshold(100);
+		setResponseThreshold(100);
+		setNotCoExistenceThreshold(100);
 	}
 
 	public void addSameCount(Collection<String> activities) {
@@ -101,20 +105,20 @@ public class LogSkeleton implements HTMLToString {
 		Set<String> preset = new HashSet<String>(pre);
 		Set<String> postset = new HashSet<String>(post);
 		if (!precedences.containsKey(activity)) {
-			precedences.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
+			precedences.put(activity, new ThresholdSet(countModel.getActivities(), precedenceThreshold));
 		}
 		if (!responses.containsKey(activity)) {
-			responses.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
+			responses.put(activity, new ThresholdSet(countModel.getActivities(), responseThreshold));
 		}
-		if (!notCoOccurrences.containsKey(activity)) {
-			notCoOccurrences.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
+		if (!notCoExistences.containsKey(activity)) {
+			notCoExistences.put(activity, new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
 		}
 		precedences.get(activity).addAll(preset);
 		responses.get(activity).addAll(postset);
 		Set<String> prepostset = new HashSet<String>(countModel.getActivities());
 		prepostset.removeAll(preset);
 		prepostset.removeAll(postset);
-		notCoOccurrences.get(activity).addAll(prepostset);
+		notCoExistences.get(activity).addAll(prepostset);
 	}
 
 	public void cleanPrePost() {
@@ -253,7 +257,7 @@ public class LogSkeleton implements HTMLToString {
 			buf.append("<td>" + sorted + "</td>");
 			// Not co-occurrence
 			sorted = new ArrayList<String>(countModel.getActivities());
-			sorted.removeAll(notCoOccurrences.get(activity));
+			sorted.removeAll(notCoExistences.get(activity));
 			Collections.sort(sorted);
 			buf.append("<td>" + sorted + "</td>");
 		}
@@ -296,7 +300,9 @@ public class LogSkeleton implements HTMLToString {
 
 		Set<String> activities = new HashSet<String>(parameters.getActivities());
 
-		setThreshold(parameters.getThreshold());
+		setPrecedenceThreshold(parameters.getPrecedenceThreshold());
+		setResponseThreshold(parameters.getResponseThreshold());
+		setNotCoExistenceThreshold(parameters.getNotCoExistenceThreshold());
 
 		if (parameters.isUseNeighbors()) {
 			for (String fromActivity : countModel.getActivities()) {
@@ -336,7 +342,7 @@ public class LogSkeleton implements HTMLToString {
 												|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
 										&& (!parameters.isUseEquivalenceClass()
 												|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
-										&& notCoOccurrences.get(fromActivity).contains(toActivity)) {
+										&& notCoExistences.get(fromActivity).contains(toActivity)) {
 									activities.add(fromActivity);
 									activities.add(toActivity);
 								}
@@ -415,7 +421,6 @@ public class LogSkeleton implements HTMLToString {
 							tailDecorator = "dot";
 							headArrow = "normal";
 							tailColor = alwaysColor;
-							System.out.println("[LogSkeleton] " + fromActivity + " " + toActivity);
 							int threshold = responses.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
@@ -460,12 +465,12 @@ public class LogSkeleton implements HTMLToString {
 											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
 									&& (!parameters.isUseEquivalenceClass()
 											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
-									&& notCoOccurrences.get(toActivity).contains(fromActivity)) {
+									&& notCoExistences.get(toActivity).contains(fromActivity)) {
 								headDecorator = "dotnonetee";
 								//								dummy = true;
 								isAsymmetric = false;
 								headColor = neverColor;
-								int threshold = notCoOccurrences.get(toActivity).getMaxThreshold(fromActivity);
+								int threshold = notCoExistences.get(toActivity).getMaxThreshold(fromActivity);
 								if (threshold < 100) {
 									headLabel = "." + threshold;
 									headColor = almostNeverColor;
@@ -476,12 +481,12 @@ public class LogSkeleton implements HTMLToString {
 											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
 									&& (!parameters.isUseEquivalenceClass()
 											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
-									&& notCoOccurrences.get(fromActivity).contains(toActivity)) {
+									&& notCoExistences.get(fromActivity).contains(toActivity)) {
 								tailDecorator = "dotnonetee";
 								//								dummy = true;
 								isAsymmetric = false;
 								tailColor = neverColor;
-								int threshold = notCoOccurrences.get(fromActivity).getMaxThreshold(toActivity);
+								int threshold = notCoExistences.get(fromActivity).getMaxThreshold(toActivity);
 								if (threshold < 100) {
 									tailLabel = "." + threshold;
 									tailColor = almostNeverColor;
@@ -1113,11 +1118,11 @@ public class LogSkeleton implements HTMLToString {
 			writer.endRecord();
 		}
 		writer.write("not co-occurrence");
-		writer.write("" + notCoOccurrences.size());
+		writer.write("" + notCoExistences.size());
 		writer.endRecord();
-		for (String activity : notCoOccurrences.keySet()) {
+		for (String activity : notCoExistences.keySet()) {
 			writer.write(activity);
-			notCoOccurrences.get(activity).exportToFile(writer);
+			notCoExistences.get(activity).exportToFile(writer);
 			writer.endRecord();
 		}
 		writer.write("required");
@@ -1182,7 +1187,7 @@ public class LogSkeleton implements HTMLToString {
 						for (int column = 1; column < reader.getColumnCount(); column++) {
 							activities.add(reader.get(column));
 						}
-						precedences.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
+						precedences.put(activity, new ThresholdSet(countModel.getActivities(), precedenceThreshold));
 						precedences.get(activity).addAll(activities);
 					}
 				}
@@ -1191,7 +1196,7 @@ public class LogSkeleton implements HTMLToString {
 				for (int row = 0; row < rows; row++) {
 					if (reader.readRecord()) {
 						String activity = reader.get(0);
-						precedences.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
+						precedences.put(activity, new ThresholdSet(countModel.getActivities(), precedenceThreshold));
 						precedences.get(activity).importFromFile(reader);
 					}
 				}
@@ -1208,7 +1213,7 @@ public class LogSkeleton implements HTMLToString {
 						for (int column = 1; column < reader.getColumnCount(); column++) {
 							activities.add(reader.get(column));
 						}
-						responses.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
+						responses.put(activity, new ThresholdSet(countModel.getActivities(), responseThreshold));
 						responses.get(activity).addAll(activities);
 					}
 				}
@@ -1217,7 +1222,7 @@ public class LogSkeleton implements HTMLToString {
 				for (int row = 0; row < rows; row++) {
 					if (reader.readRecord()) {
 						String activity = reader.get(0);
-						responses.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
+						responses.put(activity, new ThresholdSet(countModel.getActivities(), responseThreshold));
 						responses.get(activity).importFromFile(reader);
 					}
 				}
@@ -1253,7 +1258,7 @@ public class LogSkeleton implements HTMLToString {
 						}
 					}
 				}
-				notCoOccurrences = new HashMap<String, ThresholdSet>();
+				notCoExistences = new HashMap<String, ThresholdSet>();
 				for (String activity : countModel.getActivities()) {
 					Set<String> prepostset = new HashSet<String>();
 					if (anyPresets.containsKey(activity)) {
@@ -1262,17 +1267,17 @@ public class LogSkeleton implements HTMLToString {
 					if (anyPostsets.containsKey(activity)) {
 						prepostset.addAll(anyPostsets.get(activity));
 					}
-					notCoOccurrences.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
-					notCoOccurrences.get(activity).addAll(countModel.getActivities());
-					notCoOccurrences.get(activity).removeAll(prepostset);
+					notCoExistences.put(activity, new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
+					notCoExistences.get(activity).addAll(countModel.getActivities());
+					notCoExistences.get(activity).removeAll(prepostset);
 				}
 			} else if (reader.get(0).equals("not co-occurrence")) {
 				int rows = Integer.valueOf(reader.get(1));
 				for (int row = 0; row < rows; row++) {
 					if (reader.readRecord()) {
 						String activity = reader.get(0);
-						notCoOccurrences.put(activity, new ThresholdSet(countModel.getActivities(), threshold));
-						notCoOccurrences.get(activity).importFromFile(reader);
+						notCoExistences.put(activity, new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
+						notCoExistences.get(activity).importFromFile(reader);
 					}
 				}
 			}
@@ -1334,16 +1339,32 @@ public class LogSkeleton implements HTMLToString {
 		return new HashSet<String>();
 	}
 
-	public void setThreshold(int threshold) {
-		this.threshold = 100;
+	public void setPrecedenceThreshold(int precedenceThreshold) {
+		this.precedenceThreshold = precedenceThreshold;
 		for (String activity : precedences.keySet()) {
-			precedences.get(activity).setThreshold(threshold);
+			precedences.get(activity).setThreshold(precedenceThreshold);
 		}
+	}
+
+	public int getResponseThreshold() {
+		return responseThreshold;
+	}
+
+	public void setResponseThreshold(int responseThreshold) {
+		this.responseThreshold = responseThreshold;
 		for (String activity : responses.keySet()) {
-			responses.get(activity).setThreshold(threshold);
+			responses.get(activity).setThreshold(responseThreshold);
 		}
-		for (String activity : notCoOccurrences.keySet()) {
-			notCoOccurrences.get(activity).setThreshold(threshold);
+	}
+
+	public int getNotCoExistenceThreshold() {
+		return notCoExistenceeThreshold;
+	}
+
+	public void setNotCoExistenceThreshold(int notCoOccurencethreshold) {
+		this.notCoExistenceeThreshold = notCoOccurencethreshold;
+		for (String activity : notCoExistences.keySet()) {
+			notCoExistences.get(activity).setThreshold(notCoOccurencethreshold);
 		}
 	}
 }

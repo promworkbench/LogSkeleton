@@ -5,7 +5,7 @@ public enum LogSkeletonBrowser {
 //	ALWAYSTOGETHER("Always Together"),
 	ALWAYSAFTER("Response"),
 	ALWAYSBEFORE("Precedence"),
-	NEVERTOGETHER("Not Co-existence"),
+	NEVERTOGETHER("Not Co-Existence"),
 	OFTENNEXT("Often Next"),
 	OFTENPREVIOUS("Often Previous"),
 //	NEVERTOGETHERSELF("Never Together (Self)"),
