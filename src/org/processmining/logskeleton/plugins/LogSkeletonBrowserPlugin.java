@@ -37,7 +37,9 @@ import com.fluxicon.slickerbox.factory.SlickerFactory;
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
-@Plugin(name = "Log Skeleton Browser", parameterLabels = { "Log Skeleton" }, returnLabels = { "Log Skeleton Browser" }, returnTypes = { JComponent.class }, userAccessible = true, help = "Log Skeleton Browser")
+@Plugin(name = "Log Skeleton Browser", parameterLabels = { "Log Skeleton" }, returnLabels = {
+		"Log Skeleton Browser" }, returnTypes = {
+				JComponent.class }, userAccessible = true, help = "Log Skeleton Browser")
 @Visualizer
 public class LogSkeletonBrowserPlugin {
 
@@ -54,8 +56,8 @@ public class LogSkeletonBrowserPlugin {
 		this.model = model;
 
 		mainPanel = new JPanel();
-		double size[][] = { { TableLayoutConstants.FILL, 250 },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30, 30 } };
+		double size[][] = { { TableLayoutConstants.FILL, 250 }, { TableLayoutConstants.FILL, TableLayoutConstants.FILL,
+				TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -85,23 +87,31 @@ public class LogSkeletonBrowserPlugin {
 		activityList.setPreferredSize(new Dimension(100, 100));
 		mainPanel.add(activityList, "1, 0, 1, 1");
 
+		boolean doNotUseNotCoExistence = model.hasManyNotCoExistenceArcs(parameters);
+
 		List<LogSkeletonBrowser> list = Arrays.asList(LogSkeletonBrowser.values());
 		DefaultListModel<LogSkeletonBrowser> visualizers = new DefaultListModel<LogSkeletonBrowser>();
 		for (LogSkeletonBrowser visualizer : list) {
 			visualizers.addElement(visualizer);
 		}
-		final ProMList<LogSkeletonBrowser> visualizerList = new ProMList<LogSkeletonBrowser>("View Constraints", visualizers);
+		final ProMList<LogSkeletonBrowser> visualizerList = new ProMList<LogSkeletonBrowser>("View Constraints",
+				visualizers);
 		visualizerList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		List<LogSkeletonBrowser> selectedVisualizers = new ArrayList<LogSkeletonBrowser>();
-		selectedIndices = new int[3];
-//		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSTOGETHER);
-//		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSTOGETHER);
+		selectedIndices = new int[doNotUseNotCoExistence ? 2 : 3];
+		//		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSTOGETHER);
+		//		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSTOGETHER);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSBEFORE);
 		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSBEFORE);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSAFTER);
 		selectedIndices[1] = list.indexOf(LogSkeletonBrowser.ALWAYSAFTER);
-		selectedVisualizers.add(LogSkeletonBrowser.NEVERTOGETHER);
-		selectedIndices[2] = list.indexOf(LogSkeletonBrowser.NEVERTOGETHER);
+		if (!doNotUseNotCoExistence) {
+			/*
+			 * Only include in the first visualization if not too many Not Co-Existence constraints.
+			 */
+			selectedVisualizers.add(LogSkeletonBrowser.NEVERTOGETHER);
+			selectedIndices[2] = list.indexOf(LogSkeletonBrowser.NEVERTOGETHER);
+		}
 		visualizerList.setSelectedIndices(selectedIndices);
 		parameters.getVisualizers().addAll(selectedVisualizers);
 		visualizerList.addListSelectionListener(new ListSelectionListener() {
@@ -132,7 +142,8 @@ public class LogSkeletonBrowserPlugin {
 		checkBox.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBox, "1, 3");
 
-		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("Use False Constraints", false);
+		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("Use False Constraints",
+				false);
 		checkBoxFalseConstraints.setSelected(parameters.isUseFalseConstraints());
 		checkBoxFalseConstraints.addActionListener(new ActionListener() {
 
@@ -160,7 +171,8 @@ public class LogSkeletonBrowserPlugin {
 		checkBoxEdgeColors.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBoxEdgeColors, "1, 5");
 
-		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("Use Equivalence Class", false);
+		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("Use Equivalence Class",
+				false);
 		checkBoxEquivalenceClass.setSelected(parameters.isUseEquivalenceClass());
 		checkBoxEquivalenceClass.addActionListener(new ActionListener() {
 
@@ -202,8 +214,8 @@ public class LogSkeletonBrowserPlugin {
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBoxNeighbors, "1, 8");
 
-		final NiceSlider precedenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider("R/P Threshold", 80, 100,
-				parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+		final NiceSlider precedenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider("R/P Threshold",
+				80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
 		precedenceThresholdSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
@@ -215,11 +227,11 @@ public class LogSkeletonBrowserPlugin {
 				updateRight();
 			}
 		});
-		precedenceThresholdSlider.setPreferredSize(new Dimension(100,30));
+		precedenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(precedenceThresholdSlider, "1, 9");
 
-		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider("NCE Threshold", 80, 100,
-				parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
+				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
 		notCoExistenceThresholdSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
@@ -228,7 +240,7 @@ public class LogSkeletonBrowserPlugin {
 				updateRight();
 			}
 		});
-		notCoExistenceThresholdSlider.setPreferredSize(new Dimension(100,30));
+		notCoExistenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(notCoExistenceThresholdSlider, "1, 10");
 
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
@@ -236,26 +248,26 @@ public class LogSkeletonBrowserPlugin {
 			public void actionPerformed(ActionEvent e) {
 				updateLeft();
 			}
-			
+
 		});
 		mainPanel.add(button, "1, 11");
-		
-//		updateLeft();
+
+		//		updateLeft();
 		updateRight();
 		return mainPanel;
 	}
 
 	private void updateLeft() {
-//		if (leftDotPanel != null) {
-//			mainPanel.remove(leftDotPanel);
-//		}
+		//		if (leftDotPanel != null) {
+		//			mainPanel.remove(leftDotPanel);
+		//		}
 		model.setPrecedenceThreshold(parameters.getPrecedenceThreshold());
 		model.setResponseThreshold(parameters.getResponseThreshold());
 		model.setNotCoExistenceThreshold(parameters.getNotCoExistenceThreshold());
 		leftDotPanel = new DotPanel(model.createGraph(parameters));
-//		mainPanel.add(leftDotPanel, "0, 0, 0, 3");
-//		mainPanel.validate();
-//		mainPanel.repaint();
+		//		mainPanel.add(leftDotPanel, "0, 0, 0, 3");
+		//		mainPanel.validate();
+		//		mainPanel.repaint();
 		JFrame frame = new JFrame();
 		frame.add(leftDotPanel);
 		frame.setTitle("Log Skeleton Viewer on " + model.getLabel());

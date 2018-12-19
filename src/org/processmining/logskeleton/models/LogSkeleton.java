@@ -42,17 +42,20 @@ public class LogSkeleton implements HTMLToString {
 	private Collection<Collection<String>> sameCounts;
 
 	/*
-	 * The precedence relation. If precedence.get(a).contains(b), then if a occurs, some b must occur before.
+	 * The precedence relation. If precedence.get(a).contains(b), then if a
+	 * occurs, some b must occur before.
 	 */
 	private Map<String, ThresholdSet> precedences;
 
 	/*
-	 * The response relation. If response.get(a).contains(b), then if a occurs, some b must occur after.
+	 * The response relation. If response.get(a).contains(b), then if a occurs,
+	 * some b must occur after.
 	 */
 	private Map<String, ThresholdSet> responses;
 
 	/*
-	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then if a occurs, b may not occur (before or after).
+	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then
+	 * if a occurs, b may not occur (before or after).
 	 */
 	private Map<String, ThresholdSet> notCoExistences;
 
@@ -402,7 +405,7 @@ public class LogSkeleton implements HTMLToString {
 		String almostNeverColor = "#fb8072";
 		String almostAlwaysColor = "#80b1d3";
 		String alwaysColor = "#4058d3";
-		
+
 		for (String fromActivity : activities) {
 			for (String toActivity : activities) {
 				if (parameters.getActivities().contains(fromActivity)
@@ -1267,7 +1270,8 @@ public class LogSkeleton implements HTMLToString {
 					if (anyPostsets.containsKey(activity)) {
 						prepostset.addAll(anyPostsets.get(activity));
 					}
-					notCoExistences.put(activity, new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
+					notCoExistences.put(activity,
+							new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
 					notCoExistences.get(activity).addAll(countModel.getActivities());
 					notCoExistences.get(activity).removeAll(prepostset);
 				}
@@ -1276,7 +1280,8 @@ public class LogSkeleton implements HTMLToString {
 				for (int row = 0; row < rows; row++) {
 					if (reader.readRecord()) {
 						String activity = reader.get(0);
-						notCoExistences.put(activity, new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
+						notCoExistences.put(activity,
+								new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
 						notCoExistences.get(activity).importFromFile(reader);
 					}
 				}
@@ -1366,5 +1371,29 @@ public class LogSkeleton implements HTMLToString {
 		for (String activity : notCoExistences.keySet()) {
 			notCoExistences.get(activity).setThreshold(notCoOccurencethreshold);
 		}
+	}
+
+	public boolean hasManyNotCoExistenceArcs(LogSkeletonBrowserParameters parameters) {
+		int nr = 0;
+		for (String fromActivity : countModel.getActivities()) {
+			for (String toActivity : countModel.getActivities()) {
+				if (!fromActivity.equals(toActivity)) {
+					if (fromActivity.compareTo(toActivity) >= 0
+							&& (!parameters.isUseEquivalenceClass()
+									|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+							&& (!parameters.isUseEquivalenceClass()
+									|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
+							&& notCoExistences.get(fromActivity).contains(toActivity)) {
+						nr++;
+					}
+				}
+			}
+		}
+		/*
+		 * Return whether there are too many Not Co-Existence constraints to show by default.
+		 * THe first visualization should be reasonably fast. In case of too many Not Co-Existence 
+		 * constraints, this first visualization takes ages.
+		 */
+		return nr > 100;
 	}
 }
