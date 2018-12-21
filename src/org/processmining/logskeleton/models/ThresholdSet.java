@@ -44,6 +44,7 @@ public class ThresholdSet implements Set<String> {
 	public boolean contains(Object o) {
 		return (countMap.get(o) * 100 >= totalMap.get(o) * threshold);
 	}
+
 	public Iterator<String> iterator() {
 		Set<String> set = new HashSet<String>();
 		for (String activity : countMap.keySet()) {

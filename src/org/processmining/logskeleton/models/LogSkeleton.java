@@ -146,23 +146,30 @@ public class LogSkeleton implements HTMLToString {
 		for (String activity : responses.keySet()) {
 			responses.get(activity).reset();
 		}
+		Map<String, Set<String>> precedences2 = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> responses2 = new HashMap<String, Set<String>>();
 		for (String activity : countModel.getActivities()) {
-			cleanPrePost(activity, precedences);
-			cleanPrePost(activity, responses);
+			precedences2.put(activity, new HashSet<String>(precedences.get(activity)));
+			responses2.put(activity, new HashSet<String>(responses.get(activity)));
+		}
+		for (String activity : countModel.getActivities()) {
+			cleanPrePost(activity, precedences, precedences2);
+			cleanPrePost(activity, responses , responses2);
 		}
 	}
 
-	private void cleanPrePost(String activity, Map<String, ThresholdSet> map) {
-		Set<String> mappedActivities = map.get(activity);
+	private void cleanPrePost(String activity, Map<String, ThresholdSet> map, Map<String, Set<String>> map2) {
+		Set<String> mappedActivities = map2.get(activity);
 		Set<String> mappedMappedActivities = new HashSet<String>();
 		for (String mappedActivity : mappedActivities) {
-			for (String mappedMappedActivity : map.get(mappedActivity)) {
-				if (!map.get(mappedMappedActivity).contains(mappedActivity)) {
+			for (String mappedMappedActivity : map2.get(mappedActivity)) {
+				if (!map2.get(mappedMappedActivity).contains(mappedActivity)) {
 					mappedMappedActivities.add(mappedMappedActivity);
 				}
 			}
 		}
-		mappedActivities.removeAll(mappedMappedActivities);
+		System.out.println("[LogSkeleton] " + activity + " " + mappedMappedActivities);
+		map.get(activity).removeAll(mappedMappedActivities);
 	}
 
 	private boolean checkSameCounts(LogSkeletonCount model, Set<String> messages, String caseId) {
