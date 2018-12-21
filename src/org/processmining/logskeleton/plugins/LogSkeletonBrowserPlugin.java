@@ -57,7 +57,7 @@ public class LogSkeletonBrowserPlugin {
 
 		mainPanel = new JPanel();
 		double size[][] = { { TableLayoutConstants.FILL, 250 }, { TableLayoutConstants.FILL, TableLayoutConstants.FILL,
-				TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30, 30 } };
+				TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -214,35 +214,39 @@ public class LogSkeletonBrowserPlugin {
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBoxNeighbors, "1, 8");
 
-		final NiceSlider precedenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider("R/P Threshold",
-				80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
-		precedenceThresholdSlider.addChangeListener(new ChangeListener() {
+		final NiceSlider noiseLevelSlider = SlickerFactory.instance().createNiceIntegerSlider("Noise Level in %",
+				0, 20, 100 - parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+		noiseLevelSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
-				parameters.setPrecedenceThreshold(precedenceThresholdSlider.getSlider().getValue());
-				parameters.setResponseThreshold(precedenceThresholdSlider.getSlider().getValue());
-				model.setPrecedenceThreshold(precedenceThresholdSlider.getSlider().getValue());
-				model.setResponseThreshold(precedenceThresholdSlider.getSlider().getValue());
+				int value = 100 - noiseLevelSlider.getSlider().getValue();
+				model.setEquivalenceThreshold(value);
+				parameters.setPrecedenceThreshold(value);
+				parameters.setResponseThreshold(value);
+				model.setPrecedenceThreshold(value);
+				model.setResponseThreshold(value);
 				model.cleanPrePost();
+				parameters.setNotCoExistenceThreshold(value);
+				model.setNotCoExistenceThreshold(value);
 				updateRight();
 			}
 		});
-		precedenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(precedenceThresholdSlider, "1, 9");
+		noiseLevelSlider.setPreferredSize(new Dimension(100, 30));
+		mainPanel.add(noiseLevelSlider, "1, 9");
 
-		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
-				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
-		notCoExistenceThresholdSlider.addChangeListener(new ChangeListener() {
-
-			public void stateChanged(ChangeEvent e) {
-				parameters.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
-				model.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
-				updateRight();
-			}
-		});
-		notCoExistenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(notCoExistenceThresholdSlider, "1, 10");
-
+//		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
+//				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+//		notCoExistenceThresholdSlider.addChangeListener(new ChangeListener() {
+//
+//			public void stateChanged(ChangeEvent e) {
+//				parameters.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
+//				model.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
+//				updateRight();
+//			}
+//		});
+//		notCoExistenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
+//		mainPanel.add(notCoExistenceThresholdSlider, "1, 10");
+//
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -250,7 +254,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 
 		});
-		mainPanel.add(button, "1, 11");
+		mainPanel.add(button, "1, 10");
 
 		//		updateLeft();
 		updateRight();
@@ -280,7 +284,7 @@ public class LogSkeletonBrowserPlugin {
 			mainPanel.remove(rightDotPanel);
 		}
 		rightDotPanel = new DotPanel(model.visualize(parameters));
-		mainPanel.add(rightDotPanel, "0, 0, 0, 11");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 10");
 		mainPanel.validate();
 		mainPanel.repaint();
 

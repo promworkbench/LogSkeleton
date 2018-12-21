@@ -40,6 +40,7 @@ public class LogSkeleton implements HTMLToString {
 	 * elements of S are equivalent.
 	 */
 	private Collection<Collection<String>> sameCounts;
+	private Map<Integer,Collection<Collection<String>>> sameCountsNoise;
 
 	/*
 	 * The precedence relation. If precedence.get(a).contains(b), then if a
@@ -64,6 +65,7 @@ public class LogSkeleton implements HTMLToString {
 	private List<List<String>> splitters;
 	private String label;
 
+	private int equivalenceThreshold;
 	private int precedenceThreshold;
 	private int responseThreshold;
 	private int notCoExistenceeThreshold;
@@ -74,9 +76,15 @@ public class LogSkeleton implements HTMLToString {
 		this(new LogSkeletonCount());
 	}
 
+	@SuppressWarnings("unchecked")
 	public LogSkeleton(LogSkeletonCount countModel) {
 		this.countModel = countModel;
-		sameCounts = new HashSet<Collection<String>>();
+//		sameCounts = new HashSet<Collection<String>>();
+		sameCountsNoise = new HashMap<Integer,Collection<Collection<String>>>();
+		for (int noiseLevel = 0; noiseLevel < 21; noiseLevel++) {
+			sameCountsNoise.put(noiseLevel, new HashSet<Collection<String>>());
+		}
+		sameCounts = sameCountsNoise.get(0);
 		precedences = new HashMap<String, ThresholdSet>();
 		responses = new HashMap<String, ThresholdSet>();
 		notCoExistences = new HashMap<String, ThresholdSet>();
@@ -84,6 +92,7 @@ public class LogSkeleton implements HTMLToString {
 		forbidden = new HashSet<String>();
 		splitters = new ArrayList<List<String>>();
 		label = null;
+		setEquivalenceThreshold(100);
 		setPrecedenceThreshold(100);
 		setResponseThreshold(100);
 		setNotCoExistenceThreshold(100);
@@ -93,6 +102,12 @@ public class LogSkeleton implements HTMLToString {
 		List<String> orderedActivities = new ArrayList<String>(activities);
 		Collections.sort(orderedActivities);
 		sameCounts.add(orderedActivities);
+	}
+
+	public void addSameCount(int noiseLevel, Collection<String> activities) {
+		List<String> orderedActivities = new ArrayList<String>(activities);
+		Collections.sort(orderedActivities);
+		sameCountsNoise.get(noiseLevel).add(orderedActivities);
 	}
 
 	public Collection<String> getSameCounts(String activity) {
@@ -1395,5 +1410,14 @@ public class LogSkeleton implements HTMLToString {
 		 * constraints, this first visualization takes ages.
 		 */
 		return nr > 100;
+	}
+
+	public int getEquivalenceThreshold() {
+		return equivalenceThreshold;
+	}
+
+	public void setEquivalenceThreshold(int equivalenceThreshold) {
+		this.equivalenceThreshold = equivalenceThreshold;
+		sameCounts = sameCountsNoise.get(100 - equivalenceThreshold);
 	}
 }

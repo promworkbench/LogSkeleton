@@ -98,9 +98,43 @@ public class LogSkeletonBuilderAlgorithm {
 				map.put(count, newCount);
 			}
 		}
-		for (Set<String> sameCount : map.values()) {
-			constraintModel.addSameCount(sameCount);
+
+		boolean changed = true;
+		int size = map.keySet().isEmpty() ? 0 : map.keySet().iterator().next().size();
+		for (int noiseLevel = 0; noiseLevel < 21; noiseLevel++) {
+			Map<List<Integer>, Set<String>> map2 = new HashMap<List<Integer>, Set<String>>();
+			for (List<Integer> c : map.keySet()) {
+				map2.put(c, new HashSet<String>(map.get(c)));
+			}
+			while (changed) {
+				changed = false;
+				for (List<Integer> c1 : map2.keySet()) {
+					for (List<Integer> c2 : map2.keySet()) {
+						int distance = distance(c1, c2);
+						if (!map2.get(c1).equals(map2.get(c2)) && 100 * distance(c1, c2) < noiseLevel * size) {
+							map2.get(c1).addAll(map2.get(c2));
+							map2.get(c2).addAll(map2.get(c1));
+							changed = true;
+						}
+					}
+				}
+			}
+
+			for (Set<String> sameCount : map2.values()) {
+				constraintModel.addSameCount(noiseLevel, sameCount);
+			}
+			map = map2;
+			changed = true;
 		}
+	}
+
+	private int distance(List<Integer> c1, List<Integer> c2) {
+		int distance = 0;
+		int size = Math.min(c1.size(), c2.size());
+		for (int i = 0; i < size; i++) {
+			distance += Math.abs(c1.get(i) - c2.get(i));
+		}
+		return distance;
 	}
 
 	private void createCausalDependencies(XLog log, LogSkeletonCount model, LogSkeleton constraintModel) {
