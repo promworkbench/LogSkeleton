@@ -36,27 +36,27 @@ public class LogSkeleton implements HTMLToString {
 	private LogSkeletonCount countModel;
 
 	/*
-	 * The equivalence relation. If S is an element of sameCounts, then all
-	 * elements of S are equivalent.
+	 * The equivalence relation. If S is an element of sameCounts, then all elements
+	 * of S are equivalent.
 	 */
 	private Collection<Collection<String>> sameCounts;
-	private Map<Integer,Collection<Collection<String>>> sameCountsNoise;
+	private Map<Integer, Collection<Collection<String>>> sameCountsNoise;
 
 	/*
-	 * The precedence relation. If precedence.get(a).contains(b), then if a
-	 * occurs, some b must occur before.
+	 * The precedence relation. If precedence.get(a).contains(b), then if a occurs,
+	 * some b must occur before.
 	 */
 	private Map<String, ThresholdSet> precedences;
 
 	/*
-	 * The response relation. If response.get(a).contains(b), then if a occurs,
-	 * some b must occur after.
+	 * The response relation. If response.get(a).contains(b), then if a occurs, some
+	 * b must occur after.
 	 */
 	private Map<String, ThresholdSet> responses;
 
 	/*
-	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then
-	 * if a occurs, b may not occur (before or after).
+	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then if
+	 * a occurs, b may not occur (before or after).
 	 */
 	private Map<String, ThresholdSet> notCoExistences;
 
@@ -79,8 +79,8 @@ public class LogSkeleton implements HTMLToString {
 	@SuppressWarnings("unchecked")
 	public LogSkeleton(LogSkeletonCount countModel) {
 		this.countModel = countModel;
-//		sameCounts = new HashSet<Collection<String>>();
-		sameCountsNoise = new HashMap<Integer,Collection<Collection<String>>>();
+		//		sameCounts = new HashSet<Collection<String>>();
+		sameCountsNoise = new HashMap<Integer, Collection<Collection<String>>>();
 		for (int noiseLevel = 0; noiseLevel < 21; noiseLevel++) {
 			sameCountsNoise.put(noiseLevel, new HashSet<Collection<String>>());
 		}
@@ -154,7 +154,7 @@ public class LogSkeleton implements HTMLToString {
 		}
 		for (String activity : countModel.getActivities()) {
 			cleanPrePost(activity, precedences, precedences2);
-			cleanPrePost(activity, responses , responses2);
+			cleanPrePost(activity, responses, responses2);
 		}
 	}
 
@@ -671,8 +671,7 @@ public class LogSkeleton implements HTMLToString {
 
 					if (arcs != null) {
 						/*
-						 * A maximal clique was found. Update the sources and
-						 * targets to this clique.
+						 * A maximal clique was found. Update the sources and targets to this clique.
 						 */
 						sourceNodes.clear();
 						targetNodes.clear();
@@ -746,8 +745,8 @@ public class LogSkeleton implements HTMLToString {
 							candidateArcs.add(a);
 						}
 						/*
-						 * Remove the old arcs, they have now been replaced with
-						 * the newly added connector node and arcs.
+						 * Remove the old arcs, they have now been replaced with the newly added
+						 * connector node and arcs.
 						 */
 						for (DotEdge anotherArc : arcs) {
 							graph.removeEdge(anotherArc);
@@ -865,9 +864,8 @@ public class LogSkeleton implements HTMLToString {
 			return null;
 		}
 		/*
-		 * Keep track of which combinations of sources and targets have already
-		 * been checked. This prevents checking the same combinations many times
-		 * over.
+		 * Keep track of which combinations of sources and targets have already been
+		 * checked. This prevents checking the same combinations many times over.
 		 */
 		List<Set<DotNode>> checked = new ArrayList<Set<DotNode>>();
 		checked.add(new HashSet<DotNode>(sourceNodes));
@@ -894,20 +892,19 @@ public class LogSkeleton implements HTMLToString {
 			return arcs;
 		}
 		/*
-		 * No, look for maximal cliques that have one node (source or target)
-		 * less.
+		 * No, look for maximal cliques that have one node (source or target) less.
 		 */
 		Set<DotEdge> bestArcs = null; // Best solution so far.
 		if (sourceNodes.size() > targetNodes.size()) {
 			/*
-			 * More sources than targets. Removing a source yields a possible
-			 * bigger clique than removing a target. So, first try to remove a
-			 * source, and only then try to remove a target.
+			 * More sources than targets. Removing a source yields a possible bigger clique
+			 * than removing a target. So, first try to remove a source, and only then try
+			 * to remove a target.
 			 */
 			if (sourceNodes.size() > 2) {
 				/*
-				 * Try to find a maximal clique with one source removed. Sort
-				 * the source nodes first to get a (more) deterministic result.
+				 * Try to find a maximal clique with one source removed. Sort the source nodes
+				 * first to get a (more) deterministic result.
 				 */
 				List<DotNode> sortedSourceNodes = new ArrayList<DotNode>(sourceNodes);
 				Collections.sort(sortedSourceNodes, new Comparator<DotNode>() {
@@ -920,14 +917,13 @@ public class LogSkeleton implements HTMLToString {
 				for (DotNode srcNode : sortedSourceNodes) {
 					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
 						/*
-						 * May result in a bigger clique than the best found so
-						 * far. First, remove the node from the sources.
+						 * May result in a bigger clique than the best found so far. First, remove the
+						 * node from the sources.
 						 */
 						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
 						/*
-						 * Check whether this combination of sources and targets
-						 * was checked before.
+						 * Check whether this combination of sources and targets was checked before.
 						 */
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(nodes);
@@ -940,8 +936,7 @@ public class LogSkeleton implements HTMLToString {
 									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								/*
-								 * Found a bigger maximal clique than the best
-								 * found so far. Update.
+								 * Found a bigger maximal clique than the best found so far. Update.
 								 */
 								bestArcs = arcs;
 							}
@@ -1117,14 +1112,18 @@ public class LogSkeleton implements HTMLToString {
 		writer.write(label);
 		writer.endRecord();
 		countModel.exportToFile(writer);
-		writer.write("always together");
-		writer.write("" + sameCounts.size());
-		writer.endRecord();
-		for (Collection<String> activities : sameCounts) {
-			for (String activity : activities) {
-				writer.write(activity);
-			}
+		writer.write("equivalence");
+		for (int noise = 0; noise < 21; noise++) {
+			writer.write("" + sameCountsNoise.get(noise).size());
+		}
+		for (int noise = 0; noise < 21; noise++) {
 			writer.endRecord();
+			for (Collection<String> activities : sameCountsNoise.get(noise)) {
+				for (String activity : activities) {
+					writer.write(activity);
+				}
+				writer.endRecord();
+			}
 		}
 		writer.write("precedence");
 		writer.write("" + precedences.size());
@@ -1184,7 +1183,11 @@ public class LogSkeleton implements HTMLToString {
 		if (reader.readRecord()) {
 			label = reader.get(0);
 		}
-		sameCounts = new HashSet<Collection<String>>();
+		sameCountsNoise = new HashMap<Integer, Collection<Collection<String>>>();
+		for (int noise = 0; noise < 21; noise++) {
+			sameCountsNoise.put(noise, new HashSet<Collection<String>>());
+		}
+		sameCounts = sameCountsNoise.get(0);
 		countModel.importFromStream(reader);
 		if (reader.readRecord()) {
 			if (reader.get(0).equals("always together")) {
@@ -1196,7 +1199,26 @@ public class LogSkeleton implements HTMLToString {
 							orderedActivities.add(reader.get(column));
 						}
 						Collections.sort(orderedActivities);
-						sameCounts.add(orderedActivities);
+						for (int noise = 0; noise < 21; noise++) {
+							sameCountsNoise.get(noise).add(orderedActivities);
+						}
+					}
+				}
+			} else if (reader.get(0).equals("equivalence")) {
+				int rows[] = new int[21];
+				for (int noise = 0; noise < 21; noise++) {
+					rows[noise] = Integer.valueOf(reader.get(noise + 1));
+				}
+				for (int noise = 0; noise < 21; noise++) {
+					for (int row = 0; row < rows[noise]; row++) {
+						if (reader.readRecord()) {
+							List<String> orderedActivities = new ArrayList<String>();
+							for (int column = 0; column < reader.getColumnCount(); column++) {
+								orderedActivities.add(reader.get(column));
+							}
+							Collections.sort(orderedActivities);
+							sameCountsNoise.get(noise).add(orderedActivities);
+						}
 					}
 				}
 			}
@@ -1412,9 +1434,9 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 		/*
-		 * Return whether there are too many Not Co-Existence constraints to show by default.
-		 * THe first visualization should be reasonably fast. In case of too many Not Co-Existence 
-		 * constraints, this first visualization takes ages.
+		 * Return whether there are too many Not Co-Existence constraints to show by
+		 * default. THe first visualization should be reasonably fast. In case of too
+		 * many Not Co-Existence constraints, this first visualization takes ages.
 		 */
 		return nr > 100;
 	}
