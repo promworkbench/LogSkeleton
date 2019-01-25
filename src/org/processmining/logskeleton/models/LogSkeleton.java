@@ -346,20 +346,20 @@ public class LogSkeleton implements HTMLToString {
 								activities.add(toActivity);
 							}
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-							if (countModel.get(toActivity, fromActivity) == 0
-									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
-								activities.add(fromActivity);
-								activities.add(toActivity);
-							}
-						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-							if (countModel.get(toActivity, fromActivity) == 0
-									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
-								activities.add(fromActivity);
-								activities.add(toActivity);
-							}
-						}
+//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
+//							if (countModel.get(toActivity, fromActivity) == 0
+//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
+//								activities.add(fromActivity);
+//								activities.add(toActivity);
+//							}
+//						}
+//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
+//							if (countModel.get(toActivity, fromActivity) == 0
+//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
+//								activities.add(fromActivity);
+//								activities.add(toActivity);
+//							}
+//						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
@@ -373,22 +373,22 @@ public class LogSkeleton implements HTMLToString {
 								}
 							}
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
-							if (countModel.get(fromActivity, toActivity) > 0
-									&& countModel.get(toActivity, fromActivity) == 0) {
-								activities.add(fromActivity);
-								activities.add(toActivity);
-							}
-						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-							if (fromActivity.compareTo(toActivity) <= 0) {
-								if (countModel.get(fromActivity, toActivity) > 0
-										&& countModel.get(toActivity, fromActivity) > 0) {
-									activities.add(fromActivity);
-									activities.add(toActivity);
-								}
-							}
-						}
+//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+//							if (countModel.get(fromActivity, toActivity) > 0
+//									&& countModel.get(toActivity, fromActivity) == 0) {
+//								activities.add(fromActivity);
+//								activities.add(toActivity);
+//							}
+//						}
+//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
+//							if (fromActivity.compareTo(toActivity) <= 0) {
+//								if (countModel.get(fromActivity, toActivity) > 0
+//										&& countModel.get(toActivity, fromActivity) > 0) {
+//									activities.add(fromActivity);
+//									activities.add(toActivity);
+//								}
+//							}
+//						}
 					}
 				}
 			}
@@ -467,22 +467,22 @@ public class LogSkeleton implements HTMLToString {
 							//							System.out.println("[LogSkeleton] headLabel = " + headLabel);
 						}
 					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-						if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
-								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
-							tailDecorator = "odot";
-							headArrow = "normal";
-							headLabel = "" + countModel.get(fromActivity, toActivity);
-						}
-					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-						if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
-								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
-							headDecorator = "odot";
-							headArrow = "normal";
-							headLabel = "" + countModel.get(fromActivity, toActivity);
-						}
-					}
+//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
+//						if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
+//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
+//							tailDecorator = "odot";
+//							headArrow = "normal";
+//							headLabel = "" + countModel.get(fromActivity, toActivity);
+//						}
+//					}
+//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
+//						if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
+//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
+//							headDecorator = "odot";
+//							headArrow = "normal";
+//							headLabel = "" + countModel.get(fromActivity, toActivity);
+//						}
+//					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 						if (!fromActivity.equals(toActivity)) {
 							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
@@ -519,42 +519,42 @@ public class LogSkeleton implements HTMLToString {
 							}
 						}
 					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
-						if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-								&& countModel.get(toActivity, fromActivity) == 0) {
-							tailDecorator = "odot";
-							if (headLabel == null) {
-								headLabel = "" + countModel.get(fromActivity, toActivity);
-							}
-							if (headArrow == null) {
-								headArrow = "normal";
-							}
-						}
-					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-						if (fromActivity.compareTo(toActivity) <= 0) {
-							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-									&& countModel.get(toActivity, fromActivity) > 0) {
-								tailDecorator = "odot";
-								if (headLabel == null) {
-									headLabel = "" + countModel.get(fromActivity, toActivity);
-								}
-								if (headArrow == null) {
-									headArrow = "normal";
-								}
-							}
-							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
-									&& countModel.get(toActivity, fromActivity) > 0) {
-								headDecorator = "odot";
-								if (tailLabel == null) {
-									tailLabel = "" + countModel.get(toActivity, fromActivity);
-								}
-								if (tailArrow == null) {
-									tailArrow = "vee";
-								}
-							}
-						}
-					}
+//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+//						if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+//								&& countModel.get(toActivity, fromActivity) == 0) {
+//							tailDecorator = "odot";
+//							if (headLabel == null) {
+//								headLabel = "" + countModel.get(fromActivity, toActivity);
+//							}
+//							if (headArrow == null) {
+//								headArrow = "normal";
+//							}
+//						}
+//					}
+//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
+//						if (fromActivity.compareTo(toActivity) <= 0) {
+//							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+//									&& countModel.get(toActivity, fromActivity) > 0) {
+//								tailDecorator = "odot";
+//								if (headLabel == null) {
+//									headLabel = "" + countModel.get(fromActivity, toActivity);
+//								}
+//								if (headArrow == null) {
+//									headArrow = "normal";
+//								}
+//							}
+//							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
+//									&& countModel.get(toActivity, fromActivity) > 0) {
+//								headDecorator = "odot";
+//								if (tailLabel == null) {
+//									tailLabel = "" + countModel.get(toActivity, fromActivity);
+//								}
+//								if (tailArrow == null) {
+//									tailArrow = "vee";
+//								}
+//							}
+//						}
+//					}
 					if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
 						DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
 						arc.setOption("dir", "both");
