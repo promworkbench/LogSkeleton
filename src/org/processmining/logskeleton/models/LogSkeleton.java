@@ -813,6 +813,9 @@ public class LogSkeleton implements HTMLToString {
 		}
 		label += encodeRow("View Activities", selectedActivities.toString());
 		label += encodeRow("View Constraints", parameters.getVisualizers().toString());
+		if (equivalenceThreshold < 100) {
+			label += encodeRow("Noise Threshold", "" + (100 - equivalenceThreshold) + "%");
+		}
 		label += "</table>";
 		graph.setOption("fontsize", "8.0");
 		graph.setOption("label", "<" + label + ">");

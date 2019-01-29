@@ -140,7 +140,7 @@ public class LogSkeletonBrowserPlugin {
 		});
 		checkBox.setOpaque(false);
 		checkBox.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBox, "1, 3");
+		mainPanel.add(checkBox, "1, 4");
 
 		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("Use False Constraints",
 				false);
@@ -155,7 +155,7 @@ public class LogSkeletonBrowserPlugin {
 		});
 		checkBoxFalseConstraints.setOpaque(false);
 		checkBoxFalseConstraints.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxFalseConstraints, "1, 4");
+		mainPanel.add(checkBoxFalseConstraints, "1, 5");
 
 		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("Use Edge Colors", false);
 		checkBoxEdgeColors.setSelected(parameters.isUseEdgeColors());
@@ -169,7 +169,7 @@ public class LogSkeletonBrowserPlugin {
 		});
 		checkBoxEdgeColors.setOpaque(false);
 		checkBoxEdgeColors.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxEdgeColors, "1, 5");
+		mainPanel.add(checkBoxEdgeColors, "1, 6");
 
 		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("Use Equivalence Class",
 				false);
@@ -184,7 +184,7 @@ public class LogSkeletonBrowserPlugin {
 		});
 		checkBoxEquivalenceClass.setOpaque(false);
 		checkBoxEquivalenceClass.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxEquivalenceClass, "1, 6");
+		mainPanel.add(checkBoxEquivalenceClass, "1, 7");
 
 		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("Use Head/Tail Labels", false);
 		checkBoxLabels.setSelected(parameters.isUseHeadTailLabels());
@@ -198,7 +198,7 @@ public class LogSkeletonBrowserPlugin {
 		});
 		checkBoxLabels.setOpaque(false);
 		checkBoxLabels.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxLabels, "1, 7");
+		mainPanel.add(checkBoxLabels, "1, 8");
 
 		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("Show Neighbors", false);
 		checkBoxNeighbors.setSelected(parameters.isUseNeighbors());
@@ -212,7 +212,7 @@ public class LogSkeletonBrowserPlugin {
 		});
 		checkBoxNeighbors.setOpaque(false);
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxNeighbors, "1, 8");
+		mainPanel.add(checkBoxNeighbors, "1, 9");
 
 		final NiceSlider noiseLevelSlider = SlickerFactory.instance().createNiceIntegerSlider("Noise Level in %",
 				0, 20, 100 - parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
@@ -232,7 +232,7 @@ public class LogSkeletonBrowserPlugin {
 			}
 		});
 		noiseLevelSlider.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(noiseLevelSlider, "1, 9");
+		mainPanel.add(noiseLevelSlider, "1, 3");
 
 //		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
 //				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
