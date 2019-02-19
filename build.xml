@@ -13,7 +13,7 @@
 	<property name="author" value="H.M.W. Verbeek" />
 	<property name="organization" value="Eindhoven University of Technology" />
 	<property name="description" value="Log Skeleton" />
-	<property name="license" value="L-GPL" />
+	<property name="license" value="GPL" />
 	<property name="logo" value="Log/lib/images/prom_duck_300.png" />
 
 	<property name="ivy.lib.dir" value="ivy" />
