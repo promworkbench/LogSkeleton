@@ -36,27 +36,30 @@ public class LogSkeleton implements HTMLToString {
 	private LogSkeletonCount countModel;
 
 	/*
-	 * The equivalence relation. If S is an element of sameCounts, then all elements
-	 * of S are equivalent.
+	 * The equivalence relation. If S is an element of sameCounts, then all
+	 * elements of S are equivalent.
 	 */
 	private Collection<Collection<String>> sameCounts;
 	private Map<Integer, Collection<Collection<String>>> sameCountsNoise;
 
 	/*
-	 * The precedence relation. If precedence.get(a).contains(b), then if a occurs,
-	 * some b must occur before.
+	 * The precedence relation. If precedence.get(a).contains(b), then if a
+	 * occurs, some b must occur before.
 	 */
 	private Map<String, ThresholdSet> precedences;
 
 	/*
-	 * The response relation. If response.get(a).contains(b), then if a occurs, some
-	 * b must occur after.
+	 * The response relation. If response.get(a).contains(b), then if a occurs,
+	 * some b must occur after.
 	 */
 	private Map<String, ThresholdSet> responses;
 
+	private Map<String, ThresholdSet> negPrecedences;
+	private Map<String, ThresholdSet> negResponses;
+
 	/*
-	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then if
-	 * a occurs, b may not occur (before or after).
+	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then
+	 * if a occurs, b may not occur (before or after).
 	 */
 	private Map<String, ThresholdSet> notCoExistences;
 
@@ -87,6 +90,8 @@ public class LogSkeleton implements HTMLToString {
 		sameCounts = sameCountsNoise.get(0);
 		precedences = new HashMap<String, ThresholdSet>();
 		responses = new HashMap<String, ThresholdSet>();
+		negPrecedences = new HashMap<String, ThresholdSet>();
+		negResponses = new HashMap<String, ThresholdSet>();
 		notCoExistences = new HashMap<String, ThresholdSet>();
 		required = new HashSet<String>();
 		forbidden = new HashSet<String>();
@@ -128,11 +133,23 @@ public class LogSkeleton implements HTMLToString {
 		if (!responses.containsKey(activity)) {
 			responses.put(activity, new ThresholdSet(countModel.getActivities(), responseThreshold));
 		}
+		if (!negPrecedences.containsKey(activity)) {
+			negPrecedences.put(activity, new ThresholdSet(countModel.getActivities(), precedenceThreshold));
+		}
+		if (!negResponses.containsKey(activity)) {
+			negResponses.put(activity, new ThresholdSet(countModel.getActivities(), responseThreshold));
+		}
 		if (!notCoExistences.containsKey(activity)) {
 			notCoExistences.put(activity, new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
 		}
 		precedences.get(activity).addAll(preset);
 		responses.get(activity).addAll(postset);
+		Set<String> negPreset = new HashSet<String>(countModel.getActivities());
+		negPreset.removeAll(preset);
+		negPrecedences.get(activity).addAll(negPreset);
+		Set<String> negPostset = new HashSet<String>(countModel.getActivities());
+		negPostset.removeAll(postset);
+		negResponses.get(activity).addAll(negPostset);
 		Set<String> prepostset = new HashSet<String>(countModel.getActivities());
 		prepostset.removeAll(preset);
 		prepostset.removeAll(postset);
@@ -146,15 +163,31 @@ public class LogSkeleton implements HTMLToString {
 		for (String activity : responses.keySet()) {
 			responses.get(activity).reset();
 		}
+		for (String activity : negPrecedences.keySet()) {
+			negPrecedences.get(activity).reset();
+		}
+		for (String activity : negResponses.keySet()) {
+			negResponses.get(activity).reset();
+		}
+		for (String activity : notCoExistences.keySet()) {
+			negPrecedences.get(activity).removeAll(notCoExistences.get(activity));
+			negResponses.get(activity).removeAll(notCoExistences.get(activity));
+		}
 		Map<String, Set<String>> precedences2 = new HashMap<String, Set<String>>();
 		Map<String, Set<String>> responses2 = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> negPrecedences2 = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> negResponses2 = new HashMap<String, Set<String>>();
 		for (String activity : countModel.getActivities()) {
 			precedences2.put(activity, new HashSet<String>(precedences.get(activity)));
 			responses2.put(activity, new HashSet<String>(responses.get(activity)));
+			negPrecedences2.put(activity, new HashSet<String>(negPrecedences.get(activity)));
+			negResponses2.put(activity, new HashSet<String>(negResponses.get(activity)));
 		}
 		for (String activity : countModel.getActivities()) {
 			cleanPrePost(activity, precedences, precedences2);
 			cleanPrePost(activity, responses, responses2);
+			cleanPrePost(activity, negPrecedences, negPrecedences2);
+			cleanPrePost(activity, negResponses, negResponses2);
 		}
 	}
 
@@ -346,20 +379,32 @@ public class LogSkeleton implements HTMLToString {
 								activities.add(toActivity);
 							}
 						}
-//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-//							if (countModel.get(toActivity, fromActivity) == 0
-//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
-//								activities.add(fromActivity);
-//								activities.add(toActivity);
-//							}
-//						}
-//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-//							if (countModel.get(toActivity, fromActivity) == 0
-//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
-//								activities.add(fromActivity);
-//								activities.add(toActivity);
-//							}
-//						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERAFTER)) {
+							if (negResponses.get(fromActivity).contains(toActivity)) {
+								activities.add(fromActivity);
+								activities.add(toActivity);
+							}
+						}
+						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERBEFORE)) {
+							if (negPrecedences.get(toActivity).contains(fromActivity)) {
+								activities.add(fromActivity);
+								activities.add(toActivity);
+							}
+						}
+						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
+						//							if (countModel.get(toActivity, fromActivity) == 0
+						//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
+						//								activities.add(fromActivity);
+						//								activities.add(toActivity);
+						//							}
+						//						}
+						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
+						//							if (countModel.get(toActivity, fromActivity) == 0
+						//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
+						//								activities.add(fromActivity);
+						//								activities.add(toActivity);
+						//							}
+						//						}
 						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
@@ -373,22 +418,22 @@ public class LogSkeleton implements HTMLToString {
 								}
 							}
 						}
-//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
-//							if (countModel.get(fromActivity, toActivity) > 0
-//									&& countModel.get(toActivity, fromActivity) == 0) {
-//								activities.add(fromActivity);
-//								activities.add(toActivity);
-//							}
-//						}
-//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-//							if (fromActivity.compareTo(toActivity) <= 0) {
-//								if (countModel.get(fromActivity, toActivity) > 0
-//										&& countModel.get(toActivity, fromActivity) > 0) {
-//									activities.add(fromActivity);
-//									activities.add(toActivity);
-//								}
-//							}
-//						}
+						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+						//							if (countModel.get(fromActivity, toActivity) > 0
+						//									&& countModel.get(toActivity, fromActivity) == 0) {
+						//								activities.add(fromActivity);
+						//								activities.add(toActivity);
+						//							}
+						//						}
+						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
+						//							if (fromActivity.compareTo(toActivity) <= 0) {
+						//								if (countModel.get(fromActivity, toActivity) > 0
+						//										&& countModel.get(toActivity, fromActivity) > 0) {
+						//									activities.add(fromActivity);
+						//									activities.add(toActivity);
+						//								}
+						//							}
+						//						}
 					}
 				}
 			}
@@ -467,22 +512,22 @@ public class LogSkeleton implements HTMLToString {
 							//							System.out.println("[LogSkeleton] headLabel = " + headLabel);
 						}
 					}
-//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-//						if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
-//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
-//							tailDecorator = "odot";
-//							headArrow = "normal";
-//							headLabel = "" + countModel.get(fromActivity, toActivity);
-//						}
-//					}
-//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-//						if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
-//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
-//							headDecorator = "odot";
-//							headArrow = "normal";
-//							headLabel = "" + countModel.get(fromActivity, toActivity);
-//						}
-//					}
+					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
+					//						if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
+					//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
+					//							tailDecorator = "odot";
+					//							headArrow = "normal";
+					//							headLabel = "" + countModel.get(fromActivity, toActivity);
+					//						}
+					//					}
+					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
+					//						if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
+					//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
+					//							headDecorator = "odot";
+					//							headArrow = "normal";
+					//							headLabel = "" + countModel.get(fromActivity, toActivity);
+					//						}
+					//					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
 						if (!fromActivity.equals(toActivity)) {
 							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
@@ -519,42 +564,72 @@ public class LogSkeleton implements HTMLToString {
 							}
 						}
 					}
-//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
-//						if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-//								&& countModel.get(toActivity, fromActivity) == 0) {
-//							tailDecorator = "odot";
-//							if (headLabel == null) {
-//								headLabel = "" + countModel.get(fromActivity, toActivity);
-//							}
-//							if (headArrow == null) {
-//								headArrow = "normal";
-//							}
-//						}
-//					}
-//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-//						if (fromActivity.compareTo(toActivity) <= 0) {
-//							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-//									&& countModel.get(toActivity, fromActivity) > 0) {
-//								tailDecorator = "odot";
-//								if (headLabel == null) {
-//									headLabel = "" + countModel.get(fromActivity, toActivity);
-//								}
-//								if (headArrow == null) {
-//									headArrow = "normal";
-//								}
-//							}
-//							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
-//									&& countModel.get(toActivity, fromActivity) > 0) {
-//								headDecorator = "odot";
-//								if (tailLabel == null) {
-//									tailLabel = "" + countModel.get(toActivity, fromActivity);
-//								}
-//								if (tailArrow == null) {
-//									tailArrow = "vee";
-//								}
-//							}
-//						}
-//					}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERAFTER)) {
+						if (!fromActivity.equals(toActivity) && headDecorator == null
+								&& negResponses.get(toActivity).contains(fromActivity) 
+								&& !negResponses.get(fromActivity).contains(toActivity)) {
+							headDecorator = "dottee";
+							tailArrow = "normal";
+							headColor = neverColor;
+							int threshold = negResponses.get(toActivity).getMaxThreshold(fromActivity);
+							if (threshold < 100) {
+								headLabel = "." + threshold;
+								headColor = almostNeverColor;
+							}
+							//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
+						}
+					}
+					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERBEFORE)) {
+						if (!fromActivity.equals(toActivity) && tailDecorator == null
+								&& negPrecedences.get(fromActivity).contains(toActivity)
+								&& !negPrecedences.get(toActivity).contains(fromActivity)) {
+							tailDecorator = "dottee";
+							tailArrow = "normal";
+							tailColor = neverColor;
+							int threshold = negPrecedences.get(fromActivity).getMaxThreshold(toActivity);
+							if (threshold < 100) {
+								tailLabel = "." + threshold;
+								tailColor = almostNeverColor;
+							}
+							//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
+						}
+					}
+					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
+					//						if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+					//								&& countModel.get(toActivity, fromActivity) == 0) {
+					//							tailDecorator = "odot";
+					//							if (headLabel == null) {
+					//								headLabel = "" + countModel.get(fromActivity, toActivity);
+					//							}
+					//							if (headArrow == null) {
+					//								headArrow = "normal";
+					//							}
+					//						}
+					//					}
+					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
+					//						if (fromActivity.compareTo(toActivity) <= 0) {
+					//							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
+					//									&& countModel.get(toActivity, fromActivity) > 0) {
+					//								tailDecorator = "odot";
+					//								if (headLabel == null) {
+					//									headLabel = "" + countModel.get(fromActivity, toActivity);
+					//								}
+					//								if (headArrow == null) {
+					//									headArrow = "normal";
+					//								}
+					//							}
+					//							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
+					//									&& countModel.get(toActivity, fromActivity) > 0) {
+					//								headDecorator = "odot";
+					//								if (tailLabel == null) {
+					//									tailLabel = "" + countModel.get(toActivity, fromActivity);
+					//								}
+					//								if (tailArrow == null) {
+					//									tailArrow = "vee";
+					//								}
+					//							}
+					//						}
+					//					}
 					if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
 						DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
 						arc.setOption("dir", "both");
@@ -671,7 +746,8 @@ public class LogSkeleton implements HTMLToString {
 
 					if (arcs != null) {
 						/*
-						 * A maximal clique was found. Update the sources and targets to this clique.
+						 * A maximal clique was found. Update the sources and
+						 * targets to this clique.
 						 */
 						sourceNodes.clear();
 						targetNodes.clear();
@@ -745,8 +821,8 @@ public class LogSkeleton implements HTMLToString {
 							candidateArcs.add(a);
 						}
 						/*
-						 * Remove the old arcs, they have now been replaced with the newly added
-						 * connector node and arcs.
+						 * Remove the old arcs, they have now been replaced with
+						 * the newly added connector node and arcs.
 						 */
 						for (DotEdge anotherArc : arcs) {
 							graph.removeEdge(anotherArc);
@@ -867,8 +943,9 @@ public class LogSkeleton implements HTMLToString {
 			return null;
 		}
 		/*
-		 * Keep track of which combinations of sources and targets have already been
-		 * checked. This prevents checking the same combinations many times over.
+		 * Keep track of which combinations of sources and targets have already
+		 * been checked. This prevents checking the same combinations many times
+		 * over.
 		 */
 		List<Set<DotNode>> checked = new ArrayList<Set<DotNode>>();
 		checked.add(new HashSet<DotNode>(sourceNodes));
@@ -895,19 +972,20 @@ public class LogSkeleton implements HTMLToString {
 			return arcs;
 		}
 		/*
-		 * No, look for maximal cliques that have one node (source or target) less.
+		 * No, look for maximal cliques that have one node (source or target)
+		 * less.
 		 */
 		Set<DotEdge> bestArcs = null; // Best solution so far.
 		if (sourceNodes.size() > targetNodes.size()) {
 			/*
-			 * More sources than targets. Removing a source yields a possible bigger clique
-			 * than removing a target. So, first try to remove a source, and only then try
-			 * to remove a target.
+			 * More sources than targets. Removing a source yields a possible
+			 * bigger clique than removing a target. So, first try to remove a
+			 * source, and only then try to remove a target.
 			 */
 			if (sourceNodes.size() > 2) {
 				/*
-				 * Try to find a maximal clique with one source removed. Sort the source nodes
-				 * first to get a (more) deterministic result.
+				 * Try to find a maximal clique with one source removed. Sort
+				 * the source nodes first to get a (more) deterministic result.
 				 */
 				List<DotNode> sortedSourceNodes = new ArrayList<DotNode>(sourceNodes);
 				Collections.sort(sortedSourceNodes, new Comparator<DotNode>() {
@@ -920,13 +998,14 @@ public class LogSkeleton implements HTMLToString {
 				for (DotNode srcNode : sortedSourceNodes) {
 					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
 						/*
-						 * May result in a bigger clique than the best found so far. First, remove the
-						 * node from the sources.
+						 * May result in a bigger clique than the best found so
+						 * far. First, remove the node from the sources.
 						 */
 						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
 						/*
-						 * Check whether this combination of sources and targets was checked before.
+						 * Check whether this combination of sources and targets
+						 * was checked before.
 						 */
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(nodes);
@@ -939,7 +1018,8 @@ public class LogSkeleton implements HTMLToString {
 									checkedNodes);
 							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
 								/*
-								 * Found a bigger maximal clique than the best found so far. Update.
+								 * Found a bigger maximal clique than the best
+								 * found so far. Update.
 								 */
 								bestArcs = arcs;
 							}
@@ -1396,6 +1476,9 @@ public class LogSkeleton implements HTMLToString {
 		for (String activity : precedences.keySet()) {
 			precedences.get(activity).setThreshold(precedenceThreshold);
 		}
+		for (String activity : negPrecedences.keySet()) {
+			negPrecedences.get(activity).setThreshold(precedenceThreshold);
+		}
 	}
 
 	public int getResponseThreshold() {
@@ -1406,6 +1489,9 @@ public class LogSkeleton implements HTMLToString {
 		this.responseThreshold = responseThreshold;
 		for (String activity : responses.keySet()) {
 			responses.get(activity).setThreshold(responseThreshold);
+		}
+		for (String activity : negResponses.keySet()) {
+			negResponses.get(activity).setThreshold(responseThreshold);
 		}
 	}
 
@@ -1437,9 +1523,10 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 		/*
-		 * Return whether there are too many Not Co-Existence constraints to show by
-		 * default. THe first visualization should be reasonably fast. In case of too
-		 * many Not Co-Existence constraints, this first visualization takes ages.
+		 * Return whether there are too many Not Co-Existence constraints to
+		 * show by default. THe first visualization should be reasonably fast.
+		 * In case of too many Not Co-Existence constraints, this first
+		 * visualization takes ages.
 		 */
 		return nr > 100;
 	}
