@@ -709,9 +709,11 @@ public class LogSkeleton implements HTMLToString {
 				 */
 				DotEdge arc = candidateArcs.iterator().next();
 				/*
-				 * For now, only do this for always-arcs.
+				 * For now, only do this for always-arcs. Includes always-not (not response, not precendence) arcs.
 				 */
 				if (arc.getOption("arrowtail").equals("dotnone") || arc.getOption("arrowhead").equals("dotnone")
+						|| arc.getOption("arrowtail").equals("dotteenormal") 
+						|| arc.getOption("arrowhead").equals("dottee")
 						|| arc.getOption("arrowtail").equals("dotnormal")
 						|| arc.getOption("arrowhead").equals("dotnormal")) {
 					/*
