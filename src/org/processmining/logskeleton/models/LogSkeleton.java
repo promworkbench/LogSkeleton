@@ -713,7 +713,7 @@ public class LogSkeleton implements HTMLToString {
 				 */
 				if (arc.getOption("arrowtail").equals("dotnone") || arc.getOption("arrowhead").equals("dotnone")
 						|| arc.getOption("arrowtail").equals("dotteenormal") 
-						|| arc.getOption("arrowhead").equals("dottee")
+						|| arc.getOption("arrowhead").equals("dotteenone")
 						|| arc.getOption("arrowtail").equals("dotnormal")
 						|| arc.getOption("arrowhead").equals("dotnormal")) {
 					/*
