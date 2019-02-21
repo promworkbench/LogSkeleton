@@ -567,7 +567,7 @@ public class LogSkeleton implements HTMLToString {
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERAFTER)) {
 						if (!fromActivity.equals(toActivity) && headDecorator == null
 								&& notResponses.get(toActivity).contains(fromActivity) 
-								&& !notResponses.get(fromActivity).contains(toActivity)) {
+								/*&& !notResponses.get(fromActivity).contains(toActivity)*/) {
 							headDecorator = "dottee";
 							tailArrow = "normal";
 							headColor = neverColor;
@@ -582,7 +582,7 @@ public class LogSkeleton implements HTMLToString {
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERBEFORE)) {
 						if (!fromActivity.equals(toActivity) && tailDecorator == null
 								&& notPrecedences.get(fromActivity).contains(toActivity)
-								&& !notPrecedences.get(toActivity).contains(fromActivity)) {
+								/*&& !notPrecedences.get(toActivity).contains(fromActivity)*/) {
 							tailDecorator = "dottee";
 							tailArrow = "normal";
 							tailColor = neverColor;

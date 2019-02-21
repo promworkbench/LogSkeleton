@@ -225,9 +225,9 @@ public class LogSkeletonBrowserPlugin {
 				parameters.setResponseThreshold(value);
 				model.setPrecedenceThreshold(value);
 				model.setResponseThreshold(value);
-				model.cleanPrePost();
 				parameters.setNotCoExistenceThreshold(value);
 				model.setNotCoExistenceThreshold(value);
+				model.cleanPrePost();
 				updateRight();
 			}
 		});
