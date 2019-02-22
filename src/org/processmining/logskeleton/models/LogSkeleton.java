@@ -492,8 +492,8 @@ public class LogSkeleton implements HTMLToString {
 					boolean isAsymmetric = true;
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
 						if (tailDecorator == null && responses.get(fromActivity).contains(toActivity)) {
-							tailDecorator = "dot";
-							headArrow = "normal";
+							tailDecorator = "noneinv";
+//							headArrow = "normal";
 							tailColor = alwaysColor;
 							int threshold = responses.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
@@ -505,8 +505,8 @@ public class LogSkeleton implements HTMLToString {
 					}
 					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
 						if (headDecorator == null && precedences.get(toActivity).contains(fromActivity)) {
-							headDecorator = "dot";
-							headArrow = "normal";
+							headDecorator = "normal";
+//							headArrow = "normal";
 							headColor = alwaysColor;
 							int threshold = precedences.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
@@ -540,7 +540,7 @@ public class LogSkeleton implements HTMLToString {
 									&& (!parameters.isUseEquivalenceClass()
 											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 									&& notCoExistences.get(toActivity).contains(fromActivity)) {
-								headDecorator = "dotnonetee";
+								headDecorator = "nonetee";
 								//								dummy = true;
 								isAsymmetric = false;
 								headColor = neverColor;
@@ -556,7 +556,7 @@ public class LogSkeleton implements HTMLToString {
 									&& (!parameters.isUseEquivalenceClass()
 											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 									&& notCoExistences.get(fromActivity).contains(toActivity)) {
-								tailDecorator = "dotnonetee";
+								tailDecorator = "nonetee";
 								//								dummy = true;
 								isAsymmetric = false;
 								tailColor = neverColor;
@@ -572,8 +572,8 @@ public class LogSkeleton implements HTMLToString {
 						if (!fromActivity.equals(toActivity) && headDecorator == null
 								&& notResponses.get(toActivity).contains(fromActivity) 
 								/*&& !notResponses.get(fromActivity).contains(toActivity)*/) {
-							headDecorator = "dottee";
-							tailArrow = "normal";
+							headDecorator = "noneinvtee";
+//							tailArrow = "normal";
 							headColor = alwaysNotColor;
 							int threshold = notResponses.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
@@ -587,8 +587,8 @@ public class LogSkeleton implements HTMLToString {
 						if (!fromActivity.equals(toActivity) && tailDecorator == null
 								&& notPrecedences.get(fromActivity).contains(toActivity)
 								/*&& !notPrecedences.get(toActivity).contains(fromActivity)*/) {
-							tailDecorator = "dottee";
-							tailArrow = "normal";
+							tailDecorator = "teenormal";
+//							tailArrow = "normal";
 							tailColor = alwaysNotColor;
 							int threshold = notPrecedences.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
@@ -715,11 +715,9 @@ public class LogSkeleton implements HTMLToString {
 				/*
 				 * For now, only do this for always-arcs. Includes always-not (not response, not precendence) arcs.
 				 */
-				if (arc.getOption("arrowtail").equals("dotnone") || arc.getOption("arrowhead").equals("dotnone")
-						|| arc.getOption("arrowtail").equals("dotteenormal") 
-						|| arc.getOption("arrowhead").equals("dotteenone")
-						|| arc.getOption("arrowtail").equals("dotnormal")
-						|| arc.getOption("arrowhead").equals("dotnormal")) {
+				if (arc.getOption("arrowtail").contains("inv") || arc.getOption("arrowhead").contains("inv")
+						|| arc.getOption("arrowtail").contains("inv") 
+						|| arc.getOption("arrowhead").contains("normal")) {
 					/*
 					 * Get the cluster for this arc.
 					 */
