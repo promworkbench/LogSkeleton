@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.models;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -468,10 +469,13 @@ public class LogSkeleton implements HTMLToString {
 			map.put(activity, node);
 		}
 
-		String neverColor = "#fb4039";
-		String almostNeverColor = "#fb8072";
+		String defaultColor = darker("#d9d9d9");
+		String almostNeverColor = "#fdb462";
+		String neverColor = darker(almostNeverColor);
 		String almostAlwaysColor = "#80b1d3";
-		String alwaysColor = "#4058d3";
+		String alwaysColor = darker(almostAlwaysColor);
+		String almostAlwaysNotColor = "#fb8072";
+		String alwaysNotColor = darker(almostAlwaysNotColor);
 
 		for (String fromActivity : activities) {
 			for (String toActivity : activities) {
@@ -570,11 +574,11 @@ public class LogSkeleton implements HTMLToString {
 								/*&& !notResponses.get(fromActivity).contains(toActivity)*/) {
 							headDecorator = "dottee";
 							tailArrow = "normal";
-							headColor = neverColor;
+							headColor = alwaysNotColor;
 							int threshold = notResponses.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
 								headLabel = "." + threshold;
-								headColor = almostNeverColor;
+								headColor = almostAlwaysNotColor;
 							}
 							//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
@@ -585,11 +589,11 @@ public class LogSkeleton implements HTMLToString {
 								/*&& !notPrecedences.get(toActivity).contains(fromActivity)*/) {
 							tailDecorator = "dottee";
 							tailArrow = "normal";
-							tailColor = neverColor;
+							tailColor = alwaysNotColor;
 							int threshold = notPrecedences.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
-								tailColor = almostNeverColor;
+								tailColor = almostAlwaysNotColor;
 							}
 							//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
@@ -651,8 +655,8 @@ public class LogSkeleton implements HTMLToString {
 							arc.setOption("constraint", "false");
 						}
 						if (parameters.isUseEdgeColors() && (headColor != null || tailColor != null)) {
-							String color = (tailColor == null ? "black" : tailColor) + ";0.5:"
-									+ (headColor == null ? "black" : headColor) + ";0.5";
+							String color = (tailColor == null ? defaultColor : tailColor) + ";0.5:"
+									+ (headColor == null ? defaultColor : headColor) + ";0.5";
 							arc.setOption("color", color);
 						}
 						//						arc.setOption("constraint", "true");
@@ -899,6 +903,12 @@ public class LogSkeleton implements HTMLToString {
 		graph.setOption("label", "<" + label + ">");
 		//		graph.setOption("labeljust", "l");
 		return graph;
+	}
+
+	private String darker(String color) {
+		Color darkerColor = Color.decode(color).darker();
+		return "#" + Integer.toHexString(darkerColor.getRed()) + Integer.toHexString(darkerColor.getGreen())
+				+ Integer.toHexString(darkerColor.getBlue());
 	}
 
 	private boolean isEqual(DotEdge e1, DotEdge e2) {
