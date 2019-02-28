@@ -202,7 +202,7 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
-		System.out.println("[LogSkeleton] " + activity + " " + mappedMappedActivities);
+//		System.out.println("[LogSkeleton] " + activity + " " + mappedMappedActivities);
 		map.get(activity).removeAll(mappedMappedActivities);
 	}
 
@@ -252,6 +252,24 @@ public class LogSkeleton implements HTMLToString {
 				missing.removeAll(postset);
 				messages.add("[LogSkeleton] Case " + caseId + ": Response fails for " + activity + ", missing are "
 						+ missing);
+				return false;
+			}
+			Set<String> notPreset = new HashSet<String>(countModel.getActivities());
+			notPreset.removeAll(preset);
+			if (notPrecedences.containsKey(activity) && !notPreset.containsAll(notPrecedences.get(activity))) {
+				Set<String> present = new HashSet<String>(notPrecedences.get(activity));
+				present.removeAll(notPreset);
+				messages.add("[LogSkeleton] Case " + caseId + ": Not Precedence fails for " + activity + ", present are "
+						+ present);
+				return false;
+			}
+			Set<String> notPostset = new HashSet<String>(countModel.getActivities());
+			notPostset.removeAll(postset);
+			if (notResponses.containsKey(activity) && !notPostset.containsAll(notResponses.get(activity))) {
+				Set<String> present = new HashSet<String>(notResponses.get(activity));
+				present.removeAll(notPostset);
+				messages.add("[LogSkeleton] Case " + caseId + ": Not Response fails for " + activity + ", present are "
+						+ present);
 				return false;
 			}
 			prevActivity = activity;

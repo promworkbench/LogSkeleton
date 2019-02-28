@@ -61,7 +61,7 @@ public class LogSkeletonClassifierAlgorithm {
 		boolean[] checks = new boolean[] { true, true, false };
 		XLog classifiedTestLog = checkPlugin.run(context, trainingModel, testLog, messages, checks);
 		Set<String> positiveTestTraces = new HashSet<String>();
-		int threshold = 10;
+		int threshold = 0;
 		for (XTrace trace : classifiedTestLog) {
 			positiveTestTraces.add(XConceptExtension.instance().extractName(trace));
 		}
@@ -94,7 +94,7 @@ public class LogSkeletonClassifierAlgorithm {
 					} else {
 						negativeFilters.add(activity);
 					}
-					//					System.out.println("LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
+										System.out.println("[LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
 					XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
 					XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
 					if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty() || filteredTrainingLog.size() < 16) {
@@ -163,7 +163,7 @@ public class LogSkeletonClassifierAlgorithm {
 						} else {
 							negativeFilters.add(activity2);
 						}
-						//						System.out.println("LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
+												System.out.println("[LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
 						XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
 						XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
 						if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()
@@ -235,7 +235,7 @@ public class LogSkeletonClassifierAlgorithm {
 						if (trainingModel.getSameCounts(activity2).contains(activity3)) {
 							continue;
 						}
-						for (int f = 7; f < 8; f++) {
+						for (int f = 0; f < 8; f++) {
 							if (positiveTestTraces.size() <= threshold) {
 								continue;
 							}
@@ -256,7 +256,7 @@ public class LogSkeletonClassifierAlgorithm {
 							} else {
 								negativeFilters.add(activity3);
 							}
-							//							System.out.println("LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
+														System.out.println("[LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
 							XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
 							XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
 							if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()

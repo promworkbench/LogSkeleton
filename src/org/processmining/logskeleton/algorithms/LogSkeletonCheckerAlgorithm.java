@@ -2,6 +2,7 @@ package org.processmining.logskeleton.algorithms;
 
 import java.util.Set;
 
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
@@ -19,7 +20,7 @@ public class LogSkeletonCheckerAlgorithm {
 			traceLog.clear();
 			traceLog.add(trace);
 			LogSkeletonCount traceModel = algorithm.count(traceLog);
-//			traceModel.print("Trace " + XConceptExtension.instance().extractName(trace));
+			traceModel.print("Trace " + XConceptExtension.instance().extractName(trace));
 			if (skeleton.check(trace, traceModel, messages, checks)) {
 				classifiedLog.add(trace);
 			}

@@ -6,8 +6,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.DefaultListModel;
@@ -54,13 +56,13 @@ public class LogSkeletonFilterBrowserPlugin {
 	private List<List<String>> splitters;
 	private Set<String> positiveFilters;
 	private Set<String> negativeFilters;
-
+	
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
 	public JComponent run(UIPluginContext context, XLog log) {
 		this.context = context;
 		this.log = log;
-
+		
 		mainPanel = new JPanel();
 		double size[][] = { { 250, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		mainPanel.setLayout(new TableLayout(size));
@@ -74,9 +76,35 @@ public class LogSkeletonFilterBrowserPlugin {
 
 		update();
 
+		provideInfo(log);
+		
 		return mainPanel;
 	}
 
+	private void provideInfo(XLog log) {
+		Map<Set<String>, Double> scores = new HashMap<Set<String>, Double>();
+		double maxScore = 0;
+		for (XTrace trace : log) {
+			Set<String> score = new HashSet<String>();
+			for (XEvent event : trace) {
+				score.add((XConceptExtension.instance().extractName(event)));
+			}
+			if (!scores.containsKey(score)) {
+				scores.put(score, 1.0 / (trace.size() + 1));
+			} else {
+				scores.put(score, scores.get(score) + (1.0 / (trace.size() + 1)));
+			}
+			if (scores.get(score) > maxScore) {
+				maxScore = scores.get(score);
+			}
+		}
+		for (Set<String> count : scores.keySet()) {
+			if (scores.get(count) == maxScore) {
+				System.out.println("[LogSkeletonFilterBrowserPlugin] " + maxScore + ": " + count);
+			}
+		}
+	}
+	
 	private void update() {
 		SplitterAlgorithm splitterAlgorithm = new SplitterAlgorithm();
 		SplitterParameters splitterParameters = new SplitterParameters();
@@ -107,8 +135,9 @@ public class LogSkeletonFilterBrowserPlugin {
 		mainPanel.repaint();
 	}
 
-	private static XLog filter(XLog log, Set<String> positiveFilters, Set<String> negativeFilters) {
+	private XLog filter(XLog log, Set<String> positiveFilters, Set<String> negativeFilters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XLog discardedLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		for (XTrace trace : log) {
 			boolean ok = true;
 			Set<String> toMatch = new HashSet<String>(positiveFilters);
@@ -122,8 +151,12 @@ public class LogSkeletonFilterBrowserPlugin {
 			}
 			if (ok && toMatch.isEmpty()) {
 				filteredLog.add(trace);
+			} else {
+				discardedLog.add(trace);
 			}
 		}
+		context.getProvidedObjectManager().createProvidedObject(XConceptExtension.instance().extractName(filteredLog) + " In", filteredLog, XLog.class, context);
+		context.getProvidedObjectManager().createProvidedObject(XConceptExtension.instance().extractName(discardedLog) + " Out", discardedLog, XLog.class, context);
 		return filteredLog;
 	}
 
