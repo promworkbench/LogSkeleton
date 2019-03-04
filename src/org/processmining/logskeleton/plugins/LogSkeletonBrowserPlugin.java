@@ -98,19 +98,23 @@ public class LogSkeletonBrowserPlugin {
 				visualizers);
 		visualizerList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		List<LogSkeletonBrowser> selectedVisualizers = new ArrayList<LogSkeletonBrowser>();
-		selectedIndices = new int[doNotUseNotCoExistence ? 2 : 3];
+		selectedIndices = new int[doNotUseNotCoExistence ? 4 : 5];
 		//		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSTOGETHER);
 		//		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSTOGETHER);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSBEFORE);
 		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSBEFORE);
 		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSAFTER);
 		selectedIndices[1] = list.indexOf(LogSkeletonBrowser.ALWAYSAFTER);
+		selectedVisualizers.add(LogSkeletonBrowser.NEVERBEFORE);
+		selectedIndices[2] = list.indexOf(LogSkeletonBrowser.NEVERBEFORE);
+		selectedVisualizers.add(LogSkeletonBrowser.NEVERAFTER);
+		selectedIndices[3] = list.indexOf(LogSkeletonBrowser.NEVERAFTER);
 		if (!doNotUseNotCoExistence) {
 			/*
 			 * Only include in the first visualization if not too many Not Co-Existence constraints.
 			 */
 			selectedVisualizers.add(LogSkeletonBrowser.NEVERTOGETHER);
-			selectedIndices[2] = list.indexOf(LogSkeletonBrowser.NEVERTOGETHER);
+			selectedIndices[4] = list.indexOf(LogSkeletonBrowser.NEVERTOGETHER);
 		}
 		visualizerList.setSelectedIndices(selectedIndices);
 		parameters.getVisualizers().addAll(selectedVisualizers);

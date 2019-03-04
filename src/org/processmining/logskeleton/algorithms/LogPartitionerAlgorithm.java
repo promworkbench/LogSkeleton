@@ -1,7 +1,10 @@
 package org.processmining.logskeleton.algorithms;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,6 +56,14 @@ public class LogPartitionerAlgorithm {
 				activities.add(XConceptExtension.instance().extractName(event));
 			}
 		}
+		List<String> activityList = new ArrayList<String>(activities);
+		Collections.sort(activityList);
+		String line= "";
+		for (String activity : activityList) {
+			line = line + activity + ",";
+		}
+		line = line + "#";
+		System.out.println(line);
 		EventLogArray logs = EventLogArrayFactory.createEventLogArray();
 		logs.addLog(log);
 		Set<String> positiveFilters = new HashSet<String>();
@@ -74,14 +85,15 @@ public class LogPartitionerAlgorithm {
 					maxScore = scores.get(score);
 				}
 			}
-			Set<String> bestScore = null;
+			List<String> bestScore = null;
 			XAttributeList list = XFactoryRegistry.instance().currentDefault().createAttributeList("activities", null);
 			for (Set<String> score : scores.keySet()) {
 				if (bestScore == null && scores.get(score) == maxScore) {
-					bestScore = score;
-					negativeFilters.addAll(activities);
+					bestScore = new ArrayList<String>(score);
+					Collections.sort(bestScore);
+					negativeFilters.addAll(activityList);
 					negativeFilters.removeAll(score);
-					for (String s : score) {
+					for (String s : bestScore) {
 						list.addToCollection(XFactoryRegistry.instance().currentDefault()
 								.createAttributeLiteral(XConceptExtension.KEY_NAME, s, XConceptExtension.instance()));
 					}
@@ -90,6 +102,16 @@ public class LogPartitionerAlgorithm {
 			partition(logs, positiveFilters, negativeFilters);
 			log = logs.getLog(logs.getSize() - 2);
 			XConceptExtension.instance().assignName(log, name + " @" + (logs.getSize() - 1) + " |" + log.size() + "| " + bestScore);
+			line= "";
+			for (String activity : activityList) {
+				if (bestScore.contains(activity)) {
+					line = line + "1,";
+				} else {
+					line = line + "0,";
+				}
+			}
+			line = line + log.size();
+			System.out.println(line);
 			log.getAttributes().put("activities", list);
 			log = logs.getLog(logs.getSize() - 1);
 		}
