@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryRegistry;
@@ -19,7 +20,7 @@ import org.processmining.logskeleton.plugins.LogSkeletonCheckerPlugin;
 
 public class LogSkeletonClassifierAlgorithm {
 
-	public XLog apply(PluginContext context, XLog trainingLog, XLog testLog, LogPreprocessorAlgorithm preprocessor) {
+	public XLog apply(PluginContext context, XLog trainingLog, XLog testLog, XEventClassifier classifier, LogPreprocessorAlgorithm preprocessor) {
 		String name = XConceptExtension.instance().extractName(trainingLog);
 
 		ClassificationProblem problem = new ClassificationProblem(trainingLog, testLog);
@@ -43,7 +44,7 @@ public class LogSkeletonClassifierAlgorithm {
 		 * Use the log skeleton to classify the test traces.
 		 */
 		System.out.println("[LogSkeletonClassifierAlgorithm] Classify " + name + " ======");
-		XLog classifiedTestLog = classify(context, model, filteredTrainingLog, filteredTestLog, name);
+		XLog classifiedTestLog = classify(context, model, filteredTrainingLog, filteredTestLog, classifier, name);
 		context.getProvidedObjectManager().createProvidedObject("Classified Log " + name, classifiedTestLog,
 				XLog.class, context);
 
@@ -54,7 +55,7 @@ public class LogSkeletonClassifierAlgorithm {
 	}
 
 	private static XLog classify(PluginContext context, LogSkeleton trainingModel, XLog trainingLog, XLog testLog,
-			String name) {
+			XEventClassifier classifier, String name) {
 		LogSkeletonBuilderPlugin createPlugin = new LogSkeletonBuilderPlugin();
 		LogSkeletonCheckerPlugin checkPlugin = new LogSkeletonCheckerPlugin();
 		Set<String> messages = new HashSet<String>();
@@ -95,8 +96,8 @@ public class LogSkeletonClassifierAlgorithm {
 						negativeFilters.add(activity);
 					}
 										System.out.println("[LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
-					XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
-					XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
+					XLog filteredTrainingLog = filter(trainingLog, classifier, positiveFilters, negativeFilters);
+					XLog filteredTestLog = filter(testLog, classifier, positiveFilters, negativeFilters);
 					if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty() || filteredTrainingLog.size() < 16) {
 						continue;
 					}
@@ -164,8 +165,8 @@ public class LogSkeletonClassifierAlgorithm {
 							negativeFilters.add(activity2);
 						}
 												System.out.println("[LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
-						XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
-						XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
+						XLog filteredTrainingLog = filter(trainingLog, classifier, positiveFilters, negativeFilters);
+						XLog filteredTestLog = filter(testLog, classifier, positiveFilters, negativeFilters);
 						if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()
 								|| filteredTrainingLog.size() < 16) {
 							continue;
@@ -257,8 +258,8 @@ public class LogSkeletonClassifierAlgorithm {
 								negativeFilters.add(activity3);
 							}
 														System.out.println("[LogSkeletonClassifierAlgorithm] Positive = " + positiveFilters + ", Negative = " + negativeFilters);
-							XLog filteredTrainingLog = filter(trainingLog, positiveFilters, negativeFilters);
-							XLog filteredTestLog = filter(testLog, positiveFilters, negativeFilters);
+							XLog filteredTrainingLog = filter(trainingLog, classifier, positiveFilters, negativeFilters);
+							XLog filteredTestLog = filter(testLog, classifier, positiveFilters, negativeFilters);
 							if (filteredTestLog.isEmpty() || filteredTrainingLog.isEmpty()
 									|| filteredTrainingLog.size() < 16) {
 								continue;
@@ -302,13 +303,13 @@ public class LogSkeletonClassifierAlgorithm {
 		return newClassifiedTestLog;
 	}
 
-	private static XLog filter(XLog log, Set<String> positiveFilters, Set<String> negativeFilters) {
+	private static XLog filter(XLog log, XEventClassifier classifier, Set<String> positiveFilters, Set<String> negativeFilters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog();
 		for (XTrace trace : log) {
 			boolean ok = true;
 			Set<String> toMatch = new HashSet<String>(positiveFilters);
 			for (XEvent event : trace) {
-				String activity = XConceptExtension.instance().extractName(event);
+				String activity = classifier.getClassIdentity(event);
 				if (negativeFilters.contains(activity)) {
 					ok = false;
 					;

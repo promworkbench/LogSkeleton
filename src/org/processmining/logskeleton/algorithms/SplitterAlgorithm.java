@@ -1,26 +1,34 @@
 package org.processmining.logskeleton.algorithms;
 
+import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
+import org.deckfour.xes.model.XAttributeLiteral;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
+import org.processmining.logskeleton.classifiers.LogSkeletonClassifier;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 
 public class SplitterAlgorithm {
 
-	public XLog apply(XLog log, SplitterParameters parameters) {
+	public XLog apply(XLog log, XEventClassifier classifier, SplitterParameters parameters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault()
 				.createLog((XAttributeMap) log.getAttributes().clone());
 		for (XTrace trace : log) {
 			XTrace filteredTrace = XFactoryRegistry.instance().currentDefault().createTrace(trace.getAttributes());
 			int milestone = 0;
 			for (XEvent event : trace) {
-				String activity = XConceptExtension.instance().extractName(event);
+				String activity = classifier.getClassIdentity(event);
 				if (activity.equals(parameters.getDuplicateActivity())) {
-					XEvent filteredEvent = XFactoryRegistry.instance().currentDefault().createEvent();
-					XConceptExtension.instance().assignName(filteredEvent, activity + "." + milestone);
+					XEvent filteredEvent = (XEvent) event.clone(); //XFactoryRegistry.instance().currentDefault().createEvent();
+					if (event.getAttributes().containsKey(LogSkeletonClassifier.SUFFIX)) {
+						((XAttributeLiteral) filteredEvent.getAttributes().get(LogSkeletonClassifier.SUFFIX)).setValue(event.getAttributes().get(LogSkeletonClassifier.SUFFIX)+ "." + milestone);
+					} else {
+						filteredEvent.getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, "." + milestone));
+					}
 					filteredTrace.add(filteredEvent);
 				} else {
 					filteredTrace.add(event);
@@ -37,24 +45,24 @@ public class SplitterAlgorithm {
 		return filteredLog;
 	}
 
-	public XLog apply7B(XLog log) {
+	public XLog apply7B(XLog log, XEventClassifier classifier) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault()
 				.createLog((XAttributeMap) log.getAttributes().clone());
 		for (XTrace trace : log) {
 			XTrace filteredTrace = XFactoryRegistry.instance().currentDefault().createTrace(trace.getAttributes());
 			for (int i = 0; i < trace.size(); i++) {
-				if (i == trace.size() - 1 && XConceptExtension.instance().extractName(trace.get(i)).equals("b")) {
-					XEvent filteredEvent = XFactoryRegistry.instance().currentDefault().createEvent();
-					XConceptExtension.instance().assignName(filteredEvent, "b.1");
+				if (i == trace.size() - 1 && classifier.getClassIdentity(trace.get(i)).equals("b")) {
+					XEvent filteredEvent = (XEvent) trace.get(i).clone();
+					trace.get(i).getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, ".1"));
 					filteredTrace.add(filteredEvent);
-				} else if (i == trace.size() - 2 && XConceptExtension.instance().extractName(trace.get(i)).equals("b")
-						&& XConceptExtension.instance().extractName(trace.get(i + 1)).equals("s")) {
-					XEvent filteredEvent = XFactoryRegistry.instance().currentDefault().createEvent();
-					XConceptExtension.instance().assignName(filteredEvent, "b.1");
+				} else if (i == trace.size() - 2 && classifier.getClassIdentity(trace.get(i)).equals("b")
+						&& classifier.getClassIdentity(trace.get(i + 1)).equals("s")) {
+					XEvent filteredEvent = (XEvent) trace.get(i).clone();
+					trace.get(i).getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, ".1"));
 					filteredTrace.add(filteredEvent);
-				} else if (XConceptExtension.instance().extractName(trace.get(i)).equals("b")) {
-					XEvent filteredEvent = XFactoryRegistry.instance().currentDefault().createEvent();
-					XConceptExtension.instance().assignName(filteredEvent, "b.0");
+				} else if (classifier.getClassIdentity(trace.get(i)).equals("b")) {
+					XEvent filteredEvent = (XEvent) trace.get(i).clone();
+					trace.get(i).getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, ".0"));
 					filteredTrace.add(filteredEvent);
 				} else {
 					filteredTrace.add(trace.get(i));

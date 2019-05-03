@@ -21,6 +21,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
@@ -36,6 +37,7 @@ import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.framework.util.ui.widgets.WidgetColors;
 import org.processmining.logskeleton.algorithms.LogSkeletonBuilderAlgorithm;
 import org.processmining.logskeleton.algorithms.SplitterAlgorithm;
+import org.processmining.logskeleton.classifiers.LogSkeletonClassifier;
 import org.processmining.logskeleton.models.LogSkeleton;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 
@@ -62,6 +64,7 @@ public class LogSkeletonFilterBrowserPlugin {
 	public JComponent run(UIPluginContext context, XLog log) {
 		this.context = context;
 		this.log = log;
+		XEventClassifier classifier = new LogSkeletonClassifier();
 		
 		mainPanel = new JPanel();
 		double size[][] = { { 250, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
@@ -72,22 +75,22 @@ public class LogSkeletonFilterBrowserPlugin {
 		positiveFilters = new HashSet<String>();
 		negativeFilters = new HashSet<String>();
 
-		mainPanel.add(getControlPanel(), "0, 0");
+		mainPanel.add(getControlPanel(classifier), "0, 0");
 
 		update();
 
-		provideInfo(log);
+		provideInfo(log, classifier);
 		
 		return mainPanel;
 	}
 
-	private void provideInfo(XLog log) {
+	private void provideInfo(XLog log, XEventClassifier classifier) {
 		Map<Set<String>, Double> scores = new HashMap<Set<String>, Double>();
 		double maxScore = 0;
 		for (XTrace trace : log) {
 			Set<String> score = new HashSet<String>();
 			for (XEvent event : trace) {
-				score.add((XConceptExtension.instance().extractName(event)));
+				score.add(classifier.getClassIdentity(event));
 			}
 			if (!scores.containsKey(score)) {
 				scores.put(score, 1.0 / (trace.size() + 1));
@@ -109,8 +112,10 @@ public class LogSkeletonFilterBrowserPlugin {
 		SplitterAlgorithm splitterAlgorithm = new SplitterAlgorithm();
 		SplitterParameters splitterParameters = new SplitterParameters();
 		XLog filteredLog = log;
+		XEventClassifier classifier = new LogSkeletonClassifier();
+
 		if (!positiveFilters.isEmpty() || !negativeFilters.isEmpty()) {
-			filteredLog = filter(filteredLog, positiveFilters, negativeFilters);
+			filteredLog = filter(filteredLog, classifier, positiveFilters, negativeFilters);
 		}
 		for (List<String> splitter : splitters) {
 			splitterParameters.setDuplicateActivity(splitter.get(0));
@@ -118,10 +123,11 @@ public class LogSkeletonFilterBrowserPlugin {
 			for (int i = 1; i < splitter.size(); i++) {
 				splitterParameters.getMilestoneActivities().add(splitter.get(i));
 			}
-			filteredLog = splitterAlgorithm.apply(filteredLog, splitterParameters);
+			filteredLog = splitterAlgorithm.apply(filteredLog, classifier, splitterParameters);
 		}
 		LogSkeletonBuilderAlgorithm discoveryAlgorithm = new LogSkeletonBuilderAlgorithm();
-		LogSkeleton model = discoveryAlgorithm.apply(filteredLog);
+		context.getProvidedObjectManager().createProvidedObject(XConceptExtension.instance().extractName(filteredLog) + " Split", filteredLog, XLog.class, context);
+		LogSkeleton model = discoveryAlgorithm.apply(filteredLog, classifier);
 		model.setRequired(positiveFilters);
 		model.setForbidden(negativeFilters);
 		model.setSplitters(splitters);
@@ -135,14 +141,14 @@ public class LogSkeletonFilterBrowserPlugin {
 		mainPanel.repaint();
 	}
 
-	private XLog filter(XLog log, Set<String> positiveFilters, Set<String> negativeFilters) {
+	private XLog filter(XLog log, XEventClassifier classifier, Set<String> positiveFilters, Set<String> negativeFilters) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		XLog discardedLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		for (XTrace trace : log) {
 			boolean ok = true;
 			Set<String> toMatch = new HashSet<String>(positiveFilters);
 			for (XEvent event : trace) {
-				String activity = XConceptExtension.instance().extractName(event);
+				String activity = classifier.getClassIdentity(event);
 				if (negativeFilters.contains(activity)) {
 					ok = false;
 					;
@@ -160,11 +166,11 @@ public class LogSkeletonFilterBrowserPlugin {
 		return filteredLog;
 	}
 
-	private List<String> getActivities(XLog log) {
+	private List<String> getActivities(XLog log, XEventClassifier classifier) {
 		Set<String> activities = new HashSet<String>();
 		for (XTrace trace : log) {
 			for (XEvent event : trace) {
-				String activity = XConceptExtension.instance().extractName(event);
+				String activity = classifier.getClassIdentity(event);
 				activities.add(activity);
 			}
 		}
@@ -173,9 +179,9 @@ public class LogSkeletonFilterBrowserPlugin {
 		return activityList;
 	}
 
-	private JComponent getControlPanel() {
+	private JComponent getControlPanel(XEventClassifier classifier) {
 		JPanel controlPanel = new JPanel();
-		List<String> activities = getActivities(log);
+		List<String> activities = getActivities(log, classifier);
 		double size[][] = { { TableLayoutConstants.FILL },
 				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
 		controlPanel.setLayout(new TableLayout(size));

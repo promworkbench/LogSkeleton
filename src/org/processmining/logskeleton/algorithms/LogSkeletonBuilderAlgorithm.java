@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
@@ -20,28 +21,27 @@ import org.processmining.logskeleton.models.LogSkeletonCount;
 
 public class LogSkeletonBuilderAlgorithm {
 
-	public LogSkeleton apply(XLog log) {
-		LogSkeletonCount countModel = count(log);
+	public LogSkeleton apply(XLog log, XEventClassifier classifier) {
+		LogSkeletonCount countModel = count(log, classifier);
 		countModel.print("Count model");
 		EventLogArray logs = split(log);
-		Collection<LogSkeletonCount> counts = createCounts(logs);
+		Collection<LogSkeletonCount> counts = createCounts(logs, classifier);
 		LogSkeleton constraintModel = new LogSkeleton(countModel);
 		addSameCounts(counts, constraintModel);
-		createCausalDependencies(log, countModel, constraintModel);
+		createCausalDependencies(log, classifier, countModel, constraintModel);
 		String label = XConceptExtension.instance().extractName(log);
 		constraintModel.setLabel(label == null ? "<not specified>" : label);
 		return constraintModel;
 	}
 
-	public LogSkeletonCount count(XLog log) {
+	public LogSkeletonCount count(XLog log, XEventClassifier classifier) {
 		LogSkeletonCount model = new LogSkeletonCount();
-
 		for (XTrace trace : log) {
 			String activity;
 			String prevActivity = LogSkeletonCount.STARTEVENT;
 			model.inc(prevActivity);
 			for (XEvent event : trace) {
-				activity = XConceptExtension.instance().extractName(event);
+				activity = classifier.getClassIdentity(event);
 				model.inc(activity);
 				model.inc(prevActivity, activity);
 				prevActivity = activity;
@@ -70,11 +70,11 @@ public class LogSkeletonBuilderAlgorithm {
 		return logs;
 	}
 
-	private Collection<LogSkeletonCount> createCounts(EventLogArray logs) {
+	private Collection<LogSkeletonCount> createCounts(EventLogArray logs, XEventClassifier classifier) {
 		Collection<LogSkeletonCount> models = new ArrayList<LogSkeletonCount>();
 		for (int i = 0; i < logs.getSize(); i++) {
 			XLog log = logs.getLog(i);
-			models.add(count(log));
+			models.add(count(log, classifier));
 		}
 		return models;
 	}
@@ -137,12 +137,12 @@ public class LogSkeletonBuilderAlgorithm {
 		return distance;
 	}
 
-	private void createCausalDependencies(XLog log, LogSkeletonCount model, LogSkeleton constraintModel) {
+	private void createCausalDependencies(XLog log, XEventClassifier classifier, LogSkeletonCount model, LogSkeleton constraintModel) {
 		for (XTrace trace : log) {
 			List<String> postset = new ArrayList<String>();
 			postset.add(LogSkeletonCount.STARTEVENT);
 			for (XEvent event : trace) {
-				postset.add(XConceptExtension.instance().extractName(event));
+				postset.add(classifier.getClassIdentity(event));
 			}
 			postset.add(LogSkeletonCount.ENDEVENT);
 			Set<String> preset = new HashSet<String>();

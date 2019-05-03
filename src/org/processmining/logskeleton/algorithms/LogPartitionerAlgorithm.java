@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XAttributeList;
@@ -20,7 +21,7 @@ import org.processmining.log.models.impl.EventLogArrayFactory;
 
 public class LogPartitionerAlgorithm {
 
-	private void partition(EventLogArray logs, Set<String> positiveFilters, Set<String> negativeFilters) {
+	private void partition(EventLogArray logs, Set<String> positiveFilters, Set<String> negativeFilters, XEventClassifier classifier) {
 		XLog log = logs.getLog(logs.getSize() - 1);
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault()
 				.createLog((XAttributeMap) log.getAttributes().clone());
@@ -29,7 +30,7 @@ public class LogPartitionerAlgorithm {
 			boolean ok = true;
 			Set<String> toMatch = new HashSet<String>(positiveFilters);
 			for (XEvent event : trace) {
-				String activity = XConceptExtension.instance().extractName(event);
+				String activity = classifier.getClassIdentity(event);
 				if (negativeFilters.contains(activity)) {
 					ok = false;
 					;
@@ -48,12 +49,12 @@ public class LogPartitionerAlgorithm {
 		logs.addLog(discardedLog);
 	}
 
-	public EventLogArray apply(XLog log) {
+	public EventLogArray apply(XLog log, XEventClassifier classifier) {
 		String name = XConceptExtension.instance().extractName(log);
 		Set<String> activities = new HashSet<String>();
 		for (XTrace trace : log) {
 			for (XEvent event : trace) {
-				activities.add(XConceptExtension.instance().extractName(event));
+				activities.add(classifier.getClassIdentity(event));
 			}
 		}
 		List<String> activityList = new ArrayList<String>(activities);
@@ -74,7 +75,7 @@ public class LogPartitionerAlgorithm {
 			for (XTrace trace : log) {
 				Set<String> score = new HashSet<String>();
 				for (XEvent event : trace) {
-					score.add((XConceptExtension.instance().extractName(event)));
+					score.add(classifier.getClassIdentity(event));
 				}
 				if (!scores.containsKey(score)) {
 					scores.put(score, 1.0 / (trace.size() + 1));
@@ -99,7 +100,7 @@ public class LogPartitionerAlgorithm {
 					}
 				}
 			}
-			partition(logs, positiveFilters, negativeFilters);
+			partition(logs, positiveFilters, negativeFilters, classifier);
 			log = logs.getLog(logs.getSize() - 2);
 			XConceptExtension.instance().assignName(log, name + " @" + (logs.getSize() - 1) + " |" + log.size() + "| " + bestScore);
 			line= "";

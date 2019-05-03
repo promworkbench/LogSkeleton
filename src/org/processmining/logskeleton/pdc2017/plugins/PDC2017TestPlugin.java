@@ -1,6 +1,8 @@
 package org.processmining.logskeleton.pdc2017.plugins;
 
 import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
+import org.deckfour.xes.classification.XEventClassifier;
+import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -8,6 +10,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
 import org.processmining.logskeleton.algorithms.LogSkeletonClassifierAlgorithm;
+import org.processmining.logskeleton.classifiers.LogSkeletonClassifier;
 import org.processmining.logskeleton.pdc2017.dialogs.PDC2017TestDialog;
 import org.processmining.logskeleton.pdc2017.models.PDC2017TestModel;
 import org.processmining.logskeleton.pdc2017.parameters.PDC2017TestParameters;
@@ -31,6 +34,8 @@ public class PDC2017TestPlugin {
 		PDC2017TestModel testModel = new PDC2017TestModel(testParameters);
 		PDC2017Parameters parameters = new PDC2017Parameters();
 		PDC2017LogAlgorithm logAlgorithm = new PDC2017LogAlgorithm();
+
+		XEventClassifier classifier = new LogSkeletonClassifier(new XEventNameClassifier());
 
 		try {
 			for (int i : testParameters.getNrs()) {
@@ -57,19 +62,19 @@ public class PDC2017TestPlugin {
 				// Classify the logs
 				if (testParameters.getSets().contains(PDC2017Set.CAL1)) {
 					System.out.println("[PDC2017TestPlugin] Classify PDC2017 " + PDC2017Set.CAL1 + " number " + i);
-					classifiedTestLogCal1 = classifierAlgorithm.apply(context, trainingLog, testLogMay, preprocessor);
+					classifiedTestLogCal1 = classifierAlgorithm.apply(context, trainingLog, testLogMay, classifier, preprocessor);
 					context.getProvidedObjectManager().createProvidedObject("PDC2017 " + PDC2017Set.CAL1 + " number " + i,
 							classifiedTestLogCal1, XLog.class, context);
 				}
 				if (testParameters.getSets().contains(PDC2017Set.CAL2)) {
 					System.out.println("[PDC2017TestPlugin] Classify PDC2017 " + PDC2017Set.CAL2 + " number " + i);
-					classifiedTestLogCal2 = classifierAlgorithm.apply(context, trainingLog, testLogJune, preprocessor);
+					classifiedTestLogCal2 = classifierAlgorithm.apply(context, trainingLog, testLogJune, classifier, preprocessor);
 					context.getProvidedObjectManager().createProvidedObject("PDC2017 " + PDC2017Set.CAL2 + " number " + i,
 							classifiedTestLogCal2, XLog.class, context);
 				}
 				if (testParameters.getSets().contains(PDC2017Set.TEST)) {
 					System.out.println("[PDC2017TestPlugin] Classify PDC2017 " + PDC2017Set.TEST + " number " + i);
-					classifiedTestLogTest = classifierAlgorithm.apply(context, trainingLog, testLogFinal, preprocessor);
+					classifiedTestLogTest = classifierAlgorithm.apply(context, trainingLog, testLogFinal, classifier, preprocessor);
 					context.getProvidedObjectManager().createProvidedObject("PDC2017 " + PDC2017Set.TEST + " number " + i,
 							classifiedTestLogTest, XLog.class, context);
 				}
