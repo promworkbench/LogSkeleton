@@ -16,7 +16,10 @@ public class LogSkeletonClassifierPlugin extends LogSkeletonClassifierAlgorithm 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0, 1 })
 	public XLog run(PluginContext context, XLog trainingLog, XLog testLog) {
-		XEventClassifier classifier = new LogSkeletonClassifier();
+		return run(context, trainingLog, testLog, new LogSkeletonClassifier());
+	}
+
+	public XLog run(PluginContext context, XLog trainingLog, XLog testLog, XEventClassifier classifier) {
 		return apply(context, trainingLog, testLog, classifier, new LogPreprocessorAlgorithm());
 	}
 

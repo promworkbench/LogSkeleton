@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.deckfour.xes.classification.XEventClassifier;
-import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
@@ -20,13 +19,20 @@ public class LogSkeletonCheckerPlugin extends LogSkeletonCheckerAlgorithm {
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0, 1 })
 	public XLog run(PluginContext context, LogSkeleton model, XLog log) {
+		return run(context, model, log, new LogSkeletonClassifier());
+	}
+
+	public XLog run(PluginContext context, LogSkeleton model, XLog log, XEventClassifier classifier) {
 		boolean[] checks = new boolean[] { true, true, true };
-		XEventClassifier classifier = new LogSkeletonClassifier(new XEventNameClassifier());
-		return apply(model, log, classifier, new HashSet<String>(), checks);
+		return run(context, model, log, classifier, new HashSet<String>(), checks);
 	}
 
 	public XLog run(PluginContext context, LogSkeleton model, XLog log, Set<String> messages, boolean[] checks) {
 		XEventClassifier classifier = new LogSkeletonClassifier();
+		return run(context, model, log, classifier, messages, checks);
+	}
+
+	public XLog run(PluginContext context, LogSkeleton model, XLog log, XEventClassifier classifier, Set<String> messages, boolean[] checks) {
 		return apply(model, log, classifier, messages, checks);
 	}
 }

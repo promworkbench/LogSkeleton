@@ -19,7 +19,10 @@ public class LogPartitionerPlugin extends LogPartitionerAlgorithm {
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
 	public EventLogArray run(PluginContext context, XLog log) {
-		XEventClassifier classifier = new LogSkeletonClassifier();
+		return run(context, log, new LogSkeletonClassifier());
+	}
+
+	public EventLogArray run(PluginContext context, XLog log, XEventClassifier classifier) {
 		EventLogArray logs = apply(log, classifier);
 		for (int i = 0; i < logs.getSize(); i++) {
 			context.getProvidedObjectManager().createProvidedObject(

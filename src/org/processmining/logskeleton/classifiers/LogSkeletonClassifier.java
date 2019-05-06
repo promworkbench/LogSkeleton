@@ -30,7 +30,7 @@ public class LogSkeletonClassifier implements XEventClassifier {
 	}
 
 	public String[] getDefiningAttributeKeys() {
-		return null;
+		return prefixClassifier.getDefiningAttributeKeys();
 	}
 
 	public String name() {

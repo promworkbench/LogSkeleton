@@ -62,9 +62,12 @@ public class LogSkeletonFilterBrowserPlugin {
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
 	public JComponent run(UIPluginContext context, XLog log) {
+		return run(context, log, new LogSkeletonClassifier());
+	}
+	
+	public JComponent run(UIPluginContext context, XLog log, XEventClassifier classifier) {
 		this.context = context;
 		this.log = log;
-		XEventClassifier classifier = new LogSkeletonClassifier();
 		
 		mainPanel = new JPanel();
 		double size[][] = { { 250, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
@@ -77,7 +80,7 @@ public class LogSkeletonFilterBrowserPlugin {
 
 		mainPanel.add(getControlPanel(classifier), "0, 0");
 
-		update();
+		update(classifier);
 
 		provideInfo(log, classifier);
 		
@@ -108,11 +111,10 @@ public class LogSkeletonFilterBrowserPlugin {
 		}
 	}
 	
-	private void update() {
+	private void update(XEventClassifier classifier) {
 		SplitterAlgorithm splitterAlgorithm = new SplitterAlgorithm();
 		SplitterParameters splitterParameters = new SplitterParameters();
 		XLog filteredLog = log;
-		XEventClassifier classifier = new LogSkeletonClassifier();
 
 		if (!positiveFilters.isEmpty() || !negativeFilters.isEmpty()) {
 			filteredLog = filter(filteredLog, classifier, positiveFilters, negativeFilters);
@@ -179,7 +181,7 @@ public class LogSkeletonFilterBrowserPlugin {
 		return activityList;
 	}
 
-	private JComponent getControlPanel(XEventClassifier classifier) {
+	private JComponent getControlPanel(final XEventClassifier classifier) {
 		JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log, classifier);
 		double size[][] = { { TableLayoutConstants.FILL },
@@ -267,7 +269,7 @@ public class LogSkeletonFilterBrowserPlugin {
 						splitters.add(filter);
 					}
 				}
-				update();
+				update(classifier);
 			}
 
 		});

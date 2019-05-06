@@ -16,7 +16,10 @@ public class LogSkeletonBuilderPlugin extends LogSkeletonBuilderAlgorithm  {
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
 	public LogSkeleton run(PluginContext context, XLog log) {
-		XEventClassifier classifier = new LogSkeletonClassifier();
+		return apply(log, new LogSkeletonClassifier());
+	}
+
+	public LogSkeleton run(PluginContext context, XLog log, XEventClassifier classifier) {
 		return apply(log, classifier);
 	}
 }
