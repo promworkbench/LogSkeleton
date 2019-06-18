@@ -1,8 +1,10 @@
 package org.processmining.logskeleton.plugins;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.NoninvertibleTransformException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +23,7 @@ import javax.swing.event.ListSelectionListener;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
+import org.processmining.contexts.util.CompositePanel;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.widgets.ProMList;
@@ -48,6 +51,7 @@ public class LogSkeletonBrowserPlugin {
 	private JComponent leftDotPanel = null;
 	private JComponent rightDotPanel = null;
 	private JPanel mainPanel = null;
+	private boolean isRepainting = false;
 
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "H.M.W. Verbeek", email = "h.m.w.verbeek@tue.nl")
 	@PluginVariant(variantLabel = "Default", requiredParameterLabels = { 0 })
@@ -55,7 +59,19 @@ public class LogSkeletonBrowserPlugin {
 
 		this.model = model;
 
-		mainPanel = new JPanel();
+		mainPanel = new CompositePanel() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2184897562083625426L;
+
+			public JComponent getMainComponent() {
+				if (rightDotPanel instanceof CompositePanel) {
+					return ((CompositePanel) rightDotPanel).getMainComponent();
+				}
+				return rightDotPanel;
+			}
+		};
 		double size[][] = { { TableLayoutConstants.FILL, 250 }, { TableLayoutConstants.FILL, TableLayoutConstants.FILL,
 				TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
@@ -111,7 +127,8 @@ public class LogSkeletonBrowserPlugin {
 		selectedIndices[3] = list.indexOf(LogSkeletonBrowser.NEVERAFTER);
 		if (!doNotUseNotCoExistence) {
 			/*
-			 * Only include in the first visualization if not too many Not Co-Existence constraints.
+			 * Only include in the first visualization if not too many Not
+			 * Co-Existence constraints.
 			 */
 			selectedVisualizers.add(LogSkeletonBrowser.NEVERTOGETHER);
 			selectedIndices[4] = list.indexOf(LogSkeletonBrowser.NEVERTOGETHER);
@@ -218,8 +235,8 @@ public class LogSkeletonBrowserPlugin {
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(checkBoxNeighbors, "1, 9");
 
-		final NiceSlider noiseLevelSlider = SlickerFactory.instance().createNiceIntegerSlider("Noise Level in %",
-				0, 20, 100 - parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+		final NiceSlider noiseLevelSlider = SlickerFactory.instance().createNiceIntegerSlider("Noise Level in %", 0, 20,
+				100 - parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
 		noiseLevelSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
@@ -238,19 +255,19 @@ public class LogSkeletonBrowserPlugin {
 		noiseLevelSlider.setPreferredSize(new Dimension(100, 30));
 		mainPanel.add(noiseLevelSlider, "1, 3");
 
-//		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
-//				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
-//		notCoExistenceThresholdSlider.addChangeListener(new ChangeListener() {
-//
-//			public void stateChanged(ChangeEvent e) {
-//				parameters.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
-//				model.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
-//				updateRight();
-//			}
-//		});
-//		notCoExistenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
-//		mainPanel.add(notCoExistenceThresholdSlider, "1, 10");
-//
+		//		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
+		//				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+		//		notCoExistenceThresholdSlider.addChangeListener(new ChangeListener() {
+		//
+		//			public void stateChanged(ChangeEvent e) {
+		//				parameters.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
+		//				model.setNotCoExistenceThreshold(notCoExistenceThresholdSlider.getSlider().getValue());
+		//				updateRight();
+		//			}
+		//		});
+		//		notCoExistenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
+		//		mainPanel.add(notCoExistenceThresholdSlider, "1, 10");
+		//
 		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -286,11 +303,42 @@ public class LogSkeletonBrowserPlugin {
 	private void updateRight() {
 		if (rightDotPanel != null) {
 			mainPanel.remove(rightDotPanel);
+			rightDotPanel = null;
 		}
-		rightDotPanel = new DotPanel(model.visualize(parameters));
+		System.out.println("[LogSkeletonBrowser] Updating Dot panel...");
+		rightDotPanel = new DotPanel(model.visualize(parameters)) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -1188986522911680121L;
+
+			public void repaint() {
+				// Prevent nesting of repaints, as resetView may trigger a new repaint.
+				if (!isRepainting) {
+					isRepainting = true;
+					System.out.println("[LogSkeletonBrowser] Repainting Dot panel...");
+					// Make sure all initialization has been done.
+					if (rightDotPanel != null) {
+						try {
+							// Without this, the dot panel disappears in the Filterd visualizer 
+							// when a drop-down menu is selected (?)
+							((DotPanel) rightDotPanel).resetView();
+						} catch (NoninvertibleTransformException e) {
+//							e.printStackTrace();
+						}
+					}
+					super.repaint();
+					isRepainting = false;
+					System.out.println("[LogSkeletonBrowser] Repainted Dot panel...");
+				}
+			}
+		};
+		rightDotPanel.setOpaque(true);
+		rightDotPanel.setBackground(Color.white);
 		mainPanel.add(rightDotPanel, "0, 0, 0, 10");
 		mainPanel.validate();
 		mainPanel.repaint();
 
 	}
+
 }

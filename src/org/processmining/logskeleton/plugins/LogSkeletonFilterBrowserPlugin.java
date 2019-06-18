@@ -30,6 +30,7 @@ import org.deckfour.xes.model.XTrace;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
+import org.processmining.contexts.util.CompositePanel;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.widgets.ProMList;
@@ -69,7 +70,19 @@ public class LogSkeletonFilterBrowserPlugin {
 		this.context = context;
 		this.log = log;
 		
-		mainPanel = new JPanel();
+		mainPanel = new CompositePanel() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -5348800905816927444L;
+
+			public JComponent getMainComponent() {
+				if (rightPanel instanceof CompositePanel) {
+					return ((CompositePanel) rightPanel).getMainComponent();
+				}
+				return rightPanel;
+			}
+		};
 		double size[][] = { { 250, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);

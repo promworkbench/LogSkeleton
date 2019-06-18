@@ -12,6 +12,7 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
+import org.processmining.contexts.util.CompositePanel;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
@@ -38,7 +39,19 @@ public class LogSkeletonVisualizerPlugin {
 		this.context = context;
 		this.log = log;
 		
-		mainPanel = new JPanel();
+		mainPanel = new CompositePanel() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2466318591928364179L;
+
+			public JComponent getMainComponent() {
+				if (bottomPanel instanceof CompositePanel) {
+					return ((CompositePanel) bottomPanel).getMainComponent();
+				}
+				return bottomPanel;
+			}
+		};
 		double size[][] = { { TableLayoutConstants.FILL }, { 30, TableLayoutConstants.FILL } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
