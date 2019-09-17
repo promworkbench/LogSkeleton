@@ -19,7 +19,7 @@ import org.processmining.logskeleton.panels.LogPartitionerPanel;
 		returnLabels = { "Event Log Array" }, //
 		returnTypes = { EventLogArray.class }, //
 		userAccessible = true, //
-		icon = "https://www.win.tue.nl/~hverbeek/downloads/prom_duck.png", //
+		icon = "prom_duck.png", //
 		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/17/partition-log-on-activity-sets/", //
 		help = "Partition Event Log on Activity Sets" //
 ) //
