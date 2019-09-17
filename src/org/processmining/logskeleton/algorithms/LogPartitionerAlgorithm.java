@@ -18,6 +18,7 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.log.models.EventLogArray;
 import org.processmining.log.models.impl.EventLogArrayFactory;
+import org.processmining.logskeleton.configurations.LogPartitionerConfiguration;
 
 public class LogPartitionerAlgorithm {
 
@@ -49,7 +50,8 @@ public class LogPartitionerAlgorithm {
 		logs.addLog(discardedLog);
 	}
 
-	public EventLogArray apply(XLog log, XEventClassifier classifier) {
+	public EventLogArray apply(XLog log, LogPartitionerConfiguration configuration) {
+		XEventClassifier classifier = configuration.getClassifier();
 		String name = XConceptExtension.instance().extractName(log);
 		Set<String> activities = new HashSet<String>();
 		for (XTrace trace : log) {
