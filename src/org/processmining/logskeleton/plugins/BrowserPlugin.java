@@ -19,7 +19,7 @@ import org.processmining.logskeleton.models.LogSkeleton;
 		returnTypes = {	JComponent.class }, //
 		userAccessible = true, //
 		icon = "prom_duck.png", //
-		url = "https://www.win.tue.nl/~hverbeek/", //
+		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/20/log-skeleton-browser/", //
 		help = "Log Skeleton Browser" //
 ) //
 @Visualizer //

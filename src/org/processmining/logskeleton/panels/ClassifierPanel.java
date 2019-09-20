@@ -31,7 +31,7 @@ public class ClassifierPanel extends JPanel {
 		setLayout(new TableLayout(size));
 		add(new org.processmining.log.dialogs.ClassifierPanel(log.getClassifiers(), configuration), "0, 0");
 		
-		final JCheckBox check1 = SlickerFactory.instance().createCheckBox("Create a resource for every filtered log skeleton and log (on All tab)",
+		final JCheckBox check1 = SlickerFactory.instance().createCheckBox("Push every log skeleton into the workspace",
 				false);
 		check1.setSelected(configuration.isCreateProvidedObjects());
 		check1.addActionListener(new ActionListener() {

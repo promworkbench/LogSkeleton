@@ -38,7 +38,7 @@ public class PartitionerPlugin extends PartitionerAlgorithm {
 		PartitionerInput input = new PartitionerInput(log);
 		PartitionerConfiguration configuration = new PartitionerConfiguration(input);
 		PartitionerPanel panel = new PartitionerPanel(log, configuration);
-		InteractionResult result = context.showWizard("Configure partitioning (classifier, resources)", true, true, panel);
+		InteractionResult result = context.showWizard("Configure partitioning (classifier, options)", true, true, panel);
 		if (result != InteractionResult.FINISHED) {
 			return null;
 		}

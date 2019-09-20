@@ -20,7 +20,7 @@ import org.processmining.logskeleton.panels.BuilderPanel;
 		returnTypes = { LogSkeleton.class }, //
 		userAccessible = true, //
 		icon = "prom_duck.png", //
-		url = "https://www.win.tue.nl/~hverbeek/", //
+		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/20/build-log-skeleton-from-event-log/", //
 		help = "Create Log Skeleton from Event Log" //
 ) //
 public class BuilderPlugin extends BuilderAlgorithm {
@@ -40,6 +40,7 @@ public class BuilderPlugin extends BuilderAlgorithm {
 		BuilderPanel panel = new BuilderPanel(log, configuration);
 		InteractionResult result = context.showWizard("Configure builder (classifier)", true, true, panel);
 		if (result != InteractionResult.FINISHED) {
+			context.getFutureResult(0).cancel(true);
 			return null;
 		}
 		return apply(context, input, configuration).getLogSkeleton();

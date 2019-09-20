@@ -16,7 +16,7 @@ import org.processmining.logskeleton.panels.CheckerPanel;
 @Plugin( //
 		name = "Filter Event Log on Log Skeleton", //
 		icon = "prom_duck.png", //
-		url = "http://www.win.tue.nl/~hverbeek", //
+		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/20/filter-event-log-on-log-skeleton/", //
 		parameterLabels = { "Log Skeleton", "Event log", "Configuration" }, //
 		returnLabels = { "Filtered Event Log" }, //
 		returnTypes = { XLog.class }, //
@@ -38,8 +38,9 @@ public class CheckerPlugin extends CheckerAlgorithm {
 		CheckerInput input = new CheckerInput(logSkeleton, log);
 		CheckerConfiguration configuration = new CheckerConfiguration(input);
 		CheckerPanel panel = new CheckerPanel(log, configuration);
-		InteractionResult result = context.showWizard("Configure checker (classifier, checks)", true, true, panel);
+		InteractionResult result = context.showWizard("Configure checker (classifier, options)", true, true, panel);
 		if (result != InteractionResult.FINISHED) {
+			context.getFutureResult(0).cancel(true);
 			return null;
 		}
 		return apply(context, input, configuration).getLog();

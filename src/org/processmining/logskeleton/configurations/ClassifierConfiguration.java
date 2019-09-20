@@ -17,7 +17,7 @@ public class ClassifierConfiguration implements ClassifierParameter {
 	private int maxFilterDepth;
 
 	public ClassifierConfiguration(ClassifierInput input) {
-		XLog log = input.getLog();
+		XLog log = input.getReferenceLog();
 		if (log.getClassifiers().size() > 0) {
 			classifier = log.getClassifiers().get(0);
 		} else {

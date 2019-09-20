@@ -14,7 +14,8 @@ import org.processmining.logskeleton.panels.ClassifierPanel;
 
 @Plugin( //
 		name = "Classify Log using Log Skeleton", //
-		icon = "prom_duck.png", url = "http://www.win.tue.nl/~hverbeek", //
+		icon = "prom_duck.png", //
+		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/20/classify-log-using-log-skeleton/", //
 		parameterLabels = { "Reference log", "Log", "Configuration" }, //
 		returnLabels = { "Classified Log" }, //
 		returnTypes = { XLog.class }, //
@@ -35,9 +36,10 @@ public class ClassifierPlugin extends ClassifierAlgorithm {
 	public XLog run(UIPluginContext context, XLog referenceLog, XLog log) {
 		ClassifierInput input = new ClassifierInput(referenceLog, log);
 		ClassifierConfiguration configuration = new ClassifierConfiguration(input);
-		ClassifierPanel panel = new ClassifierPanel(log, configuration);
-		InteractionResult result = context.showWizard("Configure classifier (classifier, resources)", true, true, panel);
+		ClassifierPanel panel = new ClassifierPanel(referenceLog, configuration);
+		InteractionResult result = context.showWizard("Configure classifier (classifier, options)", true, true, panel);
 		if (result != InteractionResult.FINISHED) {
+			context.getFutureResult(0).cancel(true);
 			return null;
 		}
 		return apply(context, input, configuration).getLog();

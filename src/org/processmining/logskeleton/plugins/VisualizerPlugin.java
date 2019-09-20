@@ -19,6 +19,8 @@ import org.processmining.logskeleton.inputs.VisualizerInput;
 		returnLabels = { "Log Skeleton Visualizer" }, //
 		returnTypes = { JComponent.class }, //
 		userAccessible = true, //
+		icon = "prom_duck.png", //
+		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/20/visualize-log-as-log-skeleton/", //
 		help = "Log Skeleton Visualizer" //
 ) //
 @Visualizer

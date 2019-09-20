@@ -28,7 +28,7 @@ public class PartitionerPanel extends JPanel {
 		setLayout(new TableLayout(size));
 		add(new ClassifierPanel(log.getClassifiers(), configuration), "0, 0");
 
-		final JCheckBox check1 = SlickerFactory.instance().createCheckBox("Create a resource for every sublog (on All tab)",
+		final JCheckBox check1 = SlickerFactory.instance().createCheckBox("Push every sublog into the workspace",
 				false);
 		check1.setSelected(configuration.isCreateProvidedObjects());
 		check1.addActionListener(new ActionListener() {
