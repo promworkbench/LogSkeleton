@@ -16,7 +16,7 @@ public class BuilderPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = -1040026869625729765L;
 
-	public BuilderPanel(XLog log, BuilderConfiguration configuration) {
+	public BuilderPanel(XLog log, final BuilderConfiguration configuration) {
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(size));
 		add(new ClassifierPanel(log.getClassifiers(), configuration), "0, 0");

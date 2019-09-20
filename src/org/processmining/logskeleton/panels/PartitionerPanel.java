@@ -23,7 +23,7 @@ public class PartitionerPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 8303071009985037223L;
 
-	public PartitionerPanel(XLog log, PartitionerConfiguration configuration) {
+	public PartitionerPanel(XLog log, final PartitionerConfiguration configuration) {
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL, 30 } };
 		setLayout(new TableLayout(size));
 		add(new ClassifierPanel(log.getClassifiers(), configuration), "0, 0");

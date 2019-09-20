@@ -23,7 +23,7 @@ public class CheckerPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 5707483507050383273L;
 
-	public CheckerPanel(XLog log, CheckerConfiguration configuration) {
+	public CheckerPanel(XLog log, final CheckerConfiguration configuration) {
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL, 30, 30, 30, 30 } };
 		setLayout(new TableLayout(size));
 		add(new ClassifierPanel(log.getClassifiers(), configuration), "0, 0");

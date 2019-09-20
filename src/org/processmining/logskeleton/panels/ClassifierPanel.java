@@ -26,7 +26,7 @@ public class ClassifierPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 676186087055650845L;
 
-	public ClassifierPanel(XLog log, ClassifierConfiguration configuration) {
+	public ClassifierPanel(XLog log, final ClassifierConfiguration configuration) {
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL, 30, 30 } };
 		setLayout(new TableLayout(size));
 		add(new org.processmining.log.dialogs.ClassifierPanel(log.getClassifiers(), configuration), "0, 0");
