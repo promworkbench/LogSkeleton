@@ -49,7 +49,7 @@ public class BrowserAlgorithm {
 	private JPanel mainPanel = null;
 	private boolean isRepainting = false;
 
-	public BrowserOutput apply(PluginContext context, BrowserInput input, BrowserConfiguration configuration) {
+	public BrowserOutput apply(PluginContext context, BrowserInput input, final BrowserConfiguration configuration) {
 
 		this.model = input.getLogSkeleton();
 		this.configuration = configuration;
