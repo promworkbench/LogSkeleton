@@ -1,8 +1,5 @@
 package org.processmining.logskeleton.pdc2017.dialogs;
 
-import info.clearthought.layout.TableLayout;
-import info.clearthought.layout.TableLayoutConstants;
-
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,9 +14,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.processmining.framework.util.ui.widgets.ProMList;
-import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
+import org.processmining.logskeleton.algorithms.PreprocessorAlgorithm;
 import org.processmining.logskeleton.pdc2017.parameters.PDC2017TestParameters;
 import org.processmining.pdc2017.algorithms.PDC2017Set;
+
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
 
 public class PDC2017TestDialog extends JComponent {
 
@@ -87,30 +87,30 @@ public class PDC2017TestDialog extends JComponent {
 		nrList.setPreferredSize(new Dimension(100, 100));
 		add(nrList, "1, 0");
 		
-		DefaultListModel<LogPreprocessorAlgorithm> preprocessors = new DefaultListModel<LogPreprocessorAlgorithm>();
+		DefaultListModel<PreprocessorAlgorithm> preprocessors = new DefaultListModel<PreprocessorAlgorithm>();
 		selectedIndices = new int[1];
 		i = 0;
 		j = 0;
-		List<LogPreprocessorAlgorithm> sortedPreprocessors = new ArrayList<LogPreprocessorAlgorithm>();
+		List<PreprocessorAlgorithm> sortedPreprocessors = new ArrayList<PreprocessorAlgorithm>();
 		sortedPreprocessors.addAll(parameters.getAllPreprocessors());
-		Collections.sort(sortedPreprocessors, new Comparator<LogPreprocessorAlgorithm>() {
-			public int compare(LogPreprocessorAlgorithm prep1, LogPreprocessorAlgorithm prep2) {
+		Collections.sort(sortedPreprocessors, new Comparator<PreprocessorAlgorithm>() {
+			public int compare(PreprocessorAlgorithm prep1, PreprocessorAlgorithm prep2) {
 				return prep1.toString().compareTo(prep2.toString());
 			}
 		});
-		for (LogPreprocessorAlgorithm preprocessor : sortedPreprocessors) {
+		for (PreprocessorAlgorithm preprocessor : sortedPreprocessors) {
 			preprocessors.addElement(preprocessor);
 			if (parameters.getPreprocessor().equals(preprocessor)) {
 				selectedIndices[j++] = i;
 			}
 			i++;
 		}
-		final ProMList<LogPreprocessorAlgorithm> preprocessorList = new ProMList<LogPreprocessorAlgorithm>("Select preprocessor", preprocessors);
+		final ProMList<PreprocessorAlgorithm> preprocessorList = new ProMList<PreprocessorAlgorithm>("Select preprocessor", preprocessors);
 		preprocessorList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		preprocessorList.setSelectedIndices(selectedIndices);
 		preprocessorList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				List<LogPreprocessorAlgorithm> selectedPreprocessors = preprocessorList.getSelectedValuesList();
+				List<PreprocessorAlgorithm> selectedPreprocessors = preprocessorList.getSelectedValuesList();
 				if (selectedPreprocessors.size() == 1) {
 					parameters.setPreprocessor(selectedPreprocessors.iterator().next());
 				}

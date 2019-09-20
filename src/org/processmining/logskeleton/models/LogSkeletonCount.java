@@ -8,7 +8,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import org.deckfour.xes.model.XTrace;
+import org.processmining.logskeleton.configurations.CheckerConfiguration;
+import org.processmining.logskeleton.models.violations.ViolationCardinality;
 
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
@@ -52,18 +55,22 @@ public class LogSkeletonCount {
 		transitionCounts = new HashMap<List<String>, Integer>();
 	}
 
-	public boolean checkTransitionCounts(LogSkeletonCount model, Set<String> messages, String caseId) {
+	public Collection<Violation> checkTransitionCounts(LogSkeletonCount model, CheckerConfiguration configuration, XTrace trace) {
+		Collection<Violation> violations = new HashSet<Violation>();
 		for (List<String> transition : model.transitionCounts.keySet()) {
 			if (!transitionCounts.keySet().contains(transition)) {
-				messages.add("[LogSkeletonCount] Case " + caseId + ": Next fails for " + transition);
-				return false;
-			}
-			if (transitionCounts.get(transition) < model.transitionCounts.get(transition)) {
-				messages.add("[LogSkeletonCount] Case " + caseId + ": Next fails for " + transition);
-				return false;
+				violations.add(new ViolationCardinality(trace, new HashSet<String>(transition)));
+				if (configuration.isStopAtFirstViolation()) {
+					return violations;
+				}
+			} else if (transitionCounts.get(transition) < model.transitionCounts.get(transition)) {
+				violations.add(new ViolationCardinality(trace, new HashSet<String>(transition)));
+				if (configuration.isStopAtFirstViolation()) {
+					return violations;
+				}
 			}
 		}
-		return true;
+		return violations;
 	}
 
 	public Integer get(String activity) {

@@ -18,6 +18,10 @@ import org.processmining.logskeleton.models.LogSkeletonCount;
 import org.processmining.logskeleton.plugins.LogSkeletonBuilderPlugin;
 import org.processmining.logskeleton.plugins.LogSkeletonCheckerPlugin;
 
+/*
+ * @deprecated Use ClassifierAlgorithm instead.
+ */
+@Deprecated
 public class LogSkeletonClassifierAlgorithm {
 
 	public XLog apply(PluginContext context, XLog trainingLog, XLog testLog, XEventClassifier classifier, LogPreprocessorAlgorithm preprocessor) {

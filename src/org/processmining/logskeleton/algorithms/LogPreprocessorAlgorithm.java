@@ -3,6 +3,10 @@ package org.processmining.logskeleton.algorithms;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.logskeleton.models.ClassificationProblem;
 
+/*
+ * @deprecated Use PreprocessorAlgorithm instead.
+ */
+@Deprecated
 public class LogPreprocessorAlgorithm {
 
 	public ClassificationProblem preprocess(PluginContext context, ClassificationProblem problem) {

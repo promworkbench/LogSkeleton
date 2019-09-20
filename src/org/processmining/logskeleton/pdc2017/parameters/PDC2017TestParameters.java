@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
+import org.processmining.logskeleton.algorithms.PreprocessorAlgorithm;
 import org.processmining.logskeleton.pdc2017.algorithms.PDC2017LogPreprocessorAlgorithm;
 import org.processmining.pdc2017.algorithms.PDC2017Set;
 
@@ -12,8 +12,8 @@ public class PDC2017TestParameters {
 
 	private Set<PDC2017Set> sets;
 	private Set<PDC2017Set> allSets;
-	private LogPreprocessorAlgorithm preprocessor;
-	private Set<LogPreprocessorAlgorithm> allPreprocessors;
+	private PreprocessorAlgorithm preprocessor;
+	private Set<PreprocessorAlgorithm> allPreprocessors;
 	private Set<Integer> nrs;
 	private Set<Integer> allNrs;
 
@@ -34,8 +34,8 @@ public class PDC2017TestParameters {
 		}
 
 		preprocessor = new PDC2017LogPreprocessorAlgorithm();
-		allPreprocessors = new HashSet<LogPreprocessorAlgorithm>();
-		allPreprocessors.add(new LogPreprocessorAlgorithm());
+		allPreprocessors = new HashSet<PreprocessorAlgorithm>();
+		allPreprocessors.add(new PreprocessorAlgorithm());
 		allPreprocessors.add(preprocessor);
 		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(false, false, true));
 		allPreprocessors.add(new PDC2017LogPreprocessorAlgorithm(true, false, false));
@@ -53,11 +53,11 @@ public class PDC2017TestParameters {
 		this.sets = sets;
 	}
 
-	public LogPreprocessorAlgorithm getPreprocessor() {
+	public PreprocessorAlgorithm getPreprocessor() {
 		return preprocessor;
 	}
 
-	public void setPreprocessor(LogPreprocessorAlgorithm preprocessor) {
+	public void setPreprocessor(PreprocessorAlgorithm preprocessor) {
 		this.preprocessor = preprocessor;
 	}
 
@@ -69,11 +69,11 @@ public class PDC2017TestParameters {
 		this.allSets = allSets;
 	}
 
-	public Set<LogPreprocessorAlgorithm> getAllPreprocessors() {
+	public Set<PreprocessorAlgorithm> getAllPreprocessors() {
 		return allPreprocessors;
 	}
 
-	public void setAllPreprocessors(Set<LogPreprocessorAlgorithm> allPreprocessors) {
+	public void setAllPreprocessors(Set<PreprocessorAlgorithm> allPreprocessors) {
 		this.allPreprocessors = allPreprocessors;
 	}
 

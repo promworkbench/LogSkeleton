@@ -1,25 +1,20 @@
 package org.processmining.logskeleton.panels;
 
-import javax.swing.JPanel;
-
 import org.deckfour.xes.model.XLog;
-import org.processmining.log.dialogs.ClassifierPanel;
-import org.processmining.logskeleton.configurations.LogPartitionerConfiguration;
+import org.processmining.logskeleton.configurations.PartitionerConfiguration;
 
-import info.clearthought.layout.TableLayout;
-import info.clearthought.layout.TableLayoutConstants;
-
-public class LogPartitionerPanel extends JPanel {
+/*
+ * @deprecated Use PartitionerPanel instead.
+ */
+@Deprecated
+public class LogPartitionerPanel extends PartitionerPanel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4120395848381308094L;
 
-	public LogPartitionerPanel(XLog log, LogPartitionerConfiguration configuration) {
-		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
-		setLayout(new TableLayout(size));
-		add(new ClassifierPanel(log.getClassifiers(), configuration), "0, 0");
-
+	public LogPartitionerPanel(XLog log, PartitionerConfiguration configuration) {
+		super(log, configuration);
 	}
 }

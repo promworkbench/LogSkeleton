@@ -8,9 +8,10 @@ import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
-import org.processmining.logskeleton.algorithms.LogSkeletonClassifierAlgorithm;
+import org.processmining.logskeleton.algorithms.ClassifierAlgorithm;
 import org.processmining.logskeleton.classifiers.LogSkeletonClassifier;
+import org.processmining.logskeleton.configurations.ClassifierConfiguration;
+import org.processmining.logskeleton.inputs.ClassifierInput;
 import org.processmining.logskeleton.pdc2016.dialogs.PDC2016TestDialog;
 import org.processmining.logskeleton.pdc2016.models.PDC2016TestModel;
 import org.processmining.logskeleton.pdc2016.parameters.PDC2016TestParameters;
@@ -49,7 +50,7 @@ public class PDC2016TestPlugin {
 				parameters.setSet(PDC2016Set.TEST);
 				XLog testLogFinal = testParameters.getSets().contains(PDC2016Set.TEST) ? logAlgorithm.apply(context, parameters) : null;
 
-				LogSkeletonClassifierAlgorithm classifierAlgorithm = new LogSkeletonClassifierAlgorithm();
+				ClassifierAlgorithm classifierAlgorithm = new ClassifierAlgorithm();
 
 				XLog classifiedTestLogCal1 = null;
 				XLog classifiedTestLogCal2 = null;
@@ -58,22 +59,28 @@ public class PDC2016TestPlugin {
 				// Classify the logs
 				if (testParameters.getSets().contains(PDC2016Set.CAL1)) {
 					System.out.println("[PDC2016TestPlugin] Classify PDC2016 " + PDC2016Set.CAL1 + " number " + i);
-					classifiedTestLogCal1 = classifierAlgorithm.apply(context, trainingLog, testLogMay, classifier, 
-							new LogPreprocessorAlgorithm());
+					ClassifierInput input = new ClassifierInput(trainingLog, testLogMay);
+					ClassifierConfiguration configuration = new ClassifierConfiguration(input);
+					configuration.setClassifier(classifier);
+					classifiedTestLogCal1 = classifierAlgorithm.apply(context, input, configuration).getLog();
 					context.getProvidedObjectManager().createProvidedObject("PDC2016 " + PDC2016Set.CAL1 + " number " + i,
 							classifiedTestLogCal1, XLog.class, context);
 				}
 				if (testParameters.getSets().contains(PDC2016Set.CAL2)) {
 					System.out.println("[PDC2016TestPlugin] Classify PDC2016 " + PDC2016Set.CAL2 + " number " + i);
-					classifiedTestLogCal2 = classifierAlgorithm.apply(context, trainingLog, testLogJune, classifier, 
-							new LogPreprocessorAlgorithm());
+					ClassifierInput input = new ClassifierInput(trainingLog, testLogJune);
+					ClassifierConfiguration configuration = new ClassifierConfiguration(input);
+					configuration.setClassifier(classifier);
+					classifiedTestLogCal2 = classifierAlgorithm.apply(context, input, configuration).getLog();
 					context.getProvidedObjectManager().createProvidedObject("PDC2016 " + PDC2016Set.CAL2 + " number " + i,
 							classifiedTestLogCal2, XLog.class, context);
 				}
 				if (testParameters.getSets().contains(PDC2016Set.TEST)) {
 					System.out.println("[PDC2016TestPlugin] Classify PDC2016 " + PDC2016Set.TEST + " number " + i);
-					classifiedTestLogTest = classifierAlgorithm.apply(context, trainingLog, testLogFinal, classifier, 
-							new LogPreprocessorAlgorithm());
+					ClassifierInput input = new ClassifierInput(trainingLog, testLogFinal);
+					ClassifierConfiguration configuration = new ClassifierConfiguration(input);
+					configuration.setClassifier(classifier);
+					classifiedTestLogTest = classifierAlgorithm.apply(context, input, configuration).getLog();
 					context.getProvidedObjectManager().createProvidedObject("PDC2016 " + PDC2016Set.TEST + " number " + i,
 							classifiedTestLogTest, XLog.class, context);
 				}

@@ -11,7 +11,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.framework.plugin.PluginContext;
-import org.processmining.logskeleton.algorithms.LogPreprocessorAlgorithm;
+import org.processmining.logskeleton.algorithms.PreprocessorAlgorithm;
 import org.processmining.logskeleton.models.ClassificationProblem;
 import org.processmining.logskeleton.pdc2017.plugins.PDC2017Log10FilterPlugin;
 import org.processmining.logskeleton.pdc2017.plugins.PDC2017Log10SplitterPlugin;
@@ -25,7 +25,7 @@ import org.processmining.logskeleton.pdc2017.plugins.PDC2017Log7SplitterPlugin;
 import org.processmining.logskeleton.pdc2017.plugins.PDC2017Log9FilterPlugin;
 import org.processmining.logskeleton.pdc2017.plugins.PDC2017Log9SplitterPlugin;
 
-public class PDC2017LogPreprocessorAlgorithm extends LogPreprocessorAlgorithm {
+public class PDC2017LogPreprocessorAlgorithm extends PreprocessorAlgorithm {
 
 	private boolean useFilters;
 	private boolean useExtenders;

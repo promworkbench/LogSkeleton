@@ -12,14 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.deckfour.xes.extension.std.XConceptExtension;
+import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.framework.annotations.AuthoredType;
 import org.processmining.framework.annotations.Icon;
 import org.processmining.framework.util.HTMLToString;
-import org.processmining.logskeleton.parameters.LogSkeletonBrowser;
-import org.processmining.logskeleton.parameters.LogSkeletonBrowserParameters;
+import org.processmining.logskeleton.classifiers.PrefixClassifier;
+import org.processmining.logskeleton.configurations.BrowserConfiguration;
+import org.processmining.logskeleton.configurations.CheckerConfiguration;
+import org.processmining.logskeleton.models.violations.ViolationEquivalence;
+import org.processmining.logskeleton.models.violations.ViolationNotPrecedence;
+import org.processmining.logskeleton.models.violations.ViolationNotResponse;
+import org.processmining.logskeleton.models.violations.ViolationPrecedence;
+import org.processmining.logskeleton.models.violations.ViolationResponse;
 import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.graphviz.dot.DotEdge;
 import org.processmining.plugins.graphviz.dot.DotNode;
@@ -80,7 +86,6 @@ public class LogSkeleton implements HTMLToString {
 		this(new LogSkeletonCount());
 	}
 
-	@SuppressWarnings("unchecked")
 	public LogSkeleton(LogSkeletonCount countModel) {
 		this.countModel = countModel;
 		//		sameCounts = new HashSet<Collection<String>>();
@@ -206,31 +211,34 @@ public class LogSkeleton implements HTMLToString {
 		map.get(activity).removeAll(mappedMappedActivities);
 	}
 
-	private boolean checkSameCounts(LogSkeletonCount model, Set<String> messages, String caseId) {
-		boolean ok = true;
+	private Collection<Violation> checkSameCounts(LogSkeletonCount model, CheckerConfiguration configuration, XTrace trace) {
+		Set<Violation> violations = new HashSet<Violation>();
 		for (Collection<String> sameCount : sameCounts) {
 			Set<Integer> counts = new HashSet<Integer>();
 			for (String activity : sameCount) {
 				counts.add(model.get(activity));
 			}
 			if (counts.size() != 1) {
-				messages.add("[LogSkeleton] Case " + caseId + ": Always Together fails for " + sameCount);
-				ok = false;
+				violations.add(new ViolationEquivalence(trace, new HashSet<String>(sameCount)));
+				if (configuration.isStopAtFirstViolation()) {
+					return violations;
+				}
 			}
 		}
-		return ok;
+		return violations;
 	}
 
-	private boolean checkTransitionCounts(LogSkeletonCount model, Set<String> messages, String caseId) {
-		return countModel.checkTransitionCounts(model, messages, caseId);
+	private Collection<Violation> checkTransitionCounts(LogSkeletonCount model, CheckerConfiguration configuration, XTrace trace) {
+		return countModel.checkTransitionCounts(model, configuration, trace);
 	}
 
-	private boolean checkCausalDependencies(XTrace trace, Set<String> messages) {
-		String caseId = XConceptExtension.instance().extractName(trace);
+	private Collection<Violation> checkCausalDependencies(XTrace trace, CheckerConfiguration configuration) {
+		XEventClassifier classifier = new PrefixClassifier(configuration.getClassifier());
 		List<String> postset = new ArrayList<String>();
 		postset.add(LogSkeletonCount.STARTEVENT);
+		Set<Violation> violations = new HashSet<Violation>();
 		for (XEvent event : trace) {
-			postset.add(XConceptExtension.instance().extractName(event));
+			postset.add(classifier.getClassIdentity(event));
 		}
 		postset.add(LogSkeletonCount.ENDEVENT);
 		List<String> preset = new ArrayList<String>();
@@ -243,63 +251,69 @@ public class LogSkeleton implements HTMLToString {
 			if (precedences.containsKey(activity) && !preset.containsAll(precedences.get(activity))) {
 				Set<String> missing = new HashSet<String>(precedences.get(activity));
 				missing.removeAll(preset);
-				messages.add("[LogSkeleton] Case " + caseId + ": Precedence fails for " + activity + ", missing are "
-						+ missing);
-				return false;
+				violations.add(new ViolationPrecedence(trace, activity, missing));
+				if (configuration.isStopAtFirstViolation()) {
+					return violations;
+				}
 			}
 			if (responses.containsKey(activity) && !postset.containsAll(responses.get(activity))) {
 				Set<String> missing = new HashSet<String>(responses.get(activity));
 				missing.removeAll(postset);
-				messages.add("[LogSkeleton] Case " + caseId + ": Response fails for " + activity + ", missing are "
-						+ missing);
-				return false;
+				violations.add(new ViolationResponse(trace, activity, missing));
+				if (configuration.isStopAtFirstViolation()) {
+					return violations;
+				}
 			}
 			Set<String> notPreset = new HashSet<String>(countModel.getActivities());
 			notPreset.removeAll(preset);
 			if (notPrecedences.containsKey(activity) && !notPreset.containsAll(notPrecedences.get(activity))) {
 				Set<String> present = new HashSet<String>(notPrecedences.get(activity));
 				present.removeAll(notPreset);
-				messages.add("[LogSkeleton] Case " + caseId + ": Not Precedence fails for " + activity + ", present are "
-						+ present);
-				return false;
+				violations.add(new ViolationNotPrecedence(trace, activity, present));
+				if (configuration.isStopAtFirstViolation()) {
+					return violations;
+				}
 			}
 			Set<String> notPostset = new HashSet<String>(countModel.getActivities());
 			notPostset.removeAll(postset);
 			if (notResponses.containsKey(activity) && !notPostset.containsAll(notResponses.get(activity))) {
 				Set<String> present = new HashSet<String>(notResponses.get(activity));
 				present.removeAll(notPostset);
-				messages.add("[LogSkeleton] Case " + caseId + ": Not Response fails for " + activity + ", present are "
-						+ present);
-				return false;
+				violations.add(new ViolationNotResponse(trace, activity, present));
+				if (configuration.isStopAtFirstViolation()) {
+					return violations;
+				}
 			}
 			prevActivity = activity;
 		}
-		return true;
+		return violations;
 	}
 
-	public boolean check(XTrace trace, LogSkeletonCount model, Set<String> messages, boolean[] checks) {
-		boolean ok = true;
+	public Collection<Violation> check(XTrace trace, LogSkeletonCount model, CheckerConfiguration configuration) {
+		boolean[] checks = configuration.getChecks();
+		Set<Violation> violations = new HashSet<Violation>();
+		
 		if (checks[0]) {
-			ok = ok && checkSameCounts(model, messages, XConceptExtension.instance().extractName(trace));
-			if (!ok) {
-				return false;
+			violations.addAll(checkSameCounts(model, configuration, trace));
+			if (configuration.isStopAtFirstViolation() && !violations.isEmpty()) {
+				return violations;
 			}
 		}
 		if (checks[1]) {
-			ok = ok && checkCausalDependencies(trace, messages);
-			if (!ok) {
-				return false;
+			violations.addAll(checkCausalDependencies(trace, configuration));
+			if (configuration.isStopAtFirstViolation() && !violations.isEmpty()) {
+				return violations;
 			}
 		}
 		if (checks[2]) {
-			ok = ok && checkTransitionCounts(model, messages, XConceptExtension.instance().extractName(trace));
-			if (!ok) {
-				return false;
+			violations.addAll(checkTransitionCounts(model, configuration, trace));
+			if (configuration.isStopAtFirstViolation() && !violations.isEmpty()) {
+				return violations;
 			}
 		}
-		return ok;
+		return violations;
 	}
-
+	
 	public String toHTMLString(boolean includeHTMLTags) {
 		StringBuffer buf = new StringBuffer();
 		List<String> sorted;
@@ -345,7 +359,7 @@ public class LogSkeleton implements HTMLToString {
 		return buf.toString();
 	}
 
-	public Dot visualize(LogSkeletonBrowserParameters parameters) {
+	public Dot visualize(BrowserConfiguration configuration) {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
 		//		graph.setOption("concentrate", "true");
@@ -375,61 +389,47 @@ public class LogSkeleton implements HTMLToString {
 		int colorIndex = 0;
 		Map<String, String> colorMap = new HashMap<String, String>();
 
-		Set<String> activities = new HashSet<String>(parameters.getActivities());
+		Set<String> activities = new HashSet<String>(configuration.getActivities());
 
-		setPrecedenceThreshold(parameters.getPrecedenceThreshold());
-		setResponseThreshold(parameters.getResponseThreshold());
-		setNotCoExistenceThreshold(parameters.getNotCoExistenceThreshold());
+		setPrecedenceThreshold(configuration.getPrecedenceThreshold());
+		setResponseThreshold(configuration.getResponseThreshold());
+		setNotCoExistenceThreshold(configuration.getNotCoExistenceThreshold());
 
-		if (parameters.isUseNeighbors()) {
+		if (configuration.isUseNeighbors()) {
 			for (String fromActivity : countModel.getActivities()) {
 				for (String toActivity : countModel.getActivities()) {
-					if (parameters.getActivities().contains(fromActivity)
-							|| parameters.getActivities().contains(toActivity)) {
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
+					if (configuration.getActivities().contains(fromActivity)
+							|| configuration.getActivities().contains(toActivity)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSAFTER)) {
 							if (responses.get(fromActivity).contains(toActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSBEFORE)) {
 							if (precedences.get(toActivity).contains(fromActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERAFTER)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERAFTER)) {
 							if (notResponses.get(fromActivity).contains(toActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERBEFORE)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERBEFORE)) {
 							if (notPrecedences.get(toActivity).contains(fromActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-						//							if (countModel.get(toActivity, fromActivity) == 0
-						//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
-						//								activities.add(fromActivity);
-						//								activities.add(toActivity);
-						//							}
-						//						}
-						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-						//							if (countModel.get(toActivity, fromActivity) == 0
-						//									&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
-						//								activities.add(fromActivity);
-						//								activities.add(toActivity);
-						//							}
-						//						}
-						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERTOGETHER)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
-										&& (!parameters.isUseEquivalenceClass()
+										&& (!configuration.isUseEquivalenceClass()
 												|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
-										&& (!parameters.isUseEquivalenceClass()
+										&& (!configuration.isUseEquivalenceClass()
 												|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 										&& notCoExistences.get(fromActivity).contains(toActivity)) {
 									activities.add(fromActivity);
@@ -437,22 +437,6 @@ public class LogSkeleton implements HTMLToString {
 								}
 							}
 						}
-						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
-						//							if (countModel.get(fromActivity, toActivity) > 0
-						//									&& countModel.get(toActivity, fromActivity) == 0) {
-						//								activities.add(fromActivity);
-						//								activities.add(toActivity);
-						//							}
-						//						}
-						//						if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-						//							if (fromActivity.compareTo(toActivity) <= 0) {
-						//								if (countModel.get(fromActivity, toActivity) > 0
-						//										&& countModel.get(toActivity, fromActivity) > 0) {
-						//									activities.add(fromActivity);
-						//									activities.add(toActivity);
-						//								}
-						//							}
-						//						}
 					}
 				}
 			}
@@ -473,7 +457,7 @@ public class LogSkeleton implements HTMLToString {
 				interval += ".." + countModel.getMax(activity);
 			}
 			int border = 0;
-			if (parameters.getActivities().contains(activity)) {
+			if (configuration.getActivities().contains(activity)) {
 				border = 1;
 			}
 
@@ -497,8 +481,8 @@ public class LogSkeleton implements HTMLToString {
 
 		for (String fromActivity : activities) {
 			for (String toActivity : activities) {
-				if (parameters.getActivities().contains(fromActivity)
-						|| parameters.getActivities().contains(toActivity)) {
+				if (configuration.getActivities().contains(fromActivity)
+						|| configuration.getActivities().contains(toActivity)) {
 					String tailDecorator = null;
 					String headDecorator = null;
 					String tailLabel = null;
@@ -508,54 +492,34 @@ public class LogSkeleton implements HTMLToString {
 					String headColor = null;
 					String tailColor = null;
 					boolean isAsymmetric = true;
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSAFTER)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSAFTER)) {
 						if (tailDecorator == null && responses.get(fromActivity).contains(toActivity)) {
 							tailDecorator = "noneinv";
-//							headArrow = "normal";
 							tailColor = alwaysColor;
 							int threshold = responses.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
 								tailColor = almostAlwaysColor;
 							}
-							//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
 					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.ALWAYSBEFORE)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSBEFORE)) {
 						if (headDecorator == null && precedences.get(toActivity).contains(fromActivity)) {
 							headDecorator = "normal";
-//							headArrow = "normal";
 							headColor = alwaysColor;
 							int threshold = precedences.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
 								headLabel = "." + threshold;
 								headColor = almostAlwaysColor;
 							}
-							//							System.out.println("[LogSkeleton] headLabel = " + headLabel);
 						}
 					}
-					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENNEXT)) {
-					//						if (tailDecorator == null && countModel.get(toActivity, fromActivity) == 0
-					//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(fromActivity))) {
-					//							tailDecorator = "odot";
-					//							headArrow = "normal";
-					//							headLabel = "" + countModel.get(fromActivity, toActivity);
-					//						}
-					//					}
-					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.OFTENPREVIOUS)) {
-					//						if (headDecorator == null && countModel.get(toActivity, fromActivity) == 0
-					//								&& (5 * countModel.get(fromActivity, toActivity) > countModel.get(toActivity))) {
-					//							headDecorator = "odot";
-					//							headArrow = "normal";
-					//							headLabel = "" + countModel.get(fromActivity, toActivity);
-					//						}
-					//					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERTOGETHER)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERTOGETHER)) {
 						if (!fromActivity.equals(toActivity)) {
 							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
-									&& (!parameters.isUseEquivalenceClass()
+									&& (!configuration.isUseEquivalenceClass()
 											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
-									&& (!parameters.isUseEquivalenceClass()
+									&& (!configuration.isUseEquivalenceClass()
 											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 									&& notCoExistences.get(toActivity).contains(fromActivity)) {
 								headDecorator = "nonetee";
@@ -569,13 +533,12 @@ public class LogSkeleton implements HTMLToString {
 								}
 							}
 							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
-									&& (!parameters.isUseEquivalenceClass()
+									&& (!configuration.isUseEquivalenceClass()
 											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
-									&& (!parameters.isUseEquivalenceClass()
+									&& (!configuration.isUseEquivalenceClass()
 											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 									&& notCoExistences.get(fromActivity).contains(toActivity)) {
 								tailDecorator = "nonetee";
-								//								dummy = true;
 								isAsymmetric = false;
 								tailColor = neverColor;
 								int threshold = notCoExistences.get(fromActivity).getMaxThreshold(toActivity);
@@ -586,72 +549,32 @@ public class LogSkeleton implements HTMLToString {
 							}
 						}
 					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERAFTER)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERAFTER)) {
 						if (!fromActivity.equals(toActivity) && headDecorator == null
 								&& notResponses.get(toActivity).contains(fromActivity) 
 								/*&& !notResponses.get(fromActivity).contains(toActivity)*/) {
 							headDecorator = "noneinvtee";
-//							tailArrow = "normal";
 							headColor = alwaysNotColor;
 							int threshold = notResponses.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
 								headLabel = "." + threshold;
 								headColor = almostAlwaysNotColor;
 							}
-							//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
 					}
-					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEVERBEFORE)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERBEFORE)) {
 						if (!fromActivity.equals(toActivity) && tailDecorator == null
 								&& notPrecedences.get(fromActivity).contains(toActivity)
 								/*&& !notPrecedences.get(toActivity).contains(fromActivity)*/) {
 							tailDecorator = "teenormal";
-//							tailArrow = "normal";
 							tailColor = alwaysNotColor;
 							int threshold = notPrecedences.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
 								tailColor = almostAlwaysNotColor;
 							}
-							//							System.out.println("[LogSkeleton] tailLabel = " + tailLabel);
 						}
 					}
-					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTONEWAY)) {
-					//						if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-					//								&& countModel.get(toActivity, fromActivity) == 0) {
-					//							tailDecorator = "odot";
-					//							if (headLabel == null) {
-					//								headLabel = "" + countModel.get(fromActivity, toActivity);
-					//							}
-					//							if (headArrow == null) {
-					//								headArrow = "normal";
-					//							}
-					//						}
-					//					}
-					//					if (parameters.getVisualizers().contains(LogSkeletonBrowser.NEXTBOTHWAYS)) {
-					//						if (fromActivity.compareTo(toActivity) <= 0) {
-					//							if (tailDecorator == null && countModel.get(fromActivity, toActivity) > 0
-					//									&& countModel.get(toActivity, fromActivity) > 0) {
-					//								tailDecorator = "odot";
-					//								if (headLabel == null) {
-					//									headLabel = "" + countModel.get(fromActivity, toActivity);
-					//								}
-					//								if (headArrow == null) {
-					//									headArrow = "normal";
-					//								}
-					//							}
-					//							if (headDecorator == null && countModel.get(fromActivity, toActivity) > 0
-					//									&& countModel.get(toActivity, fromActivity) > 0) {
-					//								headDecorator = "odot";
-					//								if (tailLabel == null) {
-					//									tailLabel = "" + countModel.get(toActivity, fromActivity);
-					//								}
-					//								if (tailArrow == null) {
-					//									tailArrow = "vee";
-					//								}
-					//							}
-					//						}
-					//					}
 					if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
 						DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
 						arc.setOption("dir", "both");
@@ -669,16 +592,15 @@ public class LogSkeleton implements HTMLToString {
 						}
 						arc.setOption("arrowtail", tailDecorator + tailArrow);
 						arc.setOption("arrowhead", headDecorator + headArrow);
-						if (parameters.isUseFalseConstraints() && !isAsymmetric) {
+						if (configuration.isUseFalseConstraints() && !isAsymmetric) {
 							arc.setOption("constraint", "false");
 						}
-						if (parameters.isUseEdgeColors() && (headColor != null || tailColor != null)) {
+						if (configuration.isUseEdgeColors() && (headColor != null || tailColor != null)) {
 							String color = (tailColor == null ? defaultColor : tailColor) + ";0.5:"
 									+ (headColor == null ? defaultColor : headColor) + ";0.5";
 							arc.setOption("color", color);
 						}
-						//						arc.setOption("constraint", "true");
-						if (parameters.isUseHeadTailLabels()) {
+						if (configuration.isUseHeadTailLabels()) {
 							if (headLabel != null) {
 								arc.setOption("headlabel", headLabel);
 							}
@@ -701,7 +623,7 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 
-		if (parameters.isUseHyperArcs())
+		if (configuration.isUseHyperArcs())
 
 		{
 			/*
@@ -891,7 +813,7 @@ public class LogSkeleton implements HTMLToString {
 		//		if (!splitters.isEmpty()) {
 		//			label += "Activity Splitters: " + splitters + "\\l";
 		//		}
-		List<String> selectedActivities = new ArrayList<String>(parameters.getActivities());
+		List<String> selectedActivities = new ArrayList<String>(configuration.getActivities());
 		Collections.sort(selectedActivities);
 		//		label += "Show Activities: " + activities + "\\l";
 		//		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
@@ -910,7 +832,7 @@ public class LogSkeleton implements HTMLToString {
 			label += encodeRow("Activity Splitters", splitters.toString());
 		}
 		label += encodeRow("View Activities", selectedActivities.toString());
-		label += encodeRow("View Constraints", parameters.getVisualizers().toString());
+		label += encodeRow("View Constraints", configuration.getRelations().toString());
 		if (equivalenceThreshold < 100) {
 			label += encodeRow("Noise Threshold", "" + (100 - equivalenceThreshold) + "%");
 		}
@@ -1165,22 +1087,22 @@ public class LogSkeleton implements HTMLToString {
 		return s2.replaceAll("&", "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;");
 	}
 
-	public Dot createGraph(LogSkeletonBrowser visualizer) {
-		LogSkeletonBrowserParameters parameters = new LogSkeletonBrowserParameters();
-		parameters.getActivities().addAll(countModel.getActivities());
-		parameters.getVisualizers().add(visualizer);
-		return visualize(parameters);
+	public Dot createGraph(LogSkeletonRelation visualizer) {
+		BrowserConfiguration configuration = new BrowserConfiguration(null);
+		configuration.getActivities().addAll(countModel.getActivities());
+		configuration.getRelations().add(visualizer);
+		return visualize(configuration);
 	}
 
-	public Dot createGraph(Set<LogSkeletonBrowser> visualizers) {
-		LogSkeletonBrowserParameters parameters = new LogSkeletonBrowserParameters();
-		parameters.getActivities().addAll(countModel.getActivities());
-		parameters.getVisualizers().addAll(visualizers);
-		return visualize(parameters);
+	public Dot createGraph(Set<LogSkeletonRelation> visualizers) {
+		BrowserConfiguration configuration = new BrowserConfiguration(null);
+		configuration.getActivities().addAll(countModel.getActivities());
+		configuration.getRelations().addAll(visualizers);
+		return visualize(configuration);
 	}
 
-	public Dot createGraph(LogSkeletonBrowserParameters parameters) {
-		return visualize(parameters);
+	public Dot createGraph(BrowserConfiguration configuration) {
+		return visualize(configuration);
 	}
 
 	public Collection<String> getActivities() {
@@ -1576,15 +1498,15 @@ public class LogSkeleton implements HTMLToString {
 		}
 	}
 
-	public boolean hasManyNotCoExistenceArcs(LogSkeletonBrowserParameters parameters) {
+	public boolean hasManyNotCoExistenceArcs(BrowserConfiguration configuration) {
 		int nr = 0;
 		for (String fromActivity : countModel.getActivities()) {
 			for (String toActivity : countModel.getActivities()) {
 				if (!fromActivity.equals(toActivity)) {
 					if (fromActivity.compareTo(toActivity) >= 0
-							&& (!parameters.isUseEquivalenceClass()
+							&& (!configuration.isUseEquivalenceClass()
 									|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
-							&& (!parameters.isUseEquivalenceClass()
+							&& (!configuration.isUseEquivalenceClass()
 									|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 							&& notCoExistences.get(fromActivity).contains(toActivity)) {
 						nr++;

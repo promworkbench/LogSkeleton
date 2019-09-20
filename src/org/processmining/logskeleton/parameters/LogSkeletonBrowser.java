@@ -1,5 +1,9 @@
 package org.processmining.logskeleton.parameters;
 
+/*
+ * @deprecated Use BrowserRelatino instead.
+ */
+@Deprecated
 public enum LogSkeletonBrowser {
 	
 //	ALWAYSTOGETHER("Always Together"),
