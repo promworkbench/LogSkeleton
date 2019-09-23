@@ -130,6 +130,17 @@ public class LogSkeleton implements HTMLToString {
 		return null;
 	}
 
+	public Collection<String> getSameCounts(String activity, Collection<String> activities) {
+		for (Collection<String> sameCount : sameCounts) {
+			if (sameCount.contains(activity)) {
+				Collection<String> result = new HashSet<String>(sameCount);
+				result.retainAll(activities);
+				return result;
+			}
+		}
+		return null;
+	}
+
 	public void addPrePost(String activity, Collection<String> pre, Collection<String> post) {
 		Set<String> preset = new HashSet<String>(pre);
 		Set<String> postset = new HashSet<String>(post);
@@ -179,23 +190,25 @@ public class LogSkeleton implements HTMLToString {
 			notPrecedences.get(activity).removeAll(notCoExistences.get(activity));
 			notResponses.get(activity).removeAll(notCoExistences.get(activity));
 		}
-		Map<String, Set<String>> precedences2 = new HashMap<String, Set<String>>();
-		Map<String, Set<String>> responses2 = new HashMap<String, Set<String>>();
-		Map<String, Set<String>> negPrecedences2 = new HashMap<String, Set<String>>();
-		Map<String, Set<String>> negResponses2 = new HashMap<String, Set<String>>();
-		for (String activity : countModel.getActivities()) {
-			precedences2.put(activity, new HashSet<String>(precedences.get(activity)));
-			responses2.put(activity, new HashSet<String>(responses.get(activity)));
-			negPrecedences2.put(activity, new HashSet<String>(notPrecedences.get(activity)));
-			negResponses2.put(activity, new HashSet<String>(notResponses.get(activity)));
-		}
-		for (String activity : countModel.getActivities()) {
-			cleanPrePost(activity, precedences, precedences2);
-			cleanPrePost(activity, responses, responses2);
-			cleanPrePost(activity, notPrecedences, negPrecedences2);
-			cleanPrePost(activity, notResponses, negResponses2);
-		}
-	}
+		/*
+		 * Map<String, Set<String>> precedences2 = new HashMap<String,
+		 * Set<String>>(); Map<String, Set<String>> responses2 = new
+		 * HashMap<String, Set<String>>(); Map<String, Set<String>>
+		 * negPrecedences2 = new HashMap<String, Set<String>>(); Map<String,
+		 * Set<String>> negResponses2 = new HashMap<String, Set<String>>(); for
+		 * (String activity : countModel.getActivities()) {
+		 * precedences2.put(activity, new
+		 * HashSet<String>(precedences.get(activity))); responses2.put(activity,
+		 * new HashSet<String>(responses.get(activity)));
+		 * negPrecedences2.put(activity, new
+		 * HashSet<String>(notPrecedences.get(activity)));
+		 * negResponses2.put(activity, new
+		 * HashSet<String>(notResponses.get(activity))); } for (String activity
+		 * : countModel.getActivities()) { cleanPrePost(activity, precedences,
+		 * precedences2); cleanPrePost(activity, responses, responses2);
+		 * cleanPrePost(activity, notPrecedences, negPrecedences2);
+		 * cleanPrePost(activity, notResponses, negResponses2); }
+		 */ }
 
 	private void cleanPrePost(String activity, Map<String, ThresholdSet> map, Map<String, Set<String>> map2) {
 		Set<String> mappedActivities = map2.get(activity);
@@ -207,11 +220,30 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
-//		System.out.println("[LogSkeleton] " + activity + " " + mappedMappedActivities);
+		//		System.out.println("[LogSkeleton] " + activity + " " + mappedMappedActivities);
 		map.get(activity).removeAll(mappedMappedActivities);
 	}
 
-	private Collection<Violation> checkSameCounts(LogSkeletonCount model, CheckerConfiguration configuration, XTrace trace) {
+	private Set<String> getRedundant(String activity, Map<String, ThresholdSet> relation,
+			Collection<String> activities) {
+		Set<String> redundantActivities = new HashSet<String>();
+		for (String activity2 : relation.get(activity)) {
+			if (activities.contains(activity2)) {
+				for (String activity3 : relation.get(activity2)) {
+					if (activities.contains(activity3)) {
+						if (relation.get(activity).contains(activity3)
+								&& !relation.get(activity3).contains(activity2)) {
+							redundantActivities.add(activity3);
+						}
+					}
+				}
+			}
+		}
+		return redundantActivities;
+	}
+
+	private Collection<Violation> checkSameCounts(LogSkeletonCount model, CheckerConfiguration configuration,
+			XTrace trace) {
 		Set<Violation> violations = new HashSet<Violation>();
 		for (Collection<String> sameCount : sameCounts) {
 			Set<Integer> counts = new HashSet<Integer>();
@@ -228,7 +260,8 @@ public class LogSkeleton implements HTMLToString {
 		return violations;
 	}
 
-	private Collection<Violation> checkTransitionCounts(LogSkeletonCount model, CheckerConfiguration configuration, XTrace trace) {
+	private Collection<Violation> checkTransitionCounts(LogSkeletonCount model, CheckerConfiguration configuration,
+			XTrace trace) {
 		return countModel.checkTransitionCounts(model, configuration, trace);
 	}
 
@@ -292,7 +325,7 @@ public class LogSkeleton implements HTMLToString {
 	public Collection<Violation> check(XTrace trace, LogSkeletonCount model, CheckerConfiguration configuration) {
 		boolean[] checks = configuration.getChecks();
 		Set<Violation> violations = new HashSet<Violation>();
-		
+
 		if (checks[0]) {
 			violations.addAll(checkSameCounts(model, configuration, trace));
 			if (configuration.isStopAtFirstViolation() && !violations.isEmpty()) {
@@ -313,7 +346,7 @@ public class LogSkeleton implements HTMLToString {
 		}
 		return violations;
 	}
-	
+
 	public String toHTMLString(boolean includeHTMLTags) {
 		StringBuffer buf = new StringBuffer();
 		List<String> sorted;
@@ -428,9 +461,9 @@ public class LogSkeleton implements HTMLToString {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
 										&& (!configuration.isUseEquivalenceClass()
-												|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+												|| fromActivity.equals(getSameCounts(fromActivity, activities).iterator().next()))
 										&& (!configuration.isUseEquivalenceClass()
-												|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
+												|| toActivity.equals(getSameCounts(toActivity, activities).iterator().next()))
 										&& notCoExistences.get(fromActivity).contains(toActivity)) {
 									activities.add(fromActivity);
 									activities.add(toActivity);
@@ -443,7 +476,7 @@ public class LogSkeleton implements HTMLToString {
 		}
 
 		for (String activity : activities) {
-			String colorActivity = getSameCounts(activity).iterator().next();
+			String colorActivity = getSameCounts(activity, activities).iterator().next();
 			String activityColor = colorMap.get(colorActivity);
 			if (activityColor == null) {
 				activityColor = colors[colorIndex];
@@ -493,7 +526,8 @@ public class LogSkeleton implements HTMLToString {
 					String tailColor = null;
 					boolean isAsymmetric = true;
 					if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSAFTER)) {
-						if (tailDecorator == null && responses.get(fromActivity).contains(toActivity)) {
+						if (tailDecorator == null && responses.get(fromActivity).contains(toActivity)
+								&& !getRedundant(fromActivity, responses, activities).contains(toActivity)) {
 							tailDecorator = "noneinv";
 							tailColor = alwaysColor;
 							int threshold = responses.get(fromActivity).getMaxThreshold(toActivity);
@@ -504,7 +538,8 @@ public class LogSkeleton implements HTMLToString {
 						}
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSBEFORE)) {
-						if (headDecorator == null && precedences.get(toActivity).contains(fromActivity)) {
+						if (headDecorator == null && precedences.get(toActivity).contains(fromActivity)
+								&& !getRedundant(toActivity, precedences, activities).contains(fromActivity)) {
 							headDecorator = "normal";
 							headColor = alwaysColor;
 							int threshold = precedences.get(toActivity).getMaxThreshold(fromActivity);
@@ -518,9 +553,9 @@ public class LogSkeleton implements HTMLToString {
 						if (!fromActivity.equals(toActivity)) {
 							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
 									&& (!configuration.isUseEquivalenceClass()
-											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+											|| fromActivity.equals(getSameCounts(fromActivity, activities).iterator().next()))
 									&& (!configuration.isUseEquivalenceClass()
-											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
+											|| toActivity.equals(getSameCounts(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(toActivity).contains(fromActivity)) {
 								headDecorator = "nonetee";
 								//								dummy = true;
@@ -534,9 +569,9 @@ public class LogSkeleton implements HTMLToString {
 							}
 							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
 									&& (!configuration.isUseEquivalenceClass()
-											|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+											|| fromActivity.equals(getSameCounts(fromActivity, activities).iterator().next()))
 									&& (!configuration.isUseEquivalenceClass()
-											|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
+											|| toActivity.equals(getSameCounts(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(fromActivity).contains(toActivity)) {
 								tailDecorator = "nonetee";
 								isAsymmetric = false;
@@ -551,8 +586,12 @@ public class LogSkeleton implements HTMLToString {
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERAFTER)) {
 						if (!fromActivity.equals(toActivity) && headDecorator == null
-								&& notResponses.get(toActivity).contains(fromActivity) 
-								/*&& !notResponses.get(fromActivity).contains(toActivity)*/) {
+								&& notResponses.get(toActivity).contains(fromActivity)
+								&& !getRedundant(toActivity, notResponses, activities).contains(fromActivity)
+						/*
+						 * &&
+						 * !notResponses.get(fromActivity).contains(toActivity)
+						 */) {
 							headDecorator = "noneinvtee";
 							headColor = alwaysNotColor;
 							int threshold = notResponses.get(toActivity).getMaxThreshold(fromActivity);
@@ -565,7 +604,11 @@ public class LogSkeleton implements HTMLToString {
 					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERBEFORE)) {
 						if (!fromActivity.equals(toActivity) && tailDecorator == null
 								&& notPrecedences.get(fromActivity).contains(toActivity)
-								/*&& !notPrecedences.get(toActivity).contains(fromActivity)*/) {
+								&& !getRedundant(fromActivity, notPrecedences, activities).contains(toActivity)
+						/*
+						 * && !notPrecedences.get(toActivity).contains(
+						 * fromActivity)
+						 */) {
 							tailDecorator = "teenormal";
 							tailColor = alwaysNotColor;
 							int threshold = notPrecedences.get(fromActivity).getMaxThreshold(toActivity);
@@ -653,10 +696,11 @@ public class LogSkeleton implements HTMLToString {
 				 */
 				DotEdge arc = candidateArcs.iterator().next();
 				/*
-				 * For now, only do this for always-arcs. Includes always-not (not response, not precendence) arcs.
+				 * For now, only do this for always-arcs. Includes always-not
+				 * (not response, not precendence) arcs.
 				 */
 				if (arc.getOption("arrowtail").contains("inv") || arc.getOption("arrowhead").contains("inv")
-						|| arc.getOption("arrowtail").contains("inv") 
+						|| arc.getOption("arrowtail").contains("inv")
 						|| arc.getOption("arrowhead").contains("normal")) {
 					/*
 					 * Get the cluster for this arc.
