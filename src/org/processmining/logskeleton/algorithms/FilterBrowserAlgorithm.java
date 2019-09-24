@@ -1,6 +1,5 @@
 package org.processmining.logskeleton.algorithms;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,13 +13,13 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.deckfour.uitopia.ui.util.ImageLoader;
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
@@ -32,7 +31,6 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.framework.util.ui.widgets.WidgetColors;
-import org.processmining.logskeleton.classifiers.PrefixClassifier;
 import org.processmining.logskeleton.configurations.BuilderConfiguration;
 import org.processmining.logskeleton.configurations.FilterBrowserConfiguration;
 import org.processmining.logskeleton.inputs.BuilderInput;
@@ -54,6 +52,7 @@ public class FilterBrowserAlgorithm {
 	private XLog log;
 	private JComponent rightPanel = null;
 	private JPanel mainPanel = null;
+	private RoundedPanel splitterPanel = null;
 	private List<List<String>> splitters;
 	private Set<String> positiveFilters;
 	private Set<String> negativeFilters;
@@ -65,7 +64,7 @@ public class FilterBrowserAlgorithm {
 	public FilterBrowserOutput apply(PluginContext context, FilterBrowserInput input, FilterBrowserConfiguration configuration) {
 		this.context = context;
 		log = input.getLog();
-		XEventClassifier classifier = new PrefixClassifier(configuration.getClassifier());
+		XEventClassifier classifier = /*new PrefixClassifier(*/configuration.getClassifier()/*)*/;
 		
 		mainPanel = new CompositePanel() {
 			/**
@@ -116,7 +115,7 @@ public class FilterBrowserAlgorithm {
 		}
 		for (Set<String> count : scores.keySet()) {
 			if (scores.get(count) == maxScore) {
-				System.out.println("[LogSkeletonFilterBrowserPlugin] " + maxScore + ": " + count);
+				System.out.println("[FilterBrowserAlgorithm] " + maxScore + ": " + count);
 			}
 		}
 	}
@@ -198,7 +197,7 @@ public class FilterBrowserAlgorithm {
 		JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log, classifier);
 		double size[][] = { { TableLayoutConstants.FILL },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30 } };
 		controlPanel.setLayout(new TableLayout(size));
 		controlPanel.setOpaque(false);
 		controlPanel.setBackground(WidgetColors.COLOR_LIST_BG);
@@ -208,7 +207,7 @@ public class FilterBrowserAlgorithm {
 		for (String activity : activities) {
 			requiredActivityModel.addElement(activity);
 		}
-		final ProMList<String> requiredActivityList = new ProMList<String>("Required Activities Filter", requiredActivityModel);
+		final ProMList<String> requiredActivityList = new ProMList<String>("Select required activities", requiredActivityModel);
 		requiredActivityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		requiredActivityList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -224,7 +223,7 @@ public class FilterBrowserAlgorithm {
 		for (String activity : activities) {
 			forbiddenActivityModel.addElement(activity);
 		}
-		final ProMList<String> forbiddenActivityList = new ProMList<String>("Forbidden Activities Filter",
+		final ProMList<String> forbiddenActivityList = new ProMList<String>("Select forbidden activities",
 				forbiddenActivityModel);
 		forbiddenActivityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		forbiddenActivityList.addListSelectionListener(new ListSelectionListener() {
@@ -237,11 +236,11 @@ public class FilterBrowserAlgorithm {
 		forbiddenActivityList.setPreferredSize(new Dimension(100, 100));
 		controlPanel.add(forbiddenActivityList, "0, 1");
 
-		RoundedPanel splitterPanel = new RoundedPanel(10, 5, 0);
+		splitterPanel = new RoundedPanel(10, 5, 0);
 		splitterPanel.setPreferredSize(new Dimension(100, 100));
 		double splitterSize[][] = {
 				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL },
-				{ 30, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
+				{ /*30,*/ TableLayoutConstants.FILL, TableLayoutConstants.FILL,
 						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
 						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
 						TableLayoutConstants.FILL, TableLayoutConstants.FILL } };
@@ -250,25 +249,39 @@ public class FilterBrowserAlgorithm {
 		splitterPanel.setForeground(WidgetColors.COLOR_LIST_FG);
 
 		splitterPanel.setOpaque(false);
-		JLabel splitterLabel = new JLabel("Activity Splitters");
-		splitterLabel.setOpaque(false);
-		splitterLabel.setForeground(WidgetColors.COLOR_LIST_SELECTION_FG);
-		splitterLabel.setFont(splitterLabel.getFont().deriveFont(13f));
-		splitterLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		splitterLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		splitterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+//		JLabel splitterLabel = new JLabel("Select activity splitters");
+//		splitterLabel.setOpaque(false);
+//		splitterLabel.setForeground(WidgetColors.COLOR_LIST_SELECTION_FG);
+//		splitterLabel.setFont(splitterLabel.getFont().deriveFont(13f));
+//		splitterLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//		splitterLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//		splitterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
 
-		splitterPanel.add(splitterLabel, "0, 0, 1, 0");
+//		splitterPanel.add(splitterLabel, "0, 0, 1, 0");
 		final ProMTextField inputs[][] = new ProMTextField[2][10];
 		for (int row = 0; row < 10; row++) {
 			for (int col = 0; col < 2; col++) {
-				inputs[col][row] = new ProMTextField("", (col == 0 ? "Split Activity " : "Over Activity ") + (1 + col + 2*row));
-				splitterPanel.add(inputs[col][row], "" + col + ", " + (row + 1));
+				inputs[col][row] = new ProMTextField("", (col == 0 ? "Split activity " : "over activity ") + (1 + col + 2*row));
+				splitterPanel.add(inputs[col][row], "" + col + ", " + (row/* + 1*/));
 			}
 		}
-		controlPanel.add(splitterPanel, "0, 2");
+//		controlPanel.add(splitterPanel, "0, 2");
 
-		final SlickerButton button = new SlickerButton("Apply Settings");
+		final SlickerButton splitterButton = new SlickerButton("Select activity splitters...");
+		splitterButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFrame frame = new JFrame();
+				frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
+				frame.add(splitterPanel);
+				frame.setTitle("Select activity splitters for " + XConceptExtension.instance().extractName(log));
+				frame.setSize(460, 380);
+				frame.setVisible(true);
+			}
+
+		});
+		controlPanel.add(splitterButton, "0, 2");
+
+		final SlickerButton button = new SlickerButton("Apply settings");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				splitters = new ArrayList<List<String>>();
@@ -278,7 +291,7 @@ public class FilterBrowserAlgorithm {
 						filter.add(inputs[col][row].getText());
 					}
 					if (!filter.get(0).isEmpty() && !filter.get(1).isEmpty()) {
-						System.out.println("[LogSkeletonFilterBrowserPlugin] Filter added: " + filter);
+						System.out.println("[FilterBrowserAlgorithm] Filter added: " + filter);
 						splitters.add(filter);
 					}
 				}

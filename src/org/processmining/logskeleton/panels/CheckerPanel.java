@@ -56,7 +56,7 @@ public class CheckerPanel extends JPanel {
 		check2.setPreferredSize(new Dimension(100, 30));
 		add(check2, "0, 2");
 
-		final JCheckBox check3 = SlickerFactory.instance().createCheckBox("Check Cardinalities",
+		final JCheckBox check3 = SlickerFactory.instance().createCheckBox("Check cardinalities",
 				false);
 		check3.setSelected(configuration.getChecks()[2]);
 		check3.addActionListener(new ActionListener() {
@@ -70,7 +70,7 @@ public class CheckerPanel extends JPanel {
 		check3.setPreferredSize(new Dimension(100, 30));
 		add(check3, "0, 3");
 
-		final JCheckBox check4 = SlickerFactory.instance().createCheckBox("Stop on First Violation",
+		final JCheckBox check4 = SlickerFactory.instance().createCheckBox("Stop on first violation",
 				false);
 		check4.setSelected(configuration.isStopAtFirstViolation());
 		check4.addActionListener(new ActionListener() {

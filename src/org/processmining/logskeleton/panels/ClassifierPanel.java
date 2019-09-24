@@ -45,7 +45,7 @@ public class ClassifierPanel extends JPanel {
 		check1.setPreferredSize(new Dimension(100, 30));
 		add(check1, "0, 1");
 
-		final NiceSlider slider = SlickerFactory.instance().createNiceIntegerSlider("Maximal Filter Depth", 0, 3,
+		final NiceSlider slider = SlickerFactory.instance().createNiceIntegerSlider("Select maximimal number of activities to filter in or out", 0, 3,
 				configuration.getMaxFilterDepth(), Orientation.HORIZONTAL);
 		slider.addChangeListener(new ChangeListener() {
 

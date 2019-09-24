@@ -9,7 +9,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
-import org.processmining.logskeleton.classifiers.LogSkeletonClassifier;
+import org.processmining.logskeleton.classifiers.PrefixClassifier;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 
 public class SplitterAlgorithm {
@@ -24,10 +24,10 @@ public class SplitterAlgorithm {
 				String activity = classifier.getClassIdentity(event);
 				if (activity.equals(parameters.getDuplicateActivity())) {
 					XEvent filteredEvent = (XEvent) event.clone(); //XFactoryRegistry.instance().currentDefault().createEvent();
-					if (event.getAttributes().containsKey(LogSkeletonClassifier.SUFFIX)) {
-						((XAttributeLiteral) filteredEvent.getAttributes().get(LogSkeletonClassifier.SUFFIX)).setValue(event.getAttributes().get(LogSkeletonClassifier.SUFFIX)+ "." + milestone);
+					if (event.getAttributes().containsKey(PrefixClassifier.SUFFIX)) {
+						((XAttributeLiteral) filteredEvent.getAttributes().get(PrefixClassifier.SUFFIX)).setValue(event.getAttributes().get(PrefixClassifier.SUFFIX)+ "." + milestone);
 					} else {
-						filteredEvent.getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, "." + milestone));
+						filteredEvent.getAttributes().put(PrefixClassifier.SUFFIX, new XAttributeLiteralImpl(PrefixClassifier.SUFFIX, "." + milestone));
 					}
 					filteredTrace.add(filteredEvent);
 				} else {
@@ -53,16 +53,16 @@ public class SplitterAlgorithm {
 			for (int i = 0; i < trace.size(); i++) {
 				if (i == trace.size() - 1 && classifier.getClassIdentity(trace.get(i)).equals("b")) {
 					XEvent filteredEvent = (XEvent) trace.get(i).clone();
-					trace.get(i).getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, ".1"));
+					trace.get(i).getAttributes().put(PrefixClassifier.SUFFIX, new XAttributeLiteralImpl(PrefixClassifier.SUFFIX, ".1"));
 					filteredTrace.add(filteredEvent);
 				} else if (i == trace.size() - 2 && classifier.getClassIdentity(trace.get(i)).equals("b")
 						&& classifier.getClassIdentity(trace.get(i + 1)).equals("s")) {
 					XEvent filteredEvent = (XEvent) trace.get(i).clone();
-					trace.get(i).getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, ".1"));
+					trace.get(i).getAttributes().put(PrefixClassifier.SUFFIX, new XAttributeLiteralImpl(PrefixClassifier.SUFFIX, ".1"));
 					filteredTrace.add(filteredEvent);
 				} else if (classifier.getClassIdentity(trace.get(i)).equals("b")) {
 					XEvent filteredEvent = (XEvent) trace.get(i).clone();
-					trace.get(i).getAttributes().put(LogSkeletonClassifier.SUFFIX, new XAttributeLiteralImpl(LogSkeletonClassifier.SUFFIX, ".0"));
+					trace.get(i).getAttributes().put(PrefixClassifier.SUFFIX, new XAttributeLiteralImpl(PrefixClassifier.SUFFIX, ".0"));
 					filteredTrace.add(filteredEvent);
 				} else {
 					filteredTrace.add(trace.get(i));

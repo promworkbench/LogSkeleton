@@ -92,7 +92,7 @@ public class VisualizerAlgorithm {
 		final ProMTextField input = new ProMTextField(text);
 		controlPanel.add(input, "1, 0");
 
-		final SlickerButton button = new SlickerButton("Apply Classifier");
+		final SlickerButton button = new SlickerButton("Apply classifier \u25b6");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String keys[] = input.getText().split(" ");

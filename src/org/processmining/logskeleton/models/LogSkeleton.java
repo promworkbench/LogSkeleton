@@ -434,25 +434,29 @@ public class LogSkeleton implements HTMLToString {
 					if (configuration.getActivities().contains(fromActivity)
 							|| configuration.getActivities().contains(toActivity)) {
 						if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSAFTER)) {
-							if (responses.get(fromActivity).contains(toActivity)) {
+							if (responses.get(fromActivity).contains(toActivity)
+									&& !getRedundant(fromActivity, responses, countModel.getActivities()).contains(toActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSBEFORE)) {
-							if (precedences.get(toActivity).contains(fromActivity)) {
+							if (precedences.get(toActivity).contains(fromActivity)
+									&& !getRedundant(toActivity, precedences, countModel.getActivities()).contains(fromActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERAFTER)) {
-							if (notResponses.get(fromActivity).contains(toActivity)) {
+							if (notResponses.get(toActivity).contains(fromActivity)
+									&& !getRedundant(toActivity, notResponses, countModel.getActivities()).contains(fromActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERBEFORE)) {
-							if (notPrecedences.get(toActivity).contains(fromActivity)) {
+							if (notPrecedences.get(fromActivity).contains(toActivity)
+									&& !getRedundant(fromActivity, notPrecedences, countModel.getActivities()).contains(toActivity)) {
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
@@ -460,10 +464,10 @@ public class LogSkeleton implements HTMLToString {
 						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERTOGETHER)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
-										&& (!configuration.isUseEquivalenceClass()
-												|| fromActivity.equals(getSameCounts(fromActivity, activities).iterator().next()))
-										&& (!configuration.isUseEquivalenceClass()
-												|| toActivity.equals(getSameCounts(toActivity, activities).iterator().next()))
+										&& (!configuration.isUseEquivalenceClass() || fromActivity
+												.equals(getSameCounts(fromActivity, activities).iterator().next()))
+										&& (!configuration.isUseEquivalenceClass() || toActivity
+												.equals(getSameCounts(toActivity, activities).iterator().next()))
 										&& notCoExistences.get(fromActivity).contains(toActivity)) {
 									activities.add(fromActivity);
 									activities.add(toActivity);
@@ -552,10 +556,10 @@ public class LogSkeleton implements HTMLToString {
 					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERTOGETHER)) {
 						if (!fromActivity.equals(toActivity)) {
 							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
-									&& (!configuration.isUseEquivalenceClass()
-											|| fromActivity.equals(getSameCounts(fromActivity, activities).iterator().next()))
-									&& (!configuration.isUseEquivalenceClass()
-											|| toActivity.equals(getSameCounts(toActivity, activities).iterator().next()))
+									&& (!configuration.isUseEquivalenceClass() || fromActivity
+											.equals(getSameCounts(fromActivity, activities).iterator().next()))
+									&& (!configuration.isUseEquivalenceClass() || toActivity
+											.equals(getSameCounts(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(toActivity).contains(fromActivity)) {
 								headDecorator = "nonetee";
 								//								dummy = true;
@@ -568,10 +572,10 @@ public class LogSkeleton implements HTMLToString {
 								}
 							}
 							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
-									&& (!configuration.isUseEquivalenceClass()
-											|| fromActivity.equals(getSameCounts(fromActivity, activities).iterator().next()))
-									&& (!configuration.isUseEquivalenceClass()
-											|| toActivity.equals(getSameCounts(toActivity, activities).iterator().next()))
+									&& (!configuration.isUseEquivalenceClass() || fromActivity
+											.equals(getSameCounts(fromActivity, activities).iterator().next()))
+									&& (!configuration.isUseEquivalenceClass() || toActivity
+											.equals(getSameCounts(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(fromActivity).contains(toActivity)) {
 								tailDecorator = "nonetee";
 								isAsymmetric = false;

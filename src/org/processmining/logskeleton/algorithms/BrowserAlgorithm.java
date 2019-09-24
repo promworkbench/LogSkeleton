@@ -22,6 +22,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.deckfour.uitopia.ui.util.ImageLoader;
 import org.processmining.contexts.util.CompositePanel;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMList;
@@ -34,6 +35,7 @@ import org.processmining.plugins.graphviz.visualisation.DotPanel;
 
 import com.fluxicon.slickerbox.components.NiceSlider;
 import com.fluxicon.slickerbox.components.NiceSlider.Orientation;
+import com.fluxicon.slickerbox.components.RoundedPanel;
 import com.fluxicon.slickerbox.components.SlickerButton;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
@@ -47,6 +49,7 @@ public class BrowserAlgorithm {
 	private JComponent leftDotPanel = null;
 	private JComponent rightDotPanel = null;
 	private JPanel mainPanel = null;
+	private JPanel optionsPanel = null;
 	private boolean isRepainting = false;
 
 	public BrowserOutput apply(PluginContext context, BrowserInput input, final BrowserConfiguration configuration) {
@@ -68,7 +71,7 @@ public class BrowserAlgorithm {
 			}
 		};
 		double size[][] = { { TableLayoutConstants.FILL, 250 }, { TableLayoutConstants.FILL, TableLayoutConstants.FILL,
-				TableLayoutConstants.FILL, 30, 30, 30, 30, 30, 30, 30, 30 } };
+				TableLayoutConstants.FILL, 30 } };
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
@@ -80,7 +83,7 @@ public class BrowserAlgorithm {
 			selectedIndices[i] = i;
 			i++;
 		}
-		final ProMList<String> activityList = new ProMList<String>("View Activities", activities);
+		final ProMList<String> activityList = new ProMList<String>("Select activities to show", activities);
 		activityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		activityList.setSelectedIndices(selectedIndices);
 		configuration.getActivities().addAll(model.getActivities());
@@ -105,7 +108,7 @@ public class BrowserAlgorithm {
 		for (LogSkeletonRelation visualizer : list) {
 			visualizers.addElement(visualizer);
 		}
-		final ProMList<LogSkeletonRelation> visualizerList = new ProMList<LogSkeletonRelation>("View Constraints",
+		final ProMList<LogSkeletonRelation> visualizerList = new ProMList<LogSkeletonRelation>("Select relations to show",
 				visualizers);
 		visualizerList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		List<LogSkeletonRelation> selectedVisualizers = new ArrayList<LogSkeletonRelation>();
@@ -144,7 +147,12 @@ public class BrowserAlgorithm {
 		visualizerList.setPreferredSize(new Dimension(100, 100));
 		mainPanel.add(visualizerList, "1, 2");
 
-		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Use Hyper Arcs (may be slow...)", false);
+		optionsPanel = new RoundedPanel();
+		double[][] popupSize = { { TableLayoutConstants.FILL }, { 30, 30, 30, 30, 30, 30, 30 } };
+		optionsPanel.setLayout(new TableLayout(popupSize));
+		optionsPanel.setOpaque(false);
+		
+		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("Replace a clique of similar arcs by a hyper arc (may be slow...)", false);
 		checkBox.setSelected(configuration.isUseHyperArcs());
 		checkBox.addActionListener(new ActionListener() {
 
@@ -156,9 +164,9 @@ public class BrowserAlgorithm {
 		});
 		checkBox.setOpaque(false);
 		checkBox.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBox, "1, 4");
+		optionsPanel.add(checkBox, "0, 1");
 
-		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("Use False Constraints",
+		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("Ignore symmetric relations when layering activities",
 				false);
 		checkBoxFalseConstraints.setSelected(configuration.isUseFalseConstraints());
 		checkBoxFalseConstraints.addActionListener(new ActionListener() {
@@ -171,9 +179,9 @@ public class BrowserAlgorithm {
 		});
 		checkBoxFalseConstraints.setOpaque(false);
 		checkBoxFalseConstraints.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxFalseConstraints, "1, 5");
+		optionsPanel.add(checkBoxFalseConstraints, "0, 2");
 
-		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("Use Edge Colors", false);
+		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("Show relation colors", false);
 		checkBoxEdgeColors.setSelected(configuration.isUseEdgeColors());
 		checkBoxEdgeColors.addActionListener(new ActionListener() {
 
@@ -185,9 +193,9 @@ public class BrowserAlgorithm {
 		});
 		checkBoxEdgeColors.setOpaque(false);
 		checkBoxEdgeColors.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxEdgeColors, "1, 6");
+		optionsPanel.add(checkBoxEdgeColors, "0, 3");
 
-		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("Use Equivalence Class",
+		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("Show Not Co-Existence only between representatives",
 				false);
 		checkBoxEquivalenceClass.setSelected(configuration.isUseEquivalenceClass());
 		checkBoxEquivalenceClass.addActionListener(new ActionListener() {
@@ -200,9 +208,9 @@ public class BrowserAlgorithm {
 		});
 		checkBoxEquivalenceClass.setOpaque(false);
 		checkBoxEquivalenceClass.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxEquivalenceClass, "1, 7");
+		optionsPanel.add(checkBoxEquivalenceClass, "0, 4");
 
-		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("Use Head/Tail Labels", false);
+		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("Replace head/tail labels by arc labels", false);
 		checkBoxLabels.setSelected(configuration.isUseHeadTailLabels());
 		checkBoxLabels.addActionListener(new ActionListener() {
 
@@ -214,9 +222,9 @@ public class BrowserAlgorithm {
 		});
 		checkBoxLabels.setOpaque(false);
 		checkBoxLabels.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxLabels, "1, 8");
+		optionsPanel.add(checkBoxLabels, "0, 5");
 
-		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("Show Neighbors", false);
+		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("Show related (but unselected) activities as well", false);
 		checkBoxNeighbors.setSelected(configuration.isUseNeighbors());
 		checkBoxNeighbors.addActionListener(new ActionListener() {
 
@@ -228,9 +236,9 @@ public class BrowserAlgorithm {
 		});
 		checkBoxNeighbors.setOpaque(false);
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(checkBoxNeighbors, "1, 9");
+		optionsPanel.add(checkBoxNeighbors, "0, 6");
 
-		final NiceSlider noiseLevelSlider = SlickerFactory.instance().createNiceIntegerSlider("Noise Level in %", 0, 20,
+		final NiceSlider noiseLevelSlider = SlickerFactory.instance().createNiceIntegerSlider("Select noise level in %", 0, 20,
 				100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
 		noiseLevelSlider.addChangeListener(new ChangeListener() {
 
@@ -248,7 +256,7 @@ public class BrowserAlgorithm {
 			}
 		});
 		noiseLevelSlider.setPreferredSize(new Dimension(100, 30));
-		mainPanel.add(noiseLevelSlider, "1, 3");
+		optionsPanel.add(noiseLevelSlider, "0, 0");
 
 		//		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
 		//				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
@@ -263,14 +271,28 @@ public class BrowserAlgorithm {
 		//		notCoExistenceThresholdSlider.setPreferredSize(new Dimension(100, 30));
 		//		mainPanel.add(notCoExistenceThresholdSlider, "1, 10");
 		//
-		final SlickerButton button = new SlickerButton("View Log Skeleton in New Window");
-		button.addActionListener(new ActionListener() {
+		final SlickerButton newButton = new SlickerButton("View in new window...");
+		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateLeft();
 			}
 
 		});
-		mainPanel.add(button, "1, 10");
+		mainPanel.add(newButton, "0, 3");
+
+		final SlickerButton optionsButton = new SlickerButton("Select options...");
+		optionsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFrame frame = new JFrame();
+				frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
+				frame.add(optionsPanel);
+				frame.setTitle("Select options for " + model.getLabel());
+				frame.setSize(460, 280);
+				frame.setVisible(true);
+			}
+		});
+		
+		mainPanel.add(optionsButton, "1, 3");
 
 		//		updateLeft();
 		updateRight();
@@ -289,8 +311,9 @@ public class BrowserAlgorithm {
 		//		mainPanel.validate();
 		//		mainPanel.repaint();
 		JFrame frame = new JFrame();
+		frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
 		frame.add(leftDotPanel);
-		frame.setTitle("Log Skeleton Viewer on " + model.getLabel());
+		frame.setTitle("Log Skeleton viewer on " + model.getLabel());
 		frame.setSize(1024, 768);
 		frame.setVisible(true);
 	}
@@ -330,7 +353,7 @@ public class BrowserAlgorithm {
 		};
 		rightDotPanel.setOpaque(true);
 		rightDotPanel.setBackground(Color.white);
-		mainPanel.add(rightDotPanel, "0, 0, 0, 10");
+		mainPanel.add(rightDotPanel, "0, 0, 0, 2");
 		mainPanel.validate();
 		mainPanel.repaint();
 

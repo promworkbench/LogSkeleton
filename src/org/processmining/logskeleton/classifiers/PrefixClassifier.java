@@ -18,7 +18,11 @@ public class PrefixClassifier implements XEventClassifier {
 	}
 	
 	public PrefixClassifier(XEventClassifier classifier) {
-		this.prefixClassifier = classifier;
+		if (classifier instanceof PrefixClassifier) {
+			this.prefixClassifier = ((PrefixClassifier) classifier).prefixClassifier;
+		} else {
+			this.prefixClassifier = classifier;
+		}
 	}
 	
 	public void accept(XVisitor arg0, XLog arg1) {
