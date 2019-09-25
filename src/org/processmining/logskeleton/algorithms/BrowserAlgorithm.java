@@ -79,7 +79,7 @@ public class BrowserAlgorithm {
 		controlPanel.setLayout(new TableLayout(controlSize));
 		controlPanel.setOpaque(false);
 		
-		JPanel basicPanel = new JPanel();
+		final JPanel basicPanel = new JPanel();
 		double basicSize[][] = { { 250 }, { TableLayoutConstants.FILL, TableLayoutConstants.FILL,
 			TableLayoutConstants.FILL } };
 		basicPanel.setLayout(new TableLayout(basicSize));
