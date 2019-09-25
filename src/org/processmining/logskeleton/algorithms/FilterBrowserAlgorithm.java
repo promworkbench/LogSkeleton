@@ -50,7 +50,7 @@ public class FilterBrowserAlgorithm {
 	private XLog log;
 	private JComponent rightPanel = null;
 	private JPanel mainPanel = null;
-	private RoundedPanel splitterPanel = null;
+//	private RoundedPanel splitterPanel = null;
 	private List<List<String>> splitters;
 	private Set<String> positiveFilters;
 	private Set<String> negativeFilters;
@@ -192,7 +192,7 @@ public class FilterBrowserAlgorithm {
 	}
 
 	private JComponent getControlPanel(final XEventClassifier classifier) {
-		JPanel controlPanel = new JPanel();
+		final JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log, classifier);
 		double controlSize[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL },
 				{ TableLayoutConstants.FILL, 30, 30 } };
@@ -201,7 +201,7 @@ public class FilterBrowserAlgorithm {
 		controlPanel.setBackground(WidgetColors.COLOR_LIST_BG);
 		controlPanel.setForeground(WidgetColors.COLOR_LIST_FG);
 
-		JPanel filterPanel = new JPanel();
+		final JPanel filterPanel = new JPanel();
 		double filterSize[][] = { { TableLayoutConstants.FILL },
 				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL } };
 		filterPanel.setLayout(new TableLayout(filterSize));
@@ -240,7 +240,7 @@ public class FilterBrowserAlgorithm {
 		forbiddenActivityList.setPreferredSize(new Dimension(100, 100));
 		filterPanel.add(forbiddenActivityList, "0, 1");
 
-		splitterPanel = new RoundedPanel(10, 5, 0);
+		final RoundedPanel splitterPanel = new RoundedPanel(10, 5, 0);
 		splitterPanel.setPreferredSize(new Dimension(100, 100));
 		double splitterSize[][] = {
 				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL },

@@ -74,7 +74,7 @@ public class BrowserAlgorithm {
 		mainPanel.setOpaque(false);
 
 //		JTabbedPane tabbedPane = new JTabbedPane();
-		JPanel controlPanel = new JPanel();
+		final JPanel controlPanel = new JPanel();
 		double controlSize[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL, 30 } };
 		controlPanel.setLayout(new TableLayout(controlSize));
 		controlPanel.setOpaque(false);
@@ -159,7 +159,7 @@ public class BrowserAlgorithm {
 		
 //		tabbedPane.add("Basic options", basicPanel);
 
-		JPanel advancedPanel = new JPanel();
+		final JPanel advancedPanel = new JPanel();
 		double[][] advancedSize = { { 30, TableLayoutConstants.FILL }, { 40, 40, 40, 40, 40, 40, 40 } };
 		advancedPanel.setLayout(new TableLayout(advancedSize));
 		advancedPanel.setOpaque(false);
