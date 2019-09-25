@@ -13,13 +13,11 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.deckfour.uitopia.ui.util.ImageLoader;
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactoryRegistry;
@@ -196,13 +194,19 @@ public class FilterBrowserAlgorithm {
 	private JComponent getControlPanel(final XEventClassifier classifier) {
 		JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log, classifier);
-		double size[][] = { { TableLayoutConstants.FILL },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30, 30 } };
-		controlPanel.setLayout(new TableLayout(size));
+		double controlSize[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL },
+				{ TableLayoutConstants.FILL, 30, 30 } };
+		controlPanel.setLayout(new TableLayout(controlSize));
 		controlPanel.setOpaque(false);
 		controlPanel.setBackground(WidgetColors.COLOR_LIST_BG);
 		controlPanel.setForeground(WidgetColors.COLOR_LIST_FG);
 
+		JPanel filterPanel = new JPanel();
+		double filterSize[][] = { { TableLayoutConstants.FILL },
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL } };
+		filterPanel.setLayout(new TableLayout(filterSize));
+		filterPanel.setOpaque(false);
+		
 		DefaultListModel<String> requiredActivityModel = new DefaultListModel<String>();
 		for (String activity : activities) {
 			requiredActivityModel.addElement(activity);
@@ -217,7 +221,7 @@ public class FilterBrowserAlgorithm {
 			}
 		});
 		requiredActivityList.setPreferredSize(new Dimension(100, 100));
-		controlPanel.add(requiredActivityList, "0, 0");
+		filterPanel.add(requiredActivityList, "0, 0");
 
 		DefaultListModel<String> forbiddenActivityModel = new DefaultListModel<String>();
 		for (String activity : activities) {
@@ -234,7 +238,7 @@ public class FilterBrowserAlgorithm {
 			}
 		});
 		forbiddenActivityList.setPreferredSize(new Dimension(100, 100));
-		controlPanel.add(forbiddenActivityList, "0, 1");
+		filterPanel.add(forbiddenActivityList, "0, 1");
 
 		splitterPanel = new RoundedPanel(10, 5, 0);
 		splitterPanel.setPreferredSize(new Dimension(100, 100));
@@ -243,7 +247,9 @@ public class FilterBrowserAlgorithm {
 				{ /*30,*/ TableLayoutConstants.FILL, TableLayoutConstants.FILL,
 						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
 						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
-						TableLayoutConstants.FILL, TableLayoutConstants.FILL } };
+						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
+						TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,
+						TableLayoutConstants.FILL } };
 		splitterPanel.setLayout(new TableLayout(splitterSize));
 		splitterPanel.setBackground(WidgetColors.COLOR_ENCLOSURE_BG);
 		splitterPanel.setForeground(WidgetColors.COLOR_LIST_FG);
@@ -258,8 +264,8 @@ public class FilterBrowserAlgorithm {
 //		splitterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
 
 //		splitterPanel.add(splitterLabel, "0, 0, 1, 0");
-		final ProMTextField inputs[][] = new ProMTextField[2][10];
-		for (int row = 0; row < 10; row++) {
+		final ProMTextField inputs[][] = new ProMTextField[2][16];
+		for (int row = 0; row < 16; row++) {
 			for (int col = 0; col < 2; col++) {
 				inputs[col][row] = new ProMTextField("", (col == 0 ? "Split activity " : "over activity ") + (1 + col + 2*row));
 				splitterPanel.add(inputs[col][row], "" + col + ", " + (row/* + 1*/));
@@ -267,25 +273,58 @@ public class FilterBrowserAlgorithm {
 		}
 //		controlPanel.add(splitterPanel, "0, 2");
 
-		final SlickerButton splitterButton = new SlickerButton("Select activity splitters...");
-		splitterButton.addActionListener(new ActionListener() {
+//		final SlickerButton splitterButton = new SlickerButton("Select activity splitters...");
+//		splitterButton.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				JFrame frame = new JFrame();
+//				frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
+//				frame.add(splitterPanel);
+//				frame.setTitle("Select activity splitters for " + XConceptExtension.instance().extractName(log));
+//				frame.setSize(460, 380);
+//				frame.setVisible(true);
+//			}
+//
+//		});
+//		controlPanel.add(splitterButton, "0, 2");
+
+		final SlickerButton basicButton = new SlickerButton("Filter options");
+		final SlickerButton advancedButton = new SlickerButton("Splitter options");
+		
+		basicButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFrame frame = new JFrame();
-				frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
-				frame.add(splitterPanel);
-				frame.setTitle("Select activity splitters for " + XConceptExtension.instance().extractName(log));
-				frame.setSize(460, 380);
-				frame.setVisible(true);
+				controlPanel.remove(splitterPanel);
+				controlPanel.add(filterPanel, "0, 0, 1, 0");
+				advancedButton.setEnabled(true);
+				basicButton.setEnabled(false);
+				controlPanel.validate();
+				controlPanel.repaint();
 			}
 
 		});
-		controlPanel.add(splitterButton, "0, 2");
+		advancedButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controlPanel.remove(filterPanel);
+				controlPanel.add(splitterPanel, "0, 0, 1, 0");
+				advancedButton.setEnabled(false);
+				basicButton.setEnabled(true);
+				controlPanel.validate();
+				controlPanel.repaint();
+			}
+
+		});
+		
+		controlPanel.add(basicButton, "0, 1");
+		controlPanel.add(advancedButton, "1, 1");
+		
+		controlPanel.add(filterPanel, "0, 0, 1, 0");
+		advancedButton.setEnabled(true);
+		basicButton.setEnabled(false);
 
 		final SlickerButton button = new SlickerButton("Apply settings");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				splitters = new ArrayList<List<String>>();
-				for (int row = 0; row < 10; row++) {
+				for (int row = 0; row < 16; row++) {
 					List<String> filter = new ArrayList<String>();
 					for (int col = 0; col < 2; col++) {
 						filter.add(inputs[col][row].getText());
@@ -299,7 +338,7 @@ public class FilterBrowserAlgorithm {
 			}
 
 		});
-		controlPanel.add(button, "0, 3");
+		controlPanel.add(button, "0, 2, 1, 2");
 
 		return controlPanel;
 	}
