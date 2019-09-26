@@ -423,10 +423,13 @@ public class LogSkeleton implements HTMLToString {
 		Map<String, String> colorMap = new HashMap<String, String>();
 
 		Set<String> activities = new HashSet<String>(configuration.getActivities());
+		activities.retainAll(countModel.getActivities());
 
 		setPrecedenceThreshold(configuration.getPrecedenceThreshold());
 		setResponseThreshold(configuration.getResponseThreshold());
 		setNotCoExistenceThreshold(configuration.getNotCoExistenceThreshold());
+		equivalenceThreshold = configuration.getEquivalenceThreshold();
+		sameCounts = sameCountsNoise.get(100 - equivalenceThreshold);
 
 		if (configuration.isUseNeighbors()) {
 			for (String fromActivity : countModel.getActivities()) {
@@ -465,9 +468,9 @@ public class LogSkeleton implements HTMLToString {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
 										&& (!configuration.isUseEquivalenceClass() || fromActivity
-												.equals(getSameCounts(fromActivity, activities).iterator().next()))
+												.equals(getSameCounts(fromActivity, countModel.getActivities()).iterator().next()))
 										&& (!configuration.isUseEquivalenceClass() || toActivity
-												.equals(getSameCounts(toActivity, activities).iterator().next()))
+												.equals(getSameCounts(toActivity, countModel.getActivities()).iterator().next()))
 										&& notCoExistences.get(fromActivity).contains(toActivity)) {
 									activities.add(fromActivity);
 									activities.add(toActivity);
@@ -868,21 +871,39 @@ public class LogSkeleton implements HTMLToString {
 		String label = "<table bgcolor=\"gold\" cellborder=\"0\" cellpadding=\"0\" columns=\"3\" style=\"rounded\">";
 		label +=
 
-				encodeHeader("Skeleton Configuration");
+				encodeHeader("Skeleton configuration");
 		label += encodeRow("Event Log", this.label == null ? "<not specified>" : this.label);
 		if (!required.isEmpty()) {
-			label += encodeRow("Required Activities Filter", required.toString());
+			label += encodeRow("Required activities", required.toString());
 		}
 		if (!forbidden.isEmpty()) {
-			label += encodeRow("Forbidden Activities Filter", forbidden.toString());
+			label += encodeRow("Forbidden activities", forbidden.toString());
 		}
 		if (!splitters.isEmpty()) {
-			label += encodeRow("Activity Splitters", splitters.toString());
+			label += encodeRow("Splitters", splitters.toString());
 		}
-		label += encodeRow("View Activities", selectedActivities.toString());
-		label += encodeRow("View Constraints", configuration.getRelations().toString());
-		if (equivalenceThreshold < 100) {
-			label += encodeRow("Noise Threshold", "" + (100 - equivalenceThreshold) + "%");
+		label += encodeRow("View activities", selectedActivities.toString());
+		label += encodeRow("View relations", configuration.getRelations().toString());
+		if (equivalenceThreshold < 100 || responseThreshold < 100 || precedenceThreshold < 100 || notCoExistenceeThreshold < 100) {
+			String s = "";
+			String d = "";
+			if (equivalenceThreshold < 100) {
+				s += d + "Equivalence = " + (100 - equivalenceThreshold) + "%";
+				d = ", ";
+			}
+			if (responseThreshold < 100) {
+				s += d + "(Not) Response = " + (100 - responseThreshold) + "%";
+				d = ", ";
+			}
+			if (precedenceThreshold < 100) {
+				s += d + "(Not) Precedence = " + (100 - precedenceThreshold) + "%";
+				d = ", ";
+			}
+			if (notCoExistenceeThreshold < 100) {
+				s += d + "Not Co-Existence = " + (100 - notCoExistenceeThreshold) + "%";
+				d = ", ";
+			}
+			label += encodeRow("Noise levels", s);
 		}
 		label += "</table>";
 		graph.setOption("fontsize", "8.0");
@@ -1546,15 +1567,15 @@ public class LogSkeleton implements HTMLToString {
 		}
 	}
 
-	public boolean hasManyNotCoExistenceArcs(BrowserConfiguration configuration) {
+	public boolean hasManyNotCoExistenceArcs(boolean isUseEquivalenceClass) {
 		int nr = 0;
 		for (String fromActivity : countModel.getActivities()) {
 			for (String toActivity : countModel.getActivities()) {
 				if (!fromActivity.equals(toActivity)) {
 					if (fromActivity.compareTo(toActivity) >= 0
-							&& (!configuration.isUseEquivalenceClass()
+							&& (!isUseEquivalenceClass
 									|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
-							&& (!configuration.isUseEquivalenceClass()
+							&& (!isUseEquivalenceClass
 									|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
 							&& notCoExistences.get(fromActivity).contains(toActivity)) {
 						nr++;

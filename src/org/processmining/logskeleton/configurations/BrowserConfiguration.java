@@ -1,6 +1,7 @@
 package org.processmining.logskeleton.configurations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,10 +23,14 @@ public class BrowserConfiguration {
 	private int precedenceThreshold;
 	private int responseThreshold;
 	private int notCoExistenceThreshold;
+	private int equivalenceThreshold;
 
 	public BrowserConfiguration(BrowserInput input) {
-		activities = new HashSet<String>();
-		relations = new ArrayList<LogSkeletonRelation>();
+		activities = new HashSet<String>(input.getLogSkeleton().getActivities());
+		relations = new ArrayList<LogSkeletonRelation>(Arrays.asList(LogSkeletonRelation.values()));
+		if (input.getLogSkeleton().hasManyNotCoExistenceArcs(true)) {
+			relations.remove(LogSkeletonRelation.NEVERTOGETHER);
+		}
 		/* 
 		 * By default, do not use hyper arcs as finding the hyper arcs may take considerable time. 
 		 */
@@ -38,6 +43,7 @@ public class BrowserConfiguration {
 		setPrecedenceThreshold(100);
 		setResponseThreshold(100);
 		setNotCoExistenceThreshold(100);
+		setEquivalenceThreshold(100);
 	}
 	
 	public Set<String> getActivities() {
@@ -126,5 +132,13 @@ public class BrowserConfiguration {
 
 	public void setUseHeadTailLabels(boolean useHeadTailLabels) {
 		this.useHeadTailLabels = useHeadTailLabels;
+	}
+
+	public int getEquivalenceThreshold() {
+		return equivalenceThreshold;
+	}
+
+	public void setEquivalenceThreshold(int equivalenceThreshold) {
+		this.equivalenceThreshold = equivalenceThreshold;
 	}
 }

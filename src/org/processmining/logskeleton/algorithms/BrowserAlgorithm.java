@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.NoninvertibleTransformException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -85,23 +84,25 @@ public class BrowserAlgorithm {
 		basicPanel.setLayout(new TableLayout(basicSize));
 		basicPanel.setOpaque(false);
 		
-		DefaultListModel<String> activities = new DefaultListModel<String>();
-		int[] selectedIndices = new int[model.getActivities().size()];
+		DefaultListModel<String> activityModel = new DefaultListModel<String>();
+		int[] selectedIndices = new int[configuration.getActivities().size()];
 		int i = 0;
+		int j = 0;
 		for (String activity : model.getActivities()) {
-			activities.addElement(activity);
-			selectedIndices[i] = i;
+			activityModel.addElement(activity);
+			if (configuration.getActivities().contains(activity)) {
+				selectedIndices[j++] = i;
+			}
 			i++;
 		}
-		final ProMList<String> activityList = new ProMList<String>("Select activities to show", activities);
+		final ProMList<String> activityList = new ProMList<String>("Select activities to show", activityModel);
 		activityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		activityList.setSelectedIndices(selectedIndices);
-		configuration.getActivities().addAll(model.getActivities());
 		activityList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				Set<String> selectedActivities = new HashSet<String>(activityList.getSelectedValuesList());
 				if (!selectedActivities.equals(configuration.getActivities())) {
-					System.out.println("[LogSkeletonBrowserPlugin] Selected nodes = " + selectedActivities);
+					System.out.println("[BrowserAlgorithm] Selected activities = " + selectedActivities);
 					configuration.getActivities().clear();
 					configuration.getActivities().addAll(selectedActivities);
 					updateRight();
@@ -111,60 +112,113 @@ public class BrowserAlgorithm {
 		activityList.setPreferredSize(new Dimension(100, 100));
 		basicPanel.add(activityList, "0, 0, 0, 1");
 
-		boolean doNotUseNotCoExistence = model.hasManyNotCoExistenceArcs(configuration);
-
-		List<LogSkeletonRelation> list = Arrays.asList(LogSkeletonRelation.values());
-		DefaultListModel<LogSkeletonRelation> visualizers = new DefaultListModel<LogSkeletonRelation>();
-		for (LogSkeletonRelation visualizer : list) {
-			visualizers.addElement(visualizer);
+		List<LogSkeletonRelation> relations = Arrays.asList(LogSkeletonRelation.values());
+		DefaultListModel<LogSkeletonRelation> relationModel = new DefaultListModel<LogSkeletonRelation>();
+		selectedIndices = new int[configuration.getRelations().size()];
+		i = 0;
+		j = 0;
+		for (LogSkeletonRelation relation : relations) {
+			relationModel.addElement(relation);
+			if (configuration.getRelations().contains(relation)) {
+				selectedIndices[j++] = i;
+			}
+			i++;
 		}
-		final ProMList<LogSkeletonRelation> visualizerList = new ProMList<LogSkeletonRelation>("Select relations to show",
-				visualizers);
-		visualizerList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		List<LogSkeletonRelation> selectedVisualizers = new ArrayList<LogSkeletonRelation>();
-		selectedIndices = new int[doNotUseNotCoExistence ? 4 : 5];
-		//		selectedVisualizers.add(LogSkeletonBrowser.ALWAYSTOGETHER);
-		//		selectedIndices[0] = list.indexOf(LogSkeletonBrowser.ALWAYSTOGETHER);
-		selectedVisualizers.add(LogSkeletonRelation.ALWAYSBEFORE);
-		selectedIndices[0] = list.indexOf(LogSkeletonRelation.ALWAYSBEFORE);
-		selectedVisualizers.add(LogSkeletonRelation.ALWAYSAFTER);
-		selectedIndices[1] = list.indexOf(LogSkeletonRelation.ALWAYSAFTER);
-		selectedVisualizers.add(LogSkeletonRelation.NEVERBEFORE);
-		selectedIndices[2] = list.indexOf(LogSkeletonRelation.NEVERBEFORE);
-		selectedVisualizers.add(LogSkeletonRelation.NEVERAFTER);
-		selectedIndices[3] = list.indexOf(LogSkeletonRelation.NEVERAFTER);
-		if (!doNotUseNotCoExistence) {
-			/*
-			 * Only include in the first visualization if not too many Not
-			 * Co-Existence constraints.
-			 */
-			selectedVisualizers.add(LogSkeletonRelation.NEVERTOGETHER);
-			selectedIndices[4] = list.indexOf(LogSkeletonRelation.NEVERTOGETHER);
-		}
-		visualizerList.setSelectedIndices(selectedIndices);
-		configuration.getRelations().addAll(selectedVisualizers);
-		visualizerList.addListSelectionListener(new ListSelectionListener() {
+		final ProMList<LogSkeletonRelation> relationList = new ProMList<LogSkeletonRelation>("Select relations to show",
+				relationModel);
+		relationList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		relationList.setSelectedIndices(selectedIndices);
+		relationList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				List<LogSkeletonRelation> selectedVisualizers = visualizerList.getSelectedValuesList();
-				if (!selectedVisualizers.equals(configuration.getRelations())) {
-					System.out.println("[LogSkeletonBrowserPlugin] Selected edges = " + selectedVisualizers);
+				List<LogSkeletonRelation> selectedRelations = relationList.getSelectedValuesList();
+				if (!selectedRelations.equals(configuration.getRelations())) {
+					System.out.println("[BrowserAlgorithm] Selected relations = " + selectedRelations);
 					configuration.getRelations().clear();
-					configuration.getRelations().addAll(selectedVisualizers);
+					configuration.getRelations().addAll(selectedRelations);
 					updateRight();
 				}
 			}
 		});
-		visualizerList.setPreferredSize(new Dimension(100, 100));
-		basicPanel.add(visualizerList, "0, 2");
+		relationList.setPreferredSize(new Dimension(100, 100));
+		basicPanel.add(relationList, "0, 2");
 		
 //		tabbedPane.add("Basic options", basicPanel);
 
 		final JPanel advancedPanel = new JPanel();
-		double[][] advancedSize = { { 30, TableLayoutConstants.FILL }, { 40, 40, 40, 40, 40, 40, 40 } };
+		double[][] advancedSize = { { 30, TableLayoutConstants.FILL }, { 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40 } };
 		advancedPanel.setLayout(new TableLayout(advancedSize));
 		advancedPanel.setOpaque(false);
+		int y = 0;
 		
-		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("", false);
+		advancedPanel.add(new JLabel("Select noise levels in %:"), "0, " + y + ", 1, " + y);
+		y++;
+		
+		final NiceSlider equivalenceSlider = SlickerFactory.instance().createNiceIntegerSlider("Equivalence", 0, 20,
+				100 - configuration.getEquivalenceThreshold(), Orientation.HORIZONTAL);
+		equivalenceSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				int value = 100 - equivalenceSlider.getSlider().getValue();
+				model.setEquivalenceThreshold(value);
+				configuration.setEquivalenceThreshold(value);
+				model.cleanPrePost();
+				updateRight();
+			}
+		});
+		equivalenceSlider.setPreferredSize(new Dimension(100, 30));
+		advancedPanel.add(equivalenceSlider, "0, " + y + ", 1, " + y);
+		y++;
+		
+		final NiceSlider responseSlider = SlickerFactory.instance().createNiceIntegerSlider("(Not) Response", 0, 20,
+				100 - configuration.getResponseThreshold(), Orientation.HORIZONTAL);
+		responseSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				int value = 100 - responseSlider.getSlider().getValue();
+				model.setResponseThreshold(value);
+				configuration.setResponseThreshold(value);
+				model.cleanPrePost();
+				updateRight();
+			}
+		});
+		responseSlider.setPreferredSize(new Dimension(100, 30));
+		advancedPanel.add(responseSlider, "0, " + y + ", 1, " + y);
+		y++;
+		
+		final NiceSlider precedenceSlider = SlickerFactory.instance().createNiceIntegerSlider("(Not) Precedence", 0, 20,
+				100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+		precedenceSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				int value = 100 - precedenceSlider.getSlider().getValue();
+				model.setPrecedenceThreshold(value);
+				configuration.setPrecedenceThreshold(value);
+				model.cleanPrePost();
+				updateRight();
+			}
+		});
+		precedenceSlider.setPreferredSize(new Dimension(100, 30));
+		advancedPanel.add(precedenceSlider, "0, " + y + ", 1, " + y);
+		y++;
+		
+		final NiceSlider notCoExistenceSlider = SlickerFactory.instance().createNiceIntegerSlider("Not Co-Existence", 0, 20,
+				100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+		notCoExistenceSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				int value = 100 - notCoExistenceSlider.getSlider().getValue();
+				model.setNotCoExistenceThreshold(value);
+				configuration.setNotCoExistenceThreshold(value);
+				model.cleanPrePost();
+				updateRight();
+			}
+		});
+		notCoExistenceSlider.setPreferredSize(new Dimension(100, 30));
+		advancedPanel.add(notCoExistenceSlider, "0, " + y + ", 1, " + y);
+		y++;
+		y++;
+		
+		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("", configuration.isUseHyperArcs());
 		checkBox.setSelected(configuration.isUseHyperArcs());
 		checkBox.addActionListener(new ActionListener() {
 
@@ -176,11 +230,12 @@ public class BrowserAlgorithm {
 		});
 		checkBox.setOpaque(false);
 		checkBox.setPreferredSize(new Dimension(100, 30));
-		advancedPanel.add(checkBox, "0, 1");
-		advancedPanel.add(new JLabel("<html>Replace a clique of similar arcs<br>by a hyper arc (may be slow...)"), "1, 1");
+		advancedPanel.add(checkBox, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Replace a clique of similar arcs<br>by a hyper arc (may be slow...)"), "1, " + y);
+		y++;
 
 		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("",
-				false);
+				configuration.isUseFalseConstraints());
 		checkBoxFalseConstraints.setSelected(configuration.isUseFalseConstraints());
 		checkBoxFalseConstraints.addActionListener(new ActionListener() {
 
@@ -192,10 +247,11 @@ public class BrowserAlgorithm {
 		});
 		checkBoxFalseConstraints.setOpaque(false);
 		checkBoxFalseConstraints.setPreferredSize(new Dimension(100, 30));
-		advancedPanel.add(checkBoxFalseConstraints, "0, 2");
-		advancedPanel.add(new JLabel("<html>Ignore symmetric relations<br>when layering activities"), "1, 2");
+		advancedPanel.add(checkBoxFalseConstraints, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Ignore symmetric relations<br>when layering activities"), "1, " + y);
+		y++;
 
-		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("", false);
+		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("", configuration.isUseEdgeColors());
 		checkBoxEdgeColors.setSelected(configuration.isUseEdgeColors());
 		checkBoxEdgeColors.addActionListener(new ActionListener() {
 
@@ -207,11 +263,12 @@ public class BrowserAlgorithm {
 		});
 		checkBoxEdgeColors.setOpaque(false);
 		checkBoxEdgeColors.setPreferredSize(new Dimension(100, 30));
-		advancedPanel.add(checkBoxEdgeColors, "0, 3");
-		advancedPanel.add(new JLabel("<html>Show relation colors"), "1, 3");
+		advancedPanel.add(checkBoxEdgeColors, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Show relation colors"), "1, " + y);
+		y++;
 
 		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("",
-				false);
+				configuration.isUseEquivalenceClass());
 		checkBoxEquivalenceClass.setSelected(configuration.isUseEquivalenceClass());
 		checkBoxEquivalenceClass.addActionListener(new ActionListener() {
 
@@ -223,10 +280,11 @@ public class BrowserAlgorithm {
 		});
 		checkBoxEquivalenceClass.setOpaque(false);
 		checkBoxEquivalenceClass.setPreferredSize(new Dimension(100, 30));
-		advancedPanel.add(checkBoxEquivalenceClass, "0, 4");
-		advancedPanel.add(new JLabel("<html>Show Not Co-Existence only<br>between representatives"), "1, 4");
+		advancedPanel.add(checkBoxEquivalenceClass, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Show Not Co-Existence only<br>between representatives"), "1, " + y);
+		y++;
 
-		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("", false);
+		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("", configuration.isUseHeadTailLabels());
 		checkBoxLabels.setSelected(configuration.isUseHeadTailLabels());
 		checkBoxLabels.addActionListener(new ActionListener() {
 
@@ -238,10 +296,11 @@ public class BrowserAlgorithm {
 		});
 		checkBoxLabels.setOpaque(false);
 		checkBoxLabels.setPreferredSize(new Dimension(100, 30));
-		advancedPanel.add(checkBoxLabels, "0, 5");
-		advancedPanel.add(new JLabel("<html>Replace head/tail labels<br>by arc labels"), "1, 5");
+		advancedPanel.add(checkBoxLabels, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Replace head/tail labels<br>by arc labels"), "1, " + y);
+		y++;
 
-		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("", false);
+		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("", configuration.isUseNeighbors());
 		checkBoxNeighbors.setSelected(configuration.isUseNeighbors());
 		checkBoxNeighbors.addActionListener(new ActionListener() {
 
@@ -253,29 +312,10 @@ public class BrowserAlgorithm {
 		});
 		checkBoxNeighbors.setOpaque(false);
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
-		advancedPanel.add(checkBoxNeighbors, "0, 6");
-		advancedPanel.add(new JLabel("<html>Show related (but unselected)<br>activities as well"), "1, 6");
+		advancedPanel.add(checkBoxNeighbors, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Show related (but unselected)<br>activities as well"), "1, " + y);
+		y++;
 
-		final NiceSlider noiseLevelSlider = SlickerFactory.instance().createNiceIntegerSlider("Select noise level in %", 0, 20,
-				100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
-		noiseLevelSlider.addChangeListener(new ChangeListener() {
-
-			public void stateChanged(ChangeEvent e) {
-				int value = 100 - noiseLevelSlider.getSlider().getValue();
-				model.setEquivalenceThreshold(value);
-				configuration.setPrecedenceThreshold(value);
-				configuration.setResponseThreshold(value);
-				model.setPrecedenceThreshold(value);
-				model.setResponseThreshold(value);
-				configuration.setNotCoExistenceThreshold(value);
-				model.setNotCoExistenceThreshold(value);
-				model.cleanPrePost();
-				updateRight();
-			}
-		});
-		noiseLevelSlider.setPreferredSize(new Dimension(100, 30));
-		advancedPanel.add(noiseLevelSlider, "0, 0, 1, 0");
-		
 		final SlickerButton basicButton = new SlickerButton("Basic options");
 		final SlickerButton advancedButton = new SlickerButton("Advanced options");
 		

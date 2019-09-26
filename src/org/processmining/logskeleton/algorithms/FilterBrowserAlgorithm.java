@@ -29,8 +29,10 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.framework.util.ui.widgets.WidgetColors;
+import org.processmining.logskeleton.configurations.BrowserConfiguration;
 import org.processmining.logskeleton.configurations.BuilderConfiguration;
 import org.processmining.logskeleton.configurations.FilterBrowserConfiguration;
+import org.processmining.logskeleton.inputs.BrowserInput;
 import org.processmining.logskeleton.inputs.BuilderInput;
 import org.processmining.logskeleton.inputs.FilterBrowserInput;
 import org.processmining.logskeleton.models.LogSkeleton;
@@ -54,6 +56,7 @@ public class FilterBrowserAlgorithm {
 	private List<List<String>> splitters;
 	private Set<String> positiveFilters;
 	private Set<String> negativeFilters;
+	private BrowserConfiguration browserConfiguration =  null;
 	
 	public FilterBrowserOutput apply(PluginContext context, FilterBrowserInput input) {
 		return apply(context, input, new FilterBrowserConfiguration(input));
@@ -147,7 +150,11 @@ public class FilterBrowserAlgorithm {
 		if (rightPanel != null) {
 			mainPanel.remove(rightPanel);
 		}
-		rightPanel = visualizerPlugin.run(context, logSkeleton);
+		if (browserConfiguration == null) {
+			browserConfiguration = new BrowserConfiguration(new BrowserInput(logSkeleton));
+			browserConfiguration.getActivities().retainAll(logSkeleton.getActivities());
+		}
+		rightPanel = visualizerPlugin.run(context, logSkeleton, browserConfiguration);
 		mainPanel.add(rightPanel, "1, 0");
 		mainPanel.validate();
 		mainPanel.repaint();
