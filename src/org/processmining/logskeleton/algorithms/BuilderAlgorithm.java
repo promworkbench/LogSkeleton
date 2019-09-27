@@ -28,141 +28,299 @@ public class BuilderAlgorithm {
 
 	public BuilderOutput apply(PluginContext context, BuilderInput input, BuilderConfiguration configuration) {
 		XLog log = input.getLog();
-		LogSkeletonCount countModel = count(log, configuration);
-		countModel.print("Count model");
-		EventLogArray logs = split(log);
-		Collection<LogSkeletonCount> counts = createCounts(logs, configuration);
-		LogSkeleton constraintModel = new LogSkeleton(countModel);
-		addEquivalenceClasses(counts, constraintModel);
-		createCausalDependencies(log, configuration, countModel, constraintModel);
+
+		/*
+		 * Create count for entire log.
+		 */
+		System.out.println("[BuilderAlgorithm] Creating log count.");
+		LogSkeletonCount logCount = count(log, configuration);
+
+		/*
+		 * Create a count for every trace.
+		 */
+		System.out.println("[BuilderAlgorithm] Creating trace counts.");
+		EventLogArray traceLogs = split(log);
+		Collection<LogSkeletonCount> traceCounts = createCounts(traceLogs, configuration);
+
+		/*
+		 * Create an initial log skeleton from the log count.
+		 */
+		LogSkeleton logSkeleton = new LogSkeleton(logCount);
+
+		/*
+		 * Add equivalence classes to the log skeleton based on the trace
+		 * counts.
+		 */
+		System.out.println("[BuilderAlgorithm] Creating equivalence classes.");
+		addEquivalenceClasses(traceCounts, logSkeleton);
+
+		/*
+		 * Add other relations to the log skeleton.
+		 */
+		System.out.println("[BuilderAlgorithm] Creating relations.");
+		createCausalDependencies(log, configuration, logCount, logSkeleton);
+
+		/*
+		 * Set the label of the log skeleton.
+		 */
 		String label = XConceptExtension.instance().extractName(log);
-		constraintModel.setLabel(label == null ? "<not specified>" : label);
-		return new BuilderOutput(constraintModel);
+		logSkeleton.setLabel(label == null ? "<not specified>" : label);
+
+		/*
+		 * Return the output.
+		 */
+		System.out.println("[BuilderAlgorithm] Done.");
+		return new BuilderOutput(logSkeleton);
 	}
 
+	/**
+	 * Returns the count for the provided log using the provided configuration.
+	 * 
+	 * @param log
+	 *            THe provided log.
+	 * @param configuration
+	 *            The provided configuration.
+	 * @return The count.
+	 */
 	public LogSkeletonCount count(XLog log, BuilderConfiguration configuration) {
 		XEventClassifier classifier = new PrefixClassifier(configuration.getClassifier());
-		LogSkeletonCount model = new LogSkeletonCount();
+
+		/*
+		 * Start a new count.
+		 */
+		LogSkeletonCount logCount = new LogSkeletonCount();
+
+		/*
+		 * Count how often activities and transitions occur in the log.
+		 */
 		for (XTrace trace : log) {
 			String activity;
+
+			/*
+			 * Initialize the previous activity.
+			 */
 			String prevActivity = LogSkeletonCount.STARTEVENT;
-			model.inc(prevActivity);
+			logCount.inc(prevActivity);
+
 			for (XEvent event : trace) {
 				activity = classifier.getClassIdentity(event);
-				model.inc(activity);
-				model.inc(prevActivity, activity);
+
+				/*
+				 * Activity has occurred.
+				 */
+				logCount.inc(activity);
+
+				/*
+				 * transition from previous activity to activity has occurred.
+				 */
+				logCount.inc(prevActivity, activity);
+
 				prevActivity = activity;
 			}
+			/*
+			 * Finalize the count.
+			 */
 			activity = LogSkeletonCount.ENDEVENT;
-			model.inc(activity);
-			model.inc(prevActivity, activity);
+			logCount.inc(activity);
+			logCount.inc(prevActivity, activity);
 		}
-		return model;
+		/*
+		 * Return the count.
+		 */
+		return logCount;
 	}
 
+	/*
+	 * Splits the log into trace logs (a sublog for every trace).
+	 */
 	private EventLogArray split(XLog log) {
-		int N = log.size();
-		EventLogArray logs = EventLogArrayFactory.createEventLogArray();
-		for (int i = 0; i < N; i++) {
-			logs.addLog(i, XFactoryRegistry.instance().currentDefault().createLog());
-		}
-		int i = 0;
+		EventLogArray traceLogs = EventLogArrayFactory.createEventLogArray();
 		for (XTrace trace : log) {
-			logs.getLog(i).add(trace);
-			i++;
-			if (i == N) {
-				i = 0;
-			}
+			XLog traceLog = XFactoryRegistry.instance().currentDefault().createLog();
+			traceLog.add(trace);
+			traceLogs.addLog(traceLogs.getSize(), traceLog);
 		}
-		return logs;
+		return traceLogs;
 	}
 
-	private Collection<LogSkeletonCount> createCounts(EventLogArray logs, BuilderConfiguration configuration) {
-		Collection<LogSkeletonCount> models = new ArrayList<LogSkeletonCount>();
-		for (int i = 0; i < logs.getSize(); i++) {
-			XLog log = logs.getLog(i);
-			models.add(count(log, configuration));
+	/*
+	 * Returns the trace counts for the trace logs.
+	 */
+	private Collection<LogSkeletonCount> createCounts(EventLogArray traceLogs, BuilderConfiguration configuration) {
+		Collection<LogSkeletonCount> traceCounts = new ArrayList<LogSkeletonCount>();
+		for (int i = 0; i < traceLogs.getSize(); i++) {
+			XLog log = traceLogs.getLog(i);
+			traceCounts.add(count(log, configuration));
 		}
-		return models;
+		return traceCounts;
 	}
 
-	private void addEquivalenceClasses(Collection<LogSkeletonCount> countModels, LogSkeleton constraintModel) {
-		Map<List<Integer>, Set<String>> map = new HashMap<List<Integer>, Set<String>>();
-		Set<String> activities = new HashSet<String>();
-		for (LogSkeletonCount countModel : countModels) {
-			activities.addAll(countModel.getActivities());
+	private void addEquivalenceClasses(Collection<LogSkeletonCount> traceCounts, LogSkeleton logSkeleton) {
+
+		/*
+		 * Maps a list of counts (for every trace a count) to the set of
+		 * activities that have this list of counts.
+		 */
+		Map<List<Integer>, Set<String>> traceCountList2Activities = new HashMap<List<Integer>, Set<String>>();
+
+		/*
+		 * Get all activities over all trace counts.
+		 */
+		Set<String> allActivities = new HashSet<String>();
+		for (LogSkeletonCount traceCount : traceCounts) {
+			allActivities.addAll(traceCount.getActivities());
 		}
-		for (String activity : activities) {
-			List<Integer> count = new ArrayList<Integer>();
-			for (LogSkeletonCount countModel : countModels) {
-				count.add(countModel.get(activity));
+
+		/*
+		 * For every activity, count how often it occurs in every trace.
+		 */
+		for (String activity : allActivities) {
+			/*
+			 * Determine the trace count for this activity.
+			 */
+			List<Integer> traceCountList = new ArrayList<Integer>();
+			for (LogSkeletonCount traceCount : traceCounts) {
+				traceCountList.add(traceCount.get(activity));
 			}
-			if (map.containsKey(count)) {
-				map.get(count).add(activity);
+
+			/*
+			 * Add the trace count to the map.
+			 */
+			if (traceCountList2Activities.containsKey(traceCountList)) {
+				/*
+				 * Add activity to existing trace count.
+				 */
+				traceCountList2Activities.get(traceCountList).add(activity);
 			} else {
-				Set<String> newCount = new HashSet<String>();
-				newCount.add(activity);
-				map.put(count, newCount);
+				/*
+				 * Create new trace count for this activity.
+				 */
+				Set<String> activities = new HashSet<String>();
+				activities.add(activity);
+				traceCountList2Activities.put(traceCountList, activities);
 			}
 		}
 
+		/*
+		 * We now have the base equivalence classes (the values in the map).
+		 * From this, create the equivalence classes for every noise level (0% -
+		 * 20%).
+		 */
 		boolean changed = true;
-		int size = map.keySet().isEmpty() ? 0 : map.keySet().iterator().next().size();
+		int nofTraces = traceCountList2Activities.keySet().isEmpty() ? 0
+				: traceCountList2Activities.keySet().iterator().next().size();
+		/*
+		 * For every noise level, starting at noise level 0.
+		 */
 		for (int noiseLevel = 0; noiseLevel < 21; noiseLevel++) {
-			Map<List<Integer>, Set<String>> map2 = new HashMap<List<Integer>, Set<String>>();
-			for (List<Integer> c : map.keySet()) {
-				map2.put(c, new HashSet<String>(map.get(c)));
+			/*
+			 * Create a copy from the map.
+			 */
+			System.out.println("[BuilderAlgorithm] Creating Equivalence class for noiselevel " + noiseLevel + ".");
+			Map<List<Integer>, Set<String>> newTraceCountList2Activities = new HashMap<List<Integer>, Set<String>>();
+			for (List<Integer> c : traceCountList2Activities.keySet()) {
+				newTraceCountList2Activities.put(c, new HashSet<String>(traceCountList2Activities.get(c)));
 			}
+
+			/*
+			 * Update the copy: If the increased noise level causes two
+			 * equivalence classes to be joined, join them.
+			 * 
+			 * Keep on going as long as there were changes.
+			 */
 			while (changed) {
 				changed = false;
-				for (List<Integer> c1 : map2.keySet()) {
-					for (List<Integer> c2 : map2.keySet()) {
-						if (!map2.get(c1).equals(map2.get(c2)) && 100 * distance(c1, c2) < noiseLevel * size) {
-							map2.get(c1).addAll(map2.get(c2));
-							map2.get(c2).addAll(map2.get(c1));
+				/*
+				 * No join yet.
+				 */
+				for (List<Integer> traceCountList1 : newTraceCountList2Activities.keySet()) {
+					for (List<Integer> traceCountList2 : newTraceCountList2Activities.keySet()) {
+						if (!newTraceCountList2Activities.get(traceCountList1)
+								.equals(newTraceCountList2Activities.get(traceCountList2))
+								&& 100 * distance(traceCountList1, traceCountList2) < noiseLevel * nofTraces) {
+							/*
+							 * Distance is too small for noise level. Join both equivalence classes.
+							 */
+							newTraceCountList2Activities.get(traceCountList1)
+									.addAll(newTraceCountList2Activities.get(traceCountList2));
+							newTraceCountList2Activities.get(traceCountList2)
+									.addAll(newTraceCountList2Activities.get(traceCountList1));
 							changed = true;
 						}
 					}
 				}
 			}
 
-			for (Set<String> equivalenceClass : map2.values()) {
-				constraintModel.addEquivalenceClass(noiseLevel, equivalenceClass);
+			/*
+			 * Copy the equivalence classes for this noise level to the log skeleton.
+			 */
+			for (Set<String> equivalenceClass : newTraceCountList2Activities.values()) {
+				logSkeleton.addEquivalenceClass(noiseLevel, equivalenceClass);
 			}
-			map = map2;
+			
+			/*
+			 * Replace the original map by the copy.
+			 */
+			traceCountList2Activities = newTraceCountList2Activities;
+			
+			/*
+			 * Set to false for next noise level.
+			 */
 			changed = true;
 		}
 	}
 
-	private int distance(List<Integer> c1, List<Integer> c2) {
+	/*
+	 * Returns the distance between two trace counts.
+	 */
+	private int distance(List<Integer> traceCountList1, List<Integer> traceCountList2) {
 		int distance = 0;
-		int size = Math.min(c1.size(), c2.size());
+		int size = Math.min(traceCountList1.size(), traceCountList2.size());
+		/*
+		 * The distance is the accumulation of the activity-wise differences.
+		 */
 		for (int i = 0; i < size; i++) {
-			distance += Math.abs(c1.get(i) - c2.get(i));
+			distance += Math.abs(traceCountList1.get(i) - traceCountList2.get(i));
 		}
 		return distance;
 	}
 
-	private void createCausalDependencies(XLog log, BuilderConfiguration configuration, LogSkeletonCount model, LogSkeleton constraintModel) {
+	/*
+	 * Registers the (Not) Response/Precedence and Not Co-Existence in the log skeleton.
+	 */
+	private void createCausalDependencies(XLog log, BuilderConfiguration configuration, LogSkeletonCount count,
+			LogSkeleton logSkeleton) {
 		XEventClassifier classifier = new PrefixClassifier(configuration.getClassifier());
 		for (XTrace trace : log) {
+			/*
+			 * Add the entire trace (including artificial start and end) to the postset.
+			 */
 			List<String> postset = new ArrayList<String>();
 			postset.add(LogSkeletonCount.STARTEVENT);
 			for (XEvent event : trace) {
 				postset.add(classifier.getClassIdentity(event));
 			}
 			postset.add(LogSkeletonCount.ENDEVENT);
+			/*
+			 * Preset is initially empty.
+			 */
 			Set<String> preset = new HashSet<String>();
 			String prevActivity = null;
+			/*
+			 * For every activity: register the preset and the postset.
+			 */
 			while (!postset.isEmpty()) {
 				if (prevActivity != null) {
 					preset.add(prevActivity);
 				}
 				String activity = postset.remove(0);
-				constraintModel.addPrePost(activity, preset, postset);
+				logSkeleton.addPrePost(activity, preset, postset);
 				prevActivity = activity;
 			}
 		}
-		constraintModel.cleanPrePost();
+		/*
+		 * Clean up.
+		 */
+		logSkeleton.cleanPrePost();
 	}
 }

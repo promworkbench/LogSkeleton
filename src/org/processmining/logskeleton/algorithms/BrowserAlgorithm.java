@@ -43,7 +43,7 @@ import info.clearthought.layout.TableLayoutConstants;
 
 public class BrowserAlgorithm {
 
-	private LogSkeleton model;
+	private LogSkeleton logSkeleton;
 	private BrowserConfiguration configuration;
 	private JComponent leftDotPanel = null;
 	private JComponent rightDotPanel = null;
@@ -52,7 +52,7 @@ public class BrowserAlgorithm {
 
 	public BrowserOutput apply(PluginContext context, BrowserInput input, final BrowserConfiguration configuration) {
 
-		this.model = input.getLogSkeleton();
+		this.logSkeleton = input.getLogSkeleton();
 		this.configuration = configuration;
 
 		mainPanel = new CompositePanel() {
@@ -88,7 +88,7 @@ public class BrowserAlgorithm {
 		int[] selectedIndices = new int[configuration.getActivities().size()];
 		int i = 0;
 		int j = 0;
-		for (String activity : model.getActivities()) {
+		for (String activity : logSkeleton.getActivities()) {
 			activityModel.addElement(activity);
 			if (configuration.getActivities().contains(activity)) {
 				selectedIndices[j++] = i;
@@ -159,9 +159,9 @@ public class BrowserAlgorithm {
 
 			public void stateChanged(ChangeEvent e) {
 				int value = 100 - equivalenceSlider.getSlider().getValue();
-				model.setEquivalenceThreshold(value);
+				logSkeleton.setEquivalenceThreshold(value);
 				configuration.setEquivalenceThreshold(value);
-				model.cleanPrePost();
+				logSkeleton.cleanPrePost();
 				updateRight();
 			}
 		});
@@ -175,9 +175,9 @@ public class BrowserAlgorithm {
 
 			public void stateChanged(ChangeEvent e) {
 				int value = 100 - responseSlider.getSlider().getValue();
-				model.setResponseThreshold(value);
+				logSkeleton.setResponseThreshold(value);
 				configuration.setResponseThreshold(value);
-				model.cleanPrePost();
+				logSkeleton.cleanPrePost();
 				updateRight();
 			}
 		});
@@ -191,9 +191,9 @@ public class BrowserAlgorithm {
 
 			public void stateChanged(ChangeEvent e) {
 				int value = 100 - precedenceSlider.getSlider().getValue();
-				model.setPrecedenceThreshold(value);
+				logSkeleton.setPrecedenceThreshold(value);
 				configuration.setPrecedenceThreshold(value);
-				model.cleanPrePost();
+				logSkeleton.cleanPrePost();
 				updateRight();
 			}
 		});
@@ -207,9 +207,9 @@ public class BrowserAlgorithm {
 
 			public void stateChanged(ChangeEvent e) {
 				int value = 100 - notCoExistenceSlider.getSlider().getValue();
-				model.setNotCoExistenceThreshold(value);
+				logSkeleton.setNotCoExistenceThreshold(value);
 				configuration.setNotCoExistenceThreshold(value);
-				model.cleanPrePost();
+				logSkeleton.cleanPrePost();
 				updateRight();
 			}
 		});
@@ -398,17 +398,17 @@ public class BrowserAlgorithm {
 		//		if (leftDotPanel != null) {
 		//			mainPanel.remove(leftDotPanel);
 		//		}
-		model.setPrecedenceThreshold(configuration.getPrecedenceThreshold());
-		model.setResponseThreshold(configuration.getResponseThreshold());
-		model.setNotCoExistenceThreshold(configuration.getNotCoExistenceThreshold());
-		leftDotPanel = new DotPanel(model.createGraph(configuration));
+		logSkeleton.setPrecedenceThreshold(configuration.getPrecedenceThreshold());
+		logSkeleton.setResponseThreshold(configuration.getResponseThreshold());
+		logSkeleton.setNotCoExistenceThreshold(configuration.getNotCoExistenceThreshold());
+		leftDotPanel = new DotPanel(logSkeleton.createGraph(configuration));
 		//		mainPanel.add(leftDotPanel, "0, 0, 0, 3");
 		//		mainPanel.validate();
 		//		mainPanel.repaint();
 		JFrame frame = new JFrame();
 		frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
 		frame.add(leftDotPanel);
-		frame.setTitle("Log Skeleton viewer on " + model.getLabel());
+		frame.setTitle("Log Skeleton viewer on " + logSkeleton.getLabel());
 		frame.setSize(1024, 768);
 		frame.setVisible(true);
 	}
@@ -419,7 +419,7 @@ public class BrowserAlgorithm {
 			rightDotPanel = null;
 		}
 		System.out.println("[LogSkeletonBrowser] Updating Dot panel...");
-		rightDotPanel = new DotPanel(model.visualize(configuration)) {
+		rightDotPanel = new DotPanel(logSkeleton.visualize(configuration)) {
 			/**
 			 * 
 			 */

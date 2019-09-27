@@ -26,9 +26,9 @@ public class CheckerAlgorithm {
 		for (XTrace trace : log) {
 			traceLog.clear();
 			traceLog.add(trace);
-			LogSkeletonCount traceModel = algorithm.count(traceLog, builderConfiguration);
-			traceModel.print("Trace " + XConceptExtension.instance().extractName(trace));
-			if (logSkeleton.check(trace, traceModel, configuration).isEmpty()) {
+			LogSkeletonCount traceCount = algorithm.count(traceLog, builderConfiguration);
+			traceCount.print("Trace " + XConceptExtension.instance().extractName(trace));
+			if (logSkeleton.check(trace, traceCount, configuration).isEmpty()) {
 				classifiedLog.add(trace);
 			}
 		}

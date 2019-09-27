@@ -662,6 +662,8 @@ public class LogSkeleton implements HTMLToString {
 		setNotCoExistenceThreshold(configuration.getNotCoExistenceThreshold());
 		setEquivalenceThreshold(configuration.getEquivalenceThreshold());
 
+		System.out.println("[LogSkeleton] Extending activities");
+
 		if (configuration.isUseNeighbors()) {
 			/*
 			 * Extend the selected activities with activities that are related
@@ -670,8 +672,9 @@ public class LogSkeleton implements HTMLToString {
 			 */
 			for (String fromActivity : countModel.getActivities()) {
 				for (String toActivity : countModel.getActivities()) {
-					if (configuration.getActivities().contains(fromActivity)
-							|| configuration.getActivities().contains(toActivity)) {
+					if ((configuration.getActivities().contains(fromActivity)
+							|| configuration.getActivities().contains(toActivity))
+							&& (!activities.contains(fromActivity) || !activities.contains(toActivity))) {
 						if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
 							if (responses.get(fromActivity).contains(toActivity)
 									&& !getRedundant(fromActivity, responses, countModel.getActivities())
@@ -754,6 +757,7 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 
+		System.out.println("[LogSkeleton] Creating activities");
 		/*
 		 * Create a dot node for every (included) activity.
 		 */
@@ -823,6 +827,8 @@ public class LogSkeleton implements HTMLToString {
 		String lighterNotResponsePrecedenceColor = "#fb8072";
 		String notResponsePrecedenceColor = darker(lighterNotResponsePrecedenceColor);
 
+		System.out.println("[LogSkeleton] Creating relations");
+		
 		for (String fromActivity : activities) {
 			for (String toActivity : activities) {
 				if (configuration.getActivities().contains(fromActivity)
@@ -1005,6 +1011,8 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 
+		System.out.println("[LogSkeleton] Creating hyper-relations");
+
 		if (configuration.isUseHyperArcs()) {
 			/*
 			 * Replaces cliques of edges by a hyper edge.
@@ -1185,6 +1193,8 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 
+		System.out.println("[LogSkeleton] Creating legend");
+
 		/*
 		 * Add a legend to the dot visualization.
 		 */
@@ -1256,6 +1266,7 @@ public class LogSkeleton implements HTMLToString {
 		/*
 		 * All done. Return this dot visualization.
 		 */
+		System.out.println("[LogSkeleton] Done");
 		return graph;
 	}
 
