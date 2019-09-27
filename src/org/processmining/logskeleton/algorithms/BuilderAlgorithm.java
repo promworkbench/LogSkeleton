@@ -33,7 +33,7 @@ public class BuilderAlgorithm {
 		EventLogArray logs = split(log);
 		Collection<LogSkeletonCount> counts = createCounts(logs, configuration);
 		LogSkeleton constraintModel = new LogSkeleton(countModel);
-		addSameCounts(counts, constraintModel);
+		addEquivalenceClasses(counts, constraintModel);
 		createCausalDependencies(log, configuration, countModel, constraintModel);
 		String label = XConceptExtension.instance().extractName(log);
 		constraintModel.setLabel(label == null ? "<not specified>" : label);
@@ -86,7 +86,7 @@ public class BuilderAlgorithm {
 		return models;
 	}
 
-	private void addSameCounts(Collection<LogSkeletonCount> countModels, LogSkeleton constraintModel) {
+	private void addEquivalenceClasses(Collection<LogSkeletonCount> countModels, LogSkeleton constraintModel) {
 		Map<List<Integer>, Set<String>> map = new HashMap<List<Integer>, Set<String>>();
 		Set<String> activities = new HashSet<String>();
 		for (LogSkeletonCount countModel : countModels) {
@@ -117,7 +117,6 @@ public class BuilderAlgorithm {
 				changed = false;
 				for (List<Integer> c1 : map2.keySet()) {
 					for (List<Integer> c2 : map2.keySet()) {
-						int distance = distance(c1, c2);
 						if (!map2.get(c1).equals(map2.get(c2)) && 100 * distance(c1, c2) < noiseLevel * size) {
 							map2.get(c1).addAll(map2.get(c2));
 							map2.get(c2).addAll(map2.get(c1));
@@ -127,8 +126,8 @@ public class BuilderAlgorithm {
 				}
 			}
 
-			for (Set<String> sameCount : map2.values()) {
-				constraintModel.addSameCount(noiseLevel, sameCount);
+			for (Set<String> equivalenceClass : map2.values()) {
+				constraintModel.addEquivalenceClass(noiseLevel, equivalenceClass);
 			}
 			map = map2;
 			changed = true;

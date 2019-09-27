@@ -9,7 +9,7 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.SplitterAlgorithm;
-import org.processmining.logskeleton.classifiers.LogSkeletonClassifier;
+import org.processmining.logskeleton.classifiers.PrefixClassifier;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 
 @Plugin(name = "PDC 2017 Log 2 Splitter", parameterLabels = { "Event Log 2" }, returnLabels = { "Split Log 2" }, returnTypes = { XLog.class }, userAccessible = true, help = "PDC 2017 Plug-in")
@@ -20,7 +20,7 @@ public class PDC2017Log2SplitterPlugin extends SplitterAlgorithm {
 	public XLog run(PluginContext context, XLog log) {
 		SplitterParameters parameters = new SplitterParameters();
 		XLog filteredLog = log;
-		XEventClassifier classifier = new LogSkeletonClassifier(new XEventNameClassifier());
+		XEventClassifier classifier = new PrefixClassifier(new XEventNameClassifier());
 
 		// Split a over itself
 		parameters.getMilestoneActivities().clear();

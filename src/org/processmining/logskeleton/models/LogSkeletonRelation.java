@@ -2,11 +2,11 @@ package org.processmining.logskeleton.models;
 
 public enum LogSkeletonRelation {
 
-	ALWAYSAFTER("Response"),
-	ALWAYSBEFORE("Precedence"),
-	NEVERAFTER("Not Response"),
-	NEVERBEFORE("Not Precedence"),
-	NEVERTOGETHER("Not Co-Existence");
+	RESPONSE("Response"),
+	PRECEDENCE("Precedence"),
+	NOTRESPONSE("Not Response"),
+	NOTPRECEDENCE("Not Precedence"),
+	NOTCOEXISTENCE("Not Co-Existence");
 	
 	private String label;
 

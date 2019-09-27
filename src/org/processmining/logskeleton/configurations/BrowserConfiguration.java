@@ -29,7 +29,7 @@ public class BrowserConfiguration {
 		activities = new HashSet<String>(input.getLogSkeleton().getActivities());
 		relations = new ArrayList<LogSkeletonRelation>(Arrays.asList(LogSkeletonRelation.values()));
 		if (input.getLogSkeleton().hasManyNotCoExistenceArcs(true)) {
-			relations.remove(LogSkeletonRelation.NEVERTOGETHER);
+			relations.remove(LogSkeletonRelation.NOTCOEXISTENCE);
 		}
 		/* 
 		 * By default, do not use hyper arcs as finding the hyper arcs may take considerable time. 

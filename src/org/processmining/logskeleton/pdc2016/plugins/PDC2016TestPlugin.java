@@ -9,7 +9,7 @@ import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.ClassifierAlgorithm;
-import org.processmining.logskeleton.classifiers.LogSkeletonClassifier;
+import org.processmining.logskeleton.classifiers.PrefixClassifier;
 import org.processmining.logskeleton.configurations.ClassifierConfiguration;
 import org.processmining.logskeleton.inputs.ClassifierInput;
 import org.processmining.logskeleton.pdc2016.dialogs.PDC2016TestDialog;
@@ -36,7 +36,7 @@ public class PDC2016TestPlugin {
 		PDC2016Parameters parameters = new PDC2016Parameters();
 		PDC2016LogAlgorithm logAlgorithm = new PDC2016LogAlgorithm();
 		
-		XEventClassifier classifier = new LogSkeletonClassifier(new XEventNameClassifier());
+		XEventClassifier classifier = new PrefixClassifier(new XEventNameClassifier());
 
 		try {
 			for (int i : testParameters.getNrs()) {

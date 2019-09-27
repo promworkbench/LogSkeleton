@@ -103,7 +103,7 @@ public class ClassifierAlgorithm {
 				if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 					continue;
 				}
-				if (!logSkeleton.getSameCounts(activity).iterator().next().equals(activity)) {
+				if (!logSkeleton.getEquivalenceClass(activity).iterator().next().equals(activity)) {
 					continue;
 				}
 				
@@ -164,7 +164,7 @@ public class ClassifierAlgorithm {
 				if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 					continue;
 				}
-				if (!logSkeleton.getSameCounts(activity).iterator().next().equals(activity)) {
+				if (!logSkeleton.getEquivalenceClass(activity).iterator().next().equals(activity)) {
 					continue;
 				}
 				for (String activity2 : logSkeleton.getActivities()) {
@@ -174,10 +174,10 @@ public class ClassifierAlgorithm {
 					if (activity2 == LogSkeletonCount.STARTEVENT || activity2 == LogSkeletonCount.ENDEVENT) {
 						continue;
 					}
-					if (!logSkeleton.getSameCounts(activity2).iterator().next().equals(activity2)) {
+					if (!logSkeleton.getEquivalenceClass(activity2).iterator().next().equals(activity2)) {
 						continue;
 					}
-					if (logSkeleton.getSameCounts(activity).contains(activity2)) {
+					if (logSkeleton.getEquivalenceClass(activity).contains(activity2)) {
 						continue;
 					}
 					for (int f = 0; f < 4; f++) {
@@ -241,7 +241,7 @@ public class ClassifierAlgorithm {
 				if (activity == LogSkeletonCount.STARTEVENT || activity == LogSkeletonCount.ENDEVENT) {
 					continue;
 				}
-				if (!logSkeleton.getSameCounts(activity).iterator().next().equals(activity)) {
+				if (!logSkeleton.getEquivalenceClass(activity).iterator().next().equals(activity)) {
 					continue;
 				}
 				for (String activity2 : logSkeleton.getActivities()) {
@@ -251,10 +251,10 @@ public class ClassifierAlgorithm {
 					if (activity2 == LogSkeletonCount.STARTEVENT || activity2 == LogSkeletonCount.ENDEVENT) {
 						continue;
 					}
-					if (!logSkeleton.getSameCounts(activity2).iterator().next().equals(activity2)) {
+					if (!logSkeleton.getEquivalenceClass(activity2).iterator().next().equals(activity2)) {
 						continue;
 					}
-					if (logSkeleton.getSameCounts(activity).contains(activity2)) {
+					if (logSkeleton.getEquivalenceClass(activity).contains(activity2)) {
 						continue;
 					}
 					for (String activity3 : logSkeleton.getActivities()) {
@@ -264,13 +264,13 @@ public class ClassifierAlgorithm {
 						if (activity3 == LogSkeletonCount.STARTEVENT || activity3 == LogSkeletonCount.ENDEVENT) {
 							continue;
 						}
-						if (!logSkeleton.getSameCounts(activity3).iterator().next().equals(activity3)) {
+						if (!logSkeleton.getEquivalenceClass(activity3).iterator().next().equals(activity3)) {
 							continue;
 						}
-						if (logSkeleton.getSameCounts(activity).contains(activity3)) {
+						if (logSkeleton.getEquivalenceClass(activity).contains(activity3)) {
 							continue;
 						}
-						if (logSkeleton.getSameCounts(activity2).contains(activity3)) {
+						if (logSkeleton.getEquivalenceClass(activity2).contains(activity3)) {
 							continue;
 						}
 						for (int f = 0; f < 8; f++) {

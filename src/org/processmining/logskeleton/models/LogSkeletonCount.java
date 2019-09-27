@@ -25,26 +25,30 @@ public class LogSkeletonCount {
 	public final static String ENDEVENT = "\u03c9";
 
 	/*
-	 * Counts how many times an activity occurred in the entire log. 
-	 * If activityCounts.get(a) == 4, then activity a occurred 4 times in the log.
+	 * Counts how many times an activity occurred in the entire log. If
+	 * activityCounts.get(a) == 4, then activity a occurred 4 times in the log.
 	 */
 	private Map<String, Integer> activityCounts;
-	
+
 	/*
-	 * Counts the minimal number of times an activity occurs in any trace. 
-	 * If activityMinCounts.get(a) == 1, then a occurs at least once in every trace in the log.
+	 * Counts the minimal number of times an activity occurs in any trace. If
+	 * activityMinCounts.get(a) == 1, then a occurs at least once in every trace
+	 * in the log.
 	 */
 	private Map<String, Integer> activityMinCounts;
-	
+
 	/*
-	 * Counts the maximal number of times an activity occurs in any trace. 
-	 * If activityMinCounts.get(a) == 2, then a occurs at most twice in every trace in the log.
+	 * Counts the maximal number of times an activity occurs in any trace. If
+	 * activityMinCounts.get(a) == 2, then a occurs at most twice in every trace
+	 * in the log.
 	 */
 	private Map<String, Integer> activityMaxCounts;
-	
+
 	/*
-	 * The directly follows relation. If ab is a list containing first a and then b, and if transitionCounts.get(ab) == 5, 
-	 * then a was 5 times directly followed by b in the log. Note that the lists (like ab) have always length 2. 
+	 * The directly follows relation. If ab is a list containing first a and
+	 * then b, and if transitionCounts.get(ab) == 5, then a was 5 times directly
+	 * followed by b in the log. Note that the lists (like ab) have always
+	 * length 2.
 	 */
 	private Map<List<String>, Integer> transitionCounts;
 
@@ -55,7 +59,8 @@ public class LogSkeletonCount {
 		transitionCounts = new HashMap<List<String>, Integer>();
 	}
 
-	public Collection<Violation> checkTransitionCounts(LogSkeletonCount model, CheckerConfiguration configuration, XTrace trace) {
+	public Collection<Violation> checkTransitionCounts(LogSkeletonCount model, CheckerConfiguration configuration,
+			XTrace trace) {
 		Collection<Violation> violations = new HashSet<Violation>();
 		for (List<String> transition : model.transitionCounts.keySet()) {
 			if (!transitionCounts.keySet().contains(transition)) {
@@ -191,13 +196,13 @@ public class LogSkeletonCount {
 
 	public void print(String name) {
 		//		System.out.println("[PDC2017CountModel] Activity counts for " + name);
-		for (String activity : activityCounts.keySet()) {
-			//			System.out.println("[LogSkeletonCount] " + activity + ": " + activityCounts.get(activity));
-		}
+		//		for (String activity : activityCounts.keySet()) {
+		//			System.out.println("[LogSkeletonCount] " + activity + ": " + activityCounts.get(activity));
+		//		}
 		//		System.out.println("[PC2017CountModel] Transitions counts for " + name);
-		for (List<String> transition : transitionCounts.keySet()) {
-			//			System.out.println("[LogSkeletonCount] " + transition + ": " + transitionCounts.get(transition));
-		}
+		//		for (List<String> transition : transitionCounts.keySet()) {
+		//			System.out.println("[LogSkeletonCount] " + transition + ": " + transitionCounts.get(transition));
+		//		}
 	}
 
 	public void exportToFile(CsvWriter writer) throws IOException {

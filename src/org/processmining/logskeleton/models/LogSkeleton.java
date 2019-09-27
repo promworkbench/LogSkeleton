@@ -43,44 +43,65 @@ public class LogSkeleton implements HTMLToString {
 	private LogSkeletonCount countModel;
 
 	/*
-	 * The equivalence relation. If S is an element of sameCounts, then all
-	 * elements of S are equivalent.
+	 * The Equivalence relation per equivalence threshold. If 0 <= L <= N and S
+	 * is an element of equivalances.get(L), then all elements of S are
+	 * equivalent at noise level L.
 	 */
-	private Collection<Collection<String>> sameCounts;
-	private Map<Integer, Collection<Collection<String>>> sameCountsNoise;
+	private Map<Integer, Collection<Collection<String>>> equivalenceClasses;
 
 	/*
-	 * The precedence relation. If precedence.get(a).contains(b), then if a
+	 * The Precedence relation. If precedence.get(a).contains(b), then if a
 	 * occurs, some b must occur before.
 	 */
 	private Map<String, ThresholdSet> precedences;
 
 	/*
-	 * The response relation. If response.get(a).contains(b), then if a occurs,
+	 * The Response relation. If response.get(a).contains(b), then if a occurs,
 	 * some b must occur after.
 	 */
 	private Map<String, ThresholdSet> responses;
 
+	/*
+	 * The Not Precedence relation. If notPrecedence.get(a).contains(b), then if
+	 * a occurs, no b may occur before. As a result, if both a and b occur, then
+	 * b occurs after a.
+	 */
 	private Map<String, ThresholdSet> notPrecedences;
+
+	/*
+	 * The Not Response relation. If notResponse.get(a).contains(b), then if a
+	 * occurs, no b may occur after. As a result, if both a and b occur, then b
+	 * occurs before a.
+	 */
 	private Map<String, ThresholdSet> notResponses;
 
 	/*
-	 * The not co-existence relation. If notCoExistence.get(a).contains(b), then
+	 * The Not Co-Existence relation. If notCoExistence.get(a).contains(b), then
 	 * if a occurs, b may not occur (before or after).
 	 */
 	private Map<String, ThresholdSet> notCoExistences;
 
+	/*
+	 * Filters and splitters. Used for the legend below the log skeleton.
+	 */
 	private Set<String> required;
 	private Set<String> forbidden;
 	private List<List<String>> splitters;
+
+	/*
+	 * Label for the log skeleton.
+	 */
 	private String label;
 
+	/*
+	 * Thresholds for the log skeleton. A threshold of X corresponds to a noise
+	 * level of 100-X. As a result, the threshold 100 allows for no noise, 99
+	 * allows for minimal noise, etc.
+	 */
 	private int equivalenceThreshold;
 	private int precedenceThreshold;
 	private int responseThreshold;
 	private int notCoExistenceeThreshold;
-
-	//	private Map<List<String>, List<Integer>> distances;
 
 	public LogSkeleton() {
 		this(new LogSkeletonCount());
@@ -88,12 +109,10 @@ public class LogSkeleton implements HTMLToString {
 
 	public LogSkeleton(LogSkeletonCount countModel) {
 		this.countModel = countModel;
-		//		sameCounts = new HashSet<Collection<String>>();
-		sameCountsNoise = new HashMap<Integer, Collection<Collection<String>>>();
+		equivalenceClasses = new HashMap<Integer, Collection<Collection<String>>>();
 		for (int noiseLevel = 0; noiseLevel < 21; noiseLevel++) {
-			sameCountsNoise.put(noiseLevel, new HashSet<Collection<String>>());
+			equivalenceClasses.put(noiseLevel, new HashSet<Collection<String>>());
 		}
-		sameCounts = sameCountsNoise.get(0);
 		precedences = new HashMap<String, ThresholdSet>();
 		responses = new HashMap<String, ThresholdSet>();
 		notPrecedences = new HashMap<String, ThresholdSet>();
@@ -109,41 +128,127 @@ public class LogSkeleton implements HTMLToString {
 		setNotCoExistenceThreshold(100);
 	}
 
+	/*
+	 * @deprecated Use addEquivalenceClass instead.
+	 */
+	@Deprecated
 	public void addSameCount(Collection<String> activities) {
-		List<String> orderedActivities = new ArrayList<String>(activities);
-		Collections.sort(orderedActivities);
-		sameCounts.add(orderedActivities);
+		addEquivalenceClass(activities);
 	}
 
+	/**
+	 * Adds the provided activities as an equivalence for the current noise
+	 * level.
+	 * 
+	 * @param activities
+	 *            The provided activities
+	 */
+	public void addEquivalenceClass(Collection<String> activities) {
+		List<String> equivalenceClass = new ArrayList<String>(activities);
+		Collections.sort(equivalenceClass);
+		equivalenceClasses.get(100 - equivalenceThreshold).add(equivalenceClass);
+	}
+
+	/*
+	 * @deprecated Use addEquivalenceClass instead.
+	 */
+	@Deprecated
 	public void addSameCount(int noiseLevel, Collection<String> activities) {
-		List<String> orderedActivities = new ArrayList<String>(activities);
-		Collections.sort(orderedActivities);
-		sameCountsNoise.get(noiseLevel).add(orderedActivities);
+		addEquivalenceClass(noiseLevel, activities);
 	}
 
+	/**
+	 * Adds the provided activities as an equivalence for the provided noise
+	 * level.
+	 * 
+	 * @param noiseLevel
+	 *            The provided noise level.
+	 * @param activities
+	 *            The provided activities.
+	 */
+	public void addEquivalenceClass(int noiseLevel, Collection<String> activities) {
+		List<String> equivalenceClass = new ArrayList<String>(activities);
+		Collections.sort(equivalenceClass);
+		equivalenceClasses.get(noiseLevel).add(equivalenceClass);
+	}
+
+	/*
+	 * @deprecated Use getEquivalenceClass instead.
+	 */
+	@Deprecated
 	public Collection<String> getSameCounts(String activity) {
-		for (Collection<String> sameCount : sameCounts) {
-			if (sameCount.contains(activity)) {
-				return sameCount;
+		return getEquivalenceClass(activity);
+	}
+
+	/**
+	 * Returns the equivalence class for the provided activity for the current
+	 * threshold.
+	 * 
+	 * @param activity
+	 *            The provided activity.
+	 * @return The equivalence class.
+	 */
+	public Collection<String> getEquivalenceClass(String activity) {
+		for (Collection<String> equivalenceClass : equivalenceClasses.get(100 - equivalenceThreshold)) {
+			if (equivalenceClass.contains(activity)) {
+				return equivalenceClass;
 			}
 		}
 		return null;
 	}
 
+	/*
+	 * @deprecated Use getEquivalenceClass instead.
+	 */
+	@Deprecated
 	public Collection<String> getSameCounts(String activity, Collection<String> activities) {
-		for (Collection<String> sameCount : sameCounts) {
-			if (sameCount.contains(activity)) {
-				Collection<String> result = new HashSet<String>(sameCount);
-				result.retainAll(activities);
-				return result;
+		return getEquivalenceClass(activity, activities);
+	}
+
+	/**
+	 * Returns the intersection of the provided set of activities and the
+	 * equivalence class for the provided activity for the current threshold.
+	 * 
+	 * This is useful if the representative of an equivalence class is not
+	 * shown. As a result, the smallest shown activity will be used as
+	 * representative.
+	 * 
+	 * @param activity
+	 *            The provided activity.
+	 * @param activities
+	 *            The provided activities.
+	 * @return The intersected equivalence class.
+	 */
+	public Collection<String> getEquivalenceClass(String activity, Collection<String> activities) {
+		for (Collection<String> equivalenceClass : equivalenceClasses.get(100 - equivalenceThreshold)) {
+			if (equivalenceClass.contains(activity)) {
+				Collection<String> filteredEquivalenceClass = new HashSet<String>(equivalenceClass);
+				filteredEquivalenceClass.retainAll(activities);
+				return filteredEquivalenceClass;
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Registers that the provided activity has the provided preset of
+	 * activities and the provided postset of activities.
+	 * 
+	 * @param activity
+	 *            The provided activity.
+	 * @param pre
+	 *            The provided preset of activities. These activities occur
+	 *            before the provided activity in the trace.
+	 * @param post
+	 *            The provided postset of activities. These activities occur
+	 *            after the provided activity in the trace.
+	 */
 	public void addPrePost(String activity, Collection<String> pre, Collection<String> post) {
 		Set<String> preset = new HashSet<String>(pre);
 		Set<String> postset = new HashSet<String>(post);
+		/*
+		 * Initialization if a new activity.
+		 */
 		if (!precedences.containsKey(activity)) {
 			precedences.put(activity, new ThresholdSet(countModel.getActivities(), precedenceThreshold));
 		}
@@ -159,20 +264,43 @@ public class LogSkeleton implements HTMLToString {
 		if (!notCoExistences.containsKey(activity)) {
 			notCoExistences.put(activity, new ThresholdSet(countModel.getActivities(), notCoExistenceeThreshold));
 		}
+		/*
+		 * Add all activities from the preset to the precedences.
+		 */
 		precedences.get(activity).addAll(preset);
+		/*
+		 * Add all activities from the postset to the responses.
+		 */
 		responses.get(activity).addAll(postset);
+		/*
+		 * Add all activities not in the preset to the notPrecedences.
+		 */
 		Set<String> negPreset = new HashSet<String>(countModel.getActivities());
 		negPreset.removeAll(preset);
 		notPrecedences.get(activity).addAll(negPreset);
+		/*
+		 * Add all activities not in the postset to the notResponses.
+		 */
 		Set<String> negPostset = new HashSet<String>(countModel.getActivities());
 		negPostset.removeAll(postset);
 		notResponses.get(activity).addAll(negPostset);
+		/*
+		 * Add all activities not in the preset and not in the postset to the
+		 * notCoExistences.
+		 */
 		Set<String> prepostset = new HashSet<String>(countModel.getActivities());
 		prepostset.removeAll(preset);
 		prepostset.removeAll(postset);
 		notCoExistences.get(activity).addAll(prepostset);
 	}
 
+	/**
+	 * Restore any removed activities in the relations.
+	 * 
+	 * Removing an activity A from a (threshold!) set S removes it in the sense
+	 * that S.contains(A) will return false. However, the activity will still be
+	 * there in another way, which allows us to restore the removal.
+	 */
 	public void cleanPrePost() {
 		for (String activity : precedences.keySet()) {
 			precedences.get(activity).reset();
@@ -190,40 +318,23 @@ public class LogSkeleton implements HTMLToString {
 			notPrecedences.get(activity).removeAll(notCoExistences.get(activity));
 			notResponses.get(activity).removeAll(notCoExistences.get(activity));
 		}
-		/*
-		 * Map<String, Set<String>> precedences2 = new HashMap<String,
-		 * Set<String>>(); Map<String, Set<String>> responses2 = new
-		 * HashMap<String, Set<String>>(); Map<String, Set<String>>
-		 * negPrecedences2 = new HashMap<String, Set<String>>(); Map<String,
-		 * Set<String>> negResponses2 = new HashMap<String, Set<String>>(); for
-		 * (String activity : countModel.getActivities()) {
-		 * precedences2.put(activity, new
-		 * HashSet<String>(precedences.get(activity))); responses2.put(activity,
-		 * new HashSet<String>(responses.get(activity)));
-		 * negPrecedences2.put(activity, new
-		 * HashSet<String>(notPrecedences.get(activity)));
-		 * negResponses2.put(activity, new
-		 * HashSet<String>(notResponses.get(activity))); } for (String activity
-		 * : countModel.getActivities()) { cleanPrePost(activity, precedences,
-		 * precedences2); cleanPrePost(activity, responses, responses2);
-		 * cleanPrePost(activity, notPrecedences, negPrecedences2);
-		 * cleanPrePost(activity, notResponses, negResponses2); }
-		 */ }
-
-	private void cleanPrePost(String activity, Map<String, ThresholdSet> map, Map<String, Set<String>> map2) {
-		Set<String> mappedActivities = map2.get(activity);
-		Set<String> mappedMappedActivities = new HashSet<String>();
-		for (String mappedActivity : mappedActivities) {
-			for (String mappedMappedActivity : map2.get(mappedActivity)) {
-				if (!map2.get(mappedMappedActivity).contains(mappedActivity)) {
-					mappedMappedActivities.add(mappedMappedActivity);
-				}
-			}
-		}
-		//		System.out.println("[LogSkeleton] " + activity + " " + mappedMappedActivities);
-		map.get(activity).removeAll(mappedMappedActivities);
 	}
 
+	/**
+	 * Returns a set of activities to which the relation is redundant. The
+	 * relation R is redundant for the provided activity A and a returned
+	 * activity C if there is third activity B such that (A,C) in R, (A,B) in R,
+	 * and (B,C) in R. The activities A, B, and C should all be part of the
+	 * provided set of activities.
+	 * 
+	 * @param activity
+	 *            The activity A
+	 * @param relation
+	 *            The relation R
+	 * @param activities
+	 *            The provided activities (to take into account).
+	 * @return The set of possible activities C.
+	 */
 	private Set<String> getRedundant(String activity, Map<String, ThresholdSet> relation,
 			Collection<String> activities) {
 		Set<String> redundantActivities = new HashSet<String>();
@@ -232,7 +343,7 @@ public class LogSkeleton implements HTMLToString {
 				for (String activity3 : relation.get(activity2)) {
 					if (activities.contains(activity3)) {
 						if (relation.get(activity).contains(activity3)
-								&& !relation.get(activity3).contains(activity2)) {
+						/* && !relation.get(activity3).contains(activity2) */) {
 							redundantActivities.add(activity3);
 						}
 					}
@@ -242,16 +353,33 @@ public class LogSkeleton implements HTMLToString {
 		return redundantActivities;
 	}
 
-	private Collection<Violation> checkSameCounts(LogSkeletonCount model, CheckerConfiguration configuration,
+	/**
+	 * Checks whether the provided count model violates the equivalence classes
+	 * of this count model using the provided configuration.
+	 * 
+	 * @param model
+	 *            The provided count model
+	 * @param configuration
+	 *            The provided configuration
+	 * @param trace
+	 *            The trace to report if violations are detected
+	 * @return A collection of violations. Depending on the configuration, only
+	 *         the first violation is returned, or all violations.
+	 */
+	private Collection<Violation> checkEquivalenceClasses(LogSkeletonCount model, CheckerConfiguration configuration,
 			XTrace trace) {
 		Set<Violation> violations = new HashSet<Violation>();
-		for (Collection<String> sameCount : sameCounts) {
+		for (Collection<String> equivalenceClass : equivalenceClasses.get(100 - equivalenceThreshold)) {
 			Set<Integer> counts = new HashSet<Integer>();
-			for (String activity : sameCount) {
+			for (String activity : equivalenceClass) {
 				counts.add(model.get(activity));
 			}
 			if (counts.size() != 1) {
-				violations.add(new ViolationEquivalence(trace, new HashSet<String>(sameCount)));
+				/*
+				 * Equivalent activities should have the same count for every
+				 * trace.
+				 */
+				violations.add(new ViolationEquivalence(trace, new HashSet<String>(equivalenceClass)));
 				if (configuration.isStopAtFirstViolation()) {
 					return violations;
 				}
@@ -260,11 +388,38 @@ public class LogSkeleton implements HTMLToString {
 		return violations;
 	}
 
+	/**
+	 * Checks whether the provided count model violates the transition counts of
+	 * this count model using the provided configuration.
+	 * 
+	 * Most notably, this checks whether the provided count model contains a
+	 * transition that is not contained in this count model.
+	 * 
+	 * @param model
+	 *            The provided count model.
+	 * @param configuration
+	 *            The provided configuration.
+	 * @param trace
+	 *            The trace to report if violations are detected.
+	 * @return A collection of violations. Depending on the configuration, only
+	 *         the first violation is returned, or all violations.
+	 */
 	private Collection<Violation> checkTransitionCounts(LogSkeletonCount model, CheckerConfiguration configuration,
 			XTrace trace) {
 		return countModel.checkTransitionCounts(model, configuration, trace);
 	}
 
+	/**
+	 * Checks whether the provided trace violates the (not) response/precedence
+	 * relations of this log skeleton.
+	 * 
+	 * @param trace
+	 *            The provided trace.
+	 * @param configuration
+	 *            The provided configuration.
+	 * @return A collection of violations. Depending on the configuration, only
+	 *         the first violation is returned, or all violations.
+	 */
 	private Collection<Violation> checkCausalDependencies(XTrace trace, CheckerConfiguration configuration) {
 		XEventClassifier classifier = new PrefixClassifier(configuration.getClassifier());
 		List<String> postset = new ArrayList<String>();
@@ -281,7 +436,20 @@ public class LogSkeleton implements HTMLToString {
 				preset.add(prevActivity);
 			}
 			String activity = postset.remove(0);
+			/*
+			 * preset contains all activities that precede activity in the
+			 * trace. postset contains all activities that succeed activity in
+			 * the trace.
+			 */
+
+			/*
+			 * Check whether all precedences are in the preset.
+			 */
 			if (precedences.containsKey(activity) && !preset.containsAll(precedences.get(activity))) {
+				/*
+				 * Some precedences are not in the preset. Report them as
+				 * violations.
+				 */
 				Set<String> missing = new HashSet<String>(precedences.get(activity));
 				missing.removeAll(preset);
 				violations.add(new ViolationPrecedence(trace, activity, missing));
@@ -289,7 +457,14 @@ public class LogSkeleton implements HTMLToString {
 					return violations;
 				}
 			}
+			/*
+			 * Check whether all responses are in the postset.
+			 */
 			if (responses.containsKey(activity) && !postset.containsAll(responses.get(activity))) {
+				/*
+				 * Some responses are not in the postset. Report them as
+				 * violations.
+				 */
 				Set<String> missing = new HashSet<String>(responses.get(activity));
 				missing.removeAll(postset);
 				violations.add(new ViolationResponse(trace, activity, missing));
@@ -297,9 +472,16 @@ public class LogSkeleton implements HTMLToString {
 					return violations;
 				}
 			}
+			/*
+			 * Check whether no not-precedences are in the preset.
+			 */
 			Set<String> notPreset = new HashSet<String>(countModel.getActivities());
 			notPreset.removeAll(preset);
 			if (notPrecedences.containsKey(activity) && !notPreset.containsAll(notPrecedences.get(activity))) {
+				/*
+				 * Some not-precedences are in the preset. Report them as
+				 * violations.
+				 */
 				Set<String> present = new HashSet<String>(notPrecedences.get(activity));
 				present.removeAll(notPreset);
 				violations.add(new ViolationNotPrecedence(trace, activity, present));
@@ -307,9 +489,16 @@ public class LogSkeleton implements HTMLToString {
 					return violations;
 				}
 			}
+			/*
+			 * Check whether no not-responses are in the postset.
+			 */
 			Set<String> notPostset = new HashSet<String>(countModel.getActivities());
 			notPostset.removeAll(postset);
 			if (notResponses.containsKey(activity) && !notPostset.containsAll(notResponses.get(activity))) {
+				/*
+				 * Some not-responses are in the postset. Report them as
+				 * violations.
+				 */
 				Set<String> present = new HashSet<String>(notResponses.get(activity));
 				present.removeAll(notPostset);
 				violations.add(new ViolationNotResponse(trace, activity, present));
@@ -322,23 +511,46 @@ public class LogSkeleton implements HTMLToString {
 		return violations;
 	}
 
+	/**
+	 * Checks whether the provided trace and the provided count model violate
+	 * this log skeleton or this count model, using the provided configuration.
+	 * 
+	 * @param trace
+	 *            The provided trace.
+	 * @param model
+	 *            The provided count model.
+	 * @param configuration
+	 *            The provided configuration.
+	 * @return A collection of violations. The configuration determines which
+	 *         checks are done. Depending on the configuration, only the first
+	 *         violation is returned, or all violations.
+	 */
 	public Collection<Violation> check(XTrace trace, LogSkeletonCount model, CheckerConfiguration configuration) {
 		boolean[] checks = configuration.getChecks();
 		Set<Violation> violations = new HashSet<Violation>();
 
 		if (checks[0]) {
-			violations.addAll(checkSameCounts(model, configuration, trace));
+			/*
+			 * Check equivalence classes.
+			 */
+			violations.addAll(checkEquivalenceClasses(model, configuration, trace));
 			if (configuration.isStopAtFirstViolation() && !violations.isEmpty()) {
 				return violations;
 			}
 		}
 		if (checks[1]) {
+			/*
+			 * Check (not) response/precedence relations.
+			 */
 			violations.addAll(checkCausalDependencies(trace, configuration));
 			if (configuration.isStopAtFirstViolation() && !violations.isEmpty()) {
 				return violations;
 			}
 		}
 		if (checks[2]) {
+			/*
+			 * Check activity and transition counts.
+			 */
 			violations.addAll(checkTransitionCounts(model, configuration, trace));
 			if (configuration.isStopAtFirstViolation() && !violations.isEmpty()) {
 				return violations;
@@ -347,6 +559,9 @@ public class LogSkeleton implements HTMLToString {
 		return violations;
 	}
 
+	/**
+	 * Returns the log skeleton as an HTML string. For debugging purposes only.
+	 */
 	public String toHTMLString(boolean includeHTMLTags) {
 		StringBuffer buf = new StringBuffer();
 		List<String> sorted;
@@ -360,7 +575,7 @@ public class LogSkeleton implements HTMLToString {
 			// Activity
 			buf.append("<tr><td>" + activity + "</td>");
 			// Sibling activities and count
-			for (Collection<String> siblings : sameCounts) {
+			for (Collection<String> siblings : equivalenceClasses.get(100 - equivalenceThreshold)) {
 				if (siblings.contains(activity)) {
 					// Activities
 					sorted = new ArrayList<String>(siblings);
@@ -392,18 +607,25 @@ public class LogSkeleton implements HTMLToString {
 		return buf.toString();
 	}
 
+	/**
+	 * Returns a dot visualization of the log skeleton, using the provided
+	 * configuration.
+	 * 
+	 * @param configuration
+	 *            The provided configuration.
+	 * @return The dot visualization.
+	 */
 	public Dot visualize(BrowserConfiguration configuration) {
 		Map<String, DotNode> map = new HashMap<String, DotNode>();
 		Dot graph = new Dot();
-		//		graph.setOption("concentrate", "true");
-		//		graph.setKeepOrderingOfChildren(true);
-		// Set312 color scheme, with white as last resort.
+
+		/*
+		 * Create a color scheme (based on Set312) containing 99 different
+		 * colors (including gradients). Color 100 is white and is used as
+		 * fallback color.
+		 */
 		String[] set312Colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462",
 				"#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
-		//		String[] colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
-		//				"#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f", "#8dd3c7:#ffffb3", "#bebada:#fb8072",
-		//				"#80b1d3:#fdb462", "#b3de69:#fccde5", "#d9d9d9:#bc80bd", "#ccebc5:#ffed6f", "#ffffb3:#bebada",
-		//				"#fb8072:#80b1d3", "#fdb462:#b3de69", "#fccde5:#d9d9d9", "#bc80bd:#ccebc5", "#ffed6f:#8dd3c7", "white" };
 		String[] colors = new String[100];
 		for (int i = 0; i < 99; i++) {
 			int m = i / 12;
@@ -419,59 +641,109 @@ public class LogSkeleton implements HTMLToString {
 		// Fall-back color
 		colors[99] = "white";
 
+		/*
+		 * Initialization
+		 */
 		int colorIndex = 0;
 		Map<String, String> colorMap = new HashMap<String, String>();
 
+		/*
+		 * Get all selected activities. Retain only those that are actually
+		 * present.
+		 */
 		Set<String> activities = new HashSet<String>(configuration.getActivities());
 		activities.retainAll(countModel.getActivities());
 
+		/*
+		 * Copy the thresholds.
+		 */
 		setPrecedenceThreshold(configuration.getPrecedenceThreshold());
 		setResponseThreshold(configuration.getResponseThreshold());
 		setNotCoExistenceThreshold(configuration.getNotCoExistenceThreshold());
-		equivalenceThreshold = configuration.getEquivalenceThreshold();
-		sameCounts = sameCountsNoise.get(100 - equivalenceThreshold);
+		setEquivalenceThreshold(configuration.getEquivalenceThreshold());
 
 		if (configuration.isUseNeighbors()) {
+			/*
+			 * Extend the selected activities with activities that are related
+			 * (through some selected non-redundant relation) to a selected
+			 * activity.
+			 */
 			for (String fromActivity : countModel.getActivities()) {
 				for (String toActivity : countModel.getActivities()) {
 					if (configuration.getActivities().contains(fromActivity)
 							|| configuration.getActivities().contains(toActivity)) {
-						if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSAFTER)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
 							if (responses.get(fromActivity).contains(toActivity)
-									&& !getRedundant(fromActivity, responses, countModel.getActivities()).contains(toActivity)) {
+									&& !getRedundant(fromActivity, responses, countModel.getActivities())
+											.contains(toActivity)) {
+								/*
+								 * fromActivity and toActivity are related
+								 * through the selected non-redundant Response
+								 * relation, and one of them is selected.
+								 * Include the other as well.
+								 */
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSBEFORE)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.PRECEDENCE)) {
 							if (precedences.get(toActivity).contains(fromActivity)
-									&& !getRedundant(toActivity, precedences, countModel.getActivities()).contains(fromActivity)) {
+									&& !getRedundant(toActivity, precedences, countModel.getActivities())
+											.contains(fromActivity)) {
+								/*
+								 * fromActivity and toActivity are related
+								 * through the selected non-redundant Precedence
+								 * relation, and one of them is selected.
+								 * Include the other as well.
+								 */
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERAFTER)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.NOTRESPONSE)) {
 							if (notResponses.get(toActivity).contains(fromActivity)
-									&& !getRedundant(toActivity, notResponses, countModel.getActivities()).contains(fromActivity)) {
+									&& !getRedundant(toActivity, notResponses, countModel.getActivities())
+											.contains(fromActivity)) {
+								/*
+								 * fromActivity and toActivity are related
+								 * through the selected non-redundant Not
+								 * Response relation, and one of them is
+								 * selected. Include the other as well.
+								 */
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERBEFORE)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.NOTPRECEDENCE)) {
 							if (notPrecedences.get(fromActivity).contains(toActivity)
-									&& !getRedundant(fromActivity, notPrecedences, countModel.getActivities()).contains(toActivity)) {
+									&& !getRedundant(fromActivity, notPrecedences, countModel.getActivities())
+											.contains(toActivity)) {
+								/*
+								 * fromActivity and toActivity are related
+								 * through the selected non-redundant Not
+								 * Precedence relation, and one of them is
+								 * selected. Include the other as well.
+								 */
 								activities.add(fromActivity);
 								activities.add(toActivity);
 							}
 						}
-						if (configuration.getRelations().contains(LogSkeletonRelation.NEVERTOGETHER)) {
+						if (configuration.getRelations().contains(LogSkeletonRelation.NOTCOEXISTENCE)) {
 							if (!fromActivity.equals(toActivity)) {
 								if (fromActivity.compareTo(toActivity) >= 0
 										&& (!configuration.isUseEquivalenceClass() || fromActivity
-												.equals(getSameCounts(fromActivity, countModel.getActivities()).iterator().next()))
+												.equals(getEquivalenceClass(fromActivity, countModel.getActivities())
+														.iterator().next()))
 										&& (!configuration.isUseEquivalenceClass() || toActivity
-												.equals(getSameCounts(toActivity, countModel.getActivities()).iterator().next()))
+												.equals(getEquivalenceClass(toActivity, countModel.getActivities())
+														.iterator().next()))
 										&& notCoExistences.get(fromActivity).contains(toActivity)) {
+									/*
+									 * fromActivity and toActivity are related
+									 * through the selected non-redundant Not
+									 * Co-Existence relation, and one of them is
+									 * selected. Include the other as well.
+									 */
 									activities.add(fromActivity);
 									activities.add(toActivity);
 								}
@@ -482,42 +754,74 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 
+		/*
+		 * Create a dot node for every (included) activity.
+		 */
 		for (String activity : activities) {
-			String colorActivity = getSameCounts(activity, activities).iterator().next();
-			String activityColor = colorMap.get(colorActivity);
-			if (activityColor == null) {
-				activityColor = colors[colorIndex];
-				colorMap.put(colorActivity, activityColor);
+			/*
+			 * Get a color for this activity.
+			 */
+			String representative = getEquivalenceClass(activity, activities).iterator().next();
+			String representativeColor = colorMap.get(representative);
+			if (representativeColor == null) {
+				representativeColor = colors[colorIndex];
+				colorMap.put(representative, representativeColor);
 				if (colorIndex < colors.length - 1) {
 					colorIndex++;
 				}
 			}
+			/*
+			 * Get the count interval for this activity.
+			 */
 			String interval = "" + countModel.getMin(activity);
 			if (countModel.getMax(activity) > countModel.getMin(activity)) {
 				interval += ".." + countModel.getMax(activity);
 			}
+			/*
+			 * Determine the border width for this activity: - 1 if selected - 0
+			 * if not selected (but included).
+			 * 
+			 */
 			int border = 0;
 			if (configuration.getActivities().contains(activity)) {
 				border = 1;
 			}
 
-			DotNode node = graph.addNode("<<table align=\"center\" bgcolor=\"" + activityColor + "\" border=\"" + border
+			/*
+			 * Create the dot node.
+			 */
+			DotNode node = graph.addNode("<<table align=\"center\" bgcolor=\"" + representativeColor + "\" border=\""
+					+ border
 					+ "\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
-					+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + colorActivity + "</td><td>"
+					+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + representative + "</td><td>"
 					+ countModel.get(activity) + "</td>" + "<td>" + interval + "</td>" + "</tr></table>>");
 			node.setOption("shape", "none");
-			//			DotNode node = graph.addNode(activity + "\n" + countModel.get(activity));
-			//			node.setLabel("<" + encodeHTML(activity) + ">");
 			map.put(activity, node);
 		}
 
+		/*
+		 * Initialize colors for the relations. Lighter colors are used if a
+		 * relation only holds if some noise is permitted.
+		 */
+		/*
+		 * For edges without a relation.
+		 */
 		String defaultColor = darker("#d9d9d9");
-		String almostNeverColor = "#fdb462";
-		String neverColor = darker(almostNeverColor);
-		String almostAlwaysColor = "#80b1d3";
-		String alwaysColor = darker(almostAlwaysColor);
-		String almostAlwaysNotColor = "#fb8072";
-		String alwaysNotColor = darker(almostAlwaysNotColor);
+		/*
+		 * For edges with a Non Co-Existence relation.
+		 */
+		String lighterNotCoExistenceColor = "#fdb462";
+		String notCoExistenceColor = darker(lighterNotCoExistenceColor);
+		/*
+		 * For edges with a Response or Precedence relation.
+		 */
+		String lighterResponsePrecedenceColor = "#80b1d3";
+		String responsePrecedenceColor = darker(lighterResponsePrecedenceColor);
+		/*
+		 * For edges with a Not Response or Not Precedence relation.
+		 */
+		String lighterNotResponsePrecedenceColor = "#fb8072";
+		String notResponsePrecedenceColor = darker(lighterNotResponsePrecedenceColor);
 
 		for (String fromActivity : activities) {
 			for (String toActivity : activities) {
@@ -532,100 +836,113 @@ public class LogSkeleton implements HTMLToString {
 					String headColor = null;
 					String tailColor = null;
 					boolean isAsymmetric = true;
-					if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSAFTER)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
 						if (tailDecorator == null && responses.get(fromActivity).contains(toActivity)
 								&& !getRedundant(fromActivity, responses, activities).contains(toActivity)) {
+							/*
+							 * Show Response relation.
+							 */
 							tailDecorator = "noneinv";
-							tailColor = alwaysColor;
+							tailColor = responsePrecedenceColor;
 							int threshold = responses.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
-								tailColor = almostAlwaysColor;
+								tailColor = lighterResponsePrecedenceColor;
 							}
 						}
 					}
-					if (configuration.getRelations().contains(LogSkeletonRelation.ALWAYSBEFORE)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.PRECEDENCE)) {
 						if (headDecorator == null && precedences.get(toActivity).contains(fromActivity)
 								&& !getRedundant(toActivity, precedences, activities).contains(fromActivity)) {
+							/*
+							 * Show Precedence relation.
+							 */
 							headDecorator = "normal";
-							headColor = alwaysColor;
+							headColor = responsePrecedenceColor;
 							int threshold = precedences.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
 								headLabel = "." + threshold;
-								headColor = almostAlwaysColor;
+								headColor = lighterResponsePrecedenceColor;
 							}
 						}
 					}
-					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERTOGETHER)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.NOTCOEXISTENCE)) {
 						if (!fromActivity.equals(toActivity)) {
 							if (headDecorator == null && fromActivity.compareTo(toActivity) >= 0
 									&& (!configuration.isUseEquivalenceClass() || fromActivity
-											.equals(getSameCounts(fromActivity, activities).iterator().next()))
+											.equals(getEquivalenceClass(fromActivity, activities).iterator().next()))
 									&& (!configuration.isUseEquivalenceClass() || toActivity
-											.equals(getSameCounts(toActivity, activities).iterator().next()))
+											.equals(getEquivalenceClass(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(toActivity).contains(fromActivity)) {
+								/*
+								 * Show Not Co-Existence relation.
+								 */
 								headDecorator = "nonetee";
-								//								dummy = true;
 								isAsymmetric = false;
-								headColor = neverColor;
+								headColor = notCoExistenceColor;
 								int threshold = notCoExistences.get(toActivity).getMaxThreshold(fromActivity);
 								if (threshold < 100) {
 									headLabel = "." + threshold;
-									headColor = almostNeverColor;
+									headColor = lighterNotCoExistenceColor;
 								}
 							}
 							if (tailDecorator == null && fromActivity.compareTo(toActivity) >= 0
 									&& (!configuration.isUseEquivalenceClass() || fromActivity
-											.equals(getSameCounts(fromActivity, activities).iterator().next()))
+											.equals(getEquivalenceClass(fromActivity, activities).iterator().next()))
 									&& (!configuration.isUseEquivalenceClass() || toActivity
-											.equals(getSameCounts(toActivity, activities).iterator().next()))
+											.equals(getEquivalenceClass(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(fromActivity).contains(toActivity)) {
+								/*
+								 * Show Not Co-Existence relation.
+								 */
 								tailDecorator = "nonetee";
 								isAsymmetric = false;
-								tailColor = neverColor;
+								tailColor = notCoExistenceColor;
 								int threshold = notCoExistences.get(fromActivity).getMaxThreshold(toActivity);
 								if (threshold < 100) {
 									tailLabel = "." + threshold;
-									tailColor = almostNeverColor;
+									tailColor = lighterNotCoExistenceColor;
 								}
 							}
 						}
 					}
-					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERAFTER)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.NOTRESPONSE)) {
 						if (!fromActivity.equals(toActivity) && headDecorator == null
 								&& notResponses.get(toActivity).contains(fromActivity)
-								&& !getRedundant(toActivity, notResponses, activities).contains(fromActivity)
-						/*
-						 * &&
-						 * !notResponses.get(fromActivity).contains(toActivity)
-						 */) {
+								&& !getRedundant(toActivity, notResponses, activities).contains(fromActivity)) {
+							/*
+							 * Show Not Response relation.
+							 */
 							headDecorator = "noneinvtee";
-							headColor = alwaysNotColor;
+							headColor = notResponsePrecedenceColor;
 							int threshold = notResponses.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
 								headLabel = "." + threshold;
-								headColor = almostAlwaysNotColor;
+								headColor = lighterNotResponsePrecedenceColor;
 							}
 						}
 					}
-					if (configuration.getRelations().contains(LogSkeletonRelation.NEVERBEFORE)) {
+					if (configuration.getRelations().contains(LogSkeletonRelation.NOTPRECEDENCE)) {
 						if (!fromActivity.equals(toActivity) && tailDecorator == null
 								&& notPrecedences.get(fromActivity).contains(toActivity)
-								&& !getRedundant(fromActivity, notPrecedences, activities).contains(toActivity)
-						/*
-						 * && !notPrecedences.get(toActivity).contains(
-						 * fromActivity)
-						 */) {
+								&& !getRedundant(fromActivity, notPrecedences, activities).contains(toActivity)) {
+							/*
+							 * Show Not Precedence relation.
+							 */
 							tailDecorator = "teenormal";
-							tailColor = alwaysNotColor;
+							tailColor = notResponsePrecedenceColor;
 							int threshold = notPrecedences.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
 								tailLabel = "." + threshold;
-								tailColor = almostAlwaysNotColor;
+								tailColor = lighterNotResponsePrecedenceColor;
 							}
 						}
 					}
 					if (tailDecorator != null || headDecorator != null || tailArrow != null || headArrow != null) {
+						/*
+						 * Some relation should be shown. Create a corresponding
+						 * edge.
+						 */
 						DotEdge arc = graph.addEdge(map.get(fromActivity), map.get(toActivity));
 						arc.setOption("dir", "both");
 						if (tailDecorator == null) {
@@ -642,15 +959,27 @@ public class LogSkeleton implements HTMLToString {
 						}
 						arc.setOption("arrowtail", tailDecorator + tailArrow);
 						arc.setOption("arrowhead", headDecorator + headArrow);
+
 						if (configuration.isUseFalseConstraints() && !isAsymmetric) {
+							/*
+							 * Ignore symmetric relations in the layout.
+							 */
 							arc.setOption("constraint", "false");
 						}
+
 						if (configuration.isUseEdgeColors() && (headColor != null || tailColor != null)) {
+							/*
+							 * Color the edges.
+							 */
 							String color = (tailColor == null ? defaultColor : tailColor) + ";0.5:"
 									+ (headColor == null ? defaultColor : headColor) + ";0.5";
 							arc.setOption("color", color);
 						}
+
 						if (configuration.isUseHeadTailLabels()) {
+							/*
+							 * Show labels seperatley at head/tail
+							 */
 							if (headLabel != null) {
 								arc.setOption("headlabel", headLabel);
 							}
@@ -658,6 +987,9 @@ public class LogSkeleton implements HTMLToString {
 								arc.setOption("taillabel", tailLabel);
 							}
 						} else if (headLabel != null || tailLabel != null) {
+							/*
+							 * Show labels combined at middle of arc
+							 */
 							String label = "";
 							if (tailLabel != null) {
 								label += tailLabel;
@@ -673,14 +1005,16 @@ public class LogSkeleton implements HTMLToString {
 			}
 		}
 
-		if (configuration.isUseHyperArcs())
-
-		{
+		if (configuration.isUseHyperArcs()) {
 			/*
-			 * Sort the arcs to get a (more) deterministic result.
+			 * Replaces cliques of edges by a hyper edge.
 			 */
-			List<DotEdge> candidateArcs = new ArrayList<DotEdge>(graph.getEdges());
-			Collections.sort(candidateArcs, new Comparator<DotEdge>() {
+
+			/*
+			 * Sort the edge to get a (more) deterministic result.
+			 */
+			List<DotEdge> candidateEdges = new ArrayList<DotEdge>(graph.getEdges());
+			Collections.sort(candidateEdges, new Comparator<DotEdge>() {
 
 				public int compare(DotEdge o1, DotEdge o2) {
 					int c = o1.getSource().getLabel().compareTo(o2.getSource().getLabel());
@@ -693,27 +1027,27 @@ public class LogSkeleton implements HTMLToString {
 			});
 
 			/*
-			 * Iterate over all arcs in the (current!) graph.
+			 * Iterate over all edges in the (current!) graph.
 			 * 
 			 * Note that the graph may change in the process.
 			 */
-			while (!candidateArcs.isEmpty()) {
+			while (!candidateEdges.isEmpty()) {
 				/*
-				 * Get the next arc.
+				 * Get the next edge.
 				 */
-				DotEdge arc = candidateArcs.iterator().next();
+				DotEdge edge = candidateEdges.iterator().next();
 				/*
-				 * For now, only do this for always-arcs. Includes always-not
-				 * (not response, not precendence) arcs.
+				 * For now, only do this for always-edges. Includes always-not
+				 * (not response, not precedence) edges.
 				 */
-				if (arc.getOption("arrowtail").contains("inv") || arc.getOption("arrowhead").contains("inv")
-						|| arc.getOption("arrowtail").contains("inv")
-						|| arc.getOption("arrowhead").contains("normal")) {
+				if (edge.getOption("arrowtail").contains("inv") || edge.getOption("arrowhead").contains("inv")
+						|| edge.getOption("arrowtail").contains("inv")
+						|| edge.getOption("arrowhead").contains("normal")) {
 					/*
-					 * Get the cluster for this arc.
+					 * Get the cluster for this edge.
 					 */
-					DotNode sourceNode = arc.getSource();
-					DotNode targetNode = arc.getTarget();
+					DotNode sourceNode = edge.getSource();
+					DotNode targetNode = edge.getTarget();
 					Set<DotNode> sourceNodes = new HashSet<DotNode>();
 					sourceNodes.add(sourceNode);
 					Set<DotNode> targetNodes = new HashSet<DotNode>();
@@ -721,13 +1055,13 @@ public class LogSkeleton implements HTMLToString {
 					boolean changed = true;
 					while (changed) {
 						changed = false;
-						for (DotEdge anotherArc : graph.getEdges()) {
-							if (isEqual(arc, anotherArc)) {
-								if (sourceNodes.contains(anotherArc.getSource())) {
-									changed = changed || targetNodes.add(anotherArc.getTarget());
+						for (DotEdge anotherEdge : graph.getEdges()) {
+							if (isEqual(edge, anotherEdge)) {
+								if (sourceNodes.contains(anotherEdge.getSource())) {
+									changed = changed || targetNodes.add(anotherEdge.getTarget());
 								}
-								if (targetNodes.contains(anotherArc.getTarget())) {
-									changed = changed || sourceNodes.add(anotherArc.getSource());
+								if (targetNodes.contains(anotherEdge.getTarget())) {
+									changed = changed || sourceNodes.add(anotherEdge.getSource());
 								}
 							}
 						}
@@ -736,97 +1070,96 @@ public class LogSkeleton implements HTMLToString {
 					/*
 					 * Get a biggest maximal clique in the cluster.
 					 */
-					Set<DotEdge> arcs = getMaximalClique(graph, sourceNodes, targetNodes, arc.getOption("arrowtail"),
-							arc.getOption("arrowhead"), arc.getLabel(), arc, new HashSet<List<Set<DotNode>>>());
+					Set<DotEdge> edges = getMaximalClique(graph, sourceNodes, targetNodes, edge.getOption("arrowtail"),
+							edge.getOption("arrowhead"), edge.getLabel(), edge, new HashSet<List<Set<DotNode>>>());
 
-					if (arcs != null) {
+					if (edges != null) {
 						/*
 						 * A maximal clique was found. Update the sources and
 						 * targets to this clique.
 						 */
 						sourceNodes.clear();
 						targetNodes.clear();
-						for (DotEdge a : arcs) {
-							sourceNodes.add(a.getSource());
-							targetNodes.add(a.getTarget());
+						for (DotEdge anotherEdge : edges) {
+							sourceNodes.add(anotherEdge.getSource());
+							targetNodes.add(anotherEdge.getTarget());
 						}
-						//						System.out.println("[LogSkeleton] " + sourceNodes + " -> " + targetNodes);
 						/*
 						 * Add a connector node to the graph.
 						 */
 						DotNode connector = graph.addNode("");
 						connector.setOption("shape", "point");
 						/*
-						 * Add arcs from and to the new connector node.
+						 * Add edges from and to the new connector node.
 						 */
 						for (DotNode node : sourceNodes) {
-							DotEdge a = graph.addEdge(node, connector);
-							a.setOption("dir", "both");
-							a.setOption("arrowtail", arc.getOption("arrowtail"));
-							a.setOption("arrowhead", "none");
-							if (arc.getOption("taillabel") != null) {
-								a.setOption("taillabel", arc.getOption("taillabel"));
+							DotEdge anotherEdge = graph.addEdge(node, connector);
+							anotherEdge.setOption("dir", "both");
+							anotherEdge.setOption("arrowtail", edge.getOption("arrowtail"));
+							anotherEdge.setOption("arrowhead", "none");
+							if (edge.getOption("taillabel") != null) {
+								anotherEdge.setOption("taillabel", edge.getOption("taillabel"));
 							}
-							if (arc.getLabel() != null) {
-								String[] labels2 = arc.getLabel().split("&rarr;");
+							if (edge.getLabel() != null) {
+								String[] labels2 = edge.getLabel().split("&rarr;");
 								if (labels2.length == 2) {
 									System.out.println("[LogSkeleton] set label1 " + labels2[0]);
-									a.setLabel(labels2[0]);
+									anotherEdge.setLabel(labels2[0]);
 								} else {
-									a.setLabel(arc.getLabel());
+									anotherEdge.setLabel(edge.getLabel());
 								}
 							}
-							if (arc.getOption("color") != null) {
-								String[] colors2 = arc.getOption("color").split("[;:]");
+							if (edge.getOption("color") != null) {
+								String[] colors2 = edge.getOption("color").split("[;:]");
 								if (colors2.length == 4) {
 									System.out.println("[LogSkeleton] set color1 " + colors[0]);
-									a.setOption("color", colors2[0]);
+									anotherEdge.setOption("color", colors2[0]);
 								} else {
-									a.setOption("color", arc.getOption("color"));
+									anotherEdge.setOption("color", edge.getOption("color"));
 								}
 							}
-							candidateArcs.add(a);
+							candidateEdges.add(anotherEdge);
 						}
 						for (DotNode node : targetNodes) {
-							DotEdge a = graph.addEdge(connector, node);
-							a.setOption("dir", "both");
-							a.setOption("arrowtail", "none");
-							a.setOption("arrowhead", arc.getOption("arrowhead"));
-							if (arc.getOption("headlabel") != null) {
-								a.setOption("headlabel", arc.getOption("headlabel"));
+							DotEdge anotherEdge = graph.addEdge(connector, node);
+							anotherEdge.setOption("dir", "both");
+							anotherEdge.setOption("arrowtail", "none");
+							anotherEdge.setOption("arrowhead", edge.getOption("arrowhead"));
+							if (edge.getOption("headlabel") != null) {
+								anotherEdge.setOption("headlabel", edge.getOption("headlabel"));
 							}
-							if (arc.getLabel() != null) {
-								String[] labels2 = arc.getLabel().split("&rarr;");
+							if (edge.getLabel() != null) {
+								String[] labels2 = edge.getLabel().split("&rarr;");
 								if (labels2.length == 2) {
 									System.out.println("[LogSkeleton] set label2 " + labels2[1]);
-									a.setLabel(labels2[1]);
+									anotherEdge.setLabel(labels2[1]);
 								} else {
-									a.setLabel(arc.getLabel());
+									anotherEdge.setLabel(edge.getLabel());
 								}
 							}
-							if (arc.getOption("color") != null) {
-								String[] colors2 = arc.getOption("color").split("[;:]");
+							if (edge.getOption("color") != null) {
+								String[] colors2 = edge.getOption("color").split("[;:]");
 								if (colors2.length == 4) {
 									System.out.println("[LogSkeleton] set color2 " + colors[2]);
-									a.setOption("color", colors2[2]);
+									anotherEdge.setOption("color", colors2[2]);
 								} else {
-									a.setOption("color", arc.getOption("color"));
+									anotherEdge.setOption("color", edge.getOption("color"));
 								}
 							}
-							candidateArcs.add(a);
+							candidateEdges.add(anotherEdge);
 						}
 						/*
-						 * Remove the old arcs, they have now been replaced with
-						 * the newly added connector node and arcs.
+						 * Remove the old edges, they have now been replaced
+						 * with the newly added connector node and edges.
 						 */
-						for (DotEdge anotherArc : arcs) {
+						for (DotEdge anotherArc : edges) {
 							graph.removeEdge(anotherArc);
 						}
-						candidateArcs.removeAll(arcs);
+						candidateEdges.removeAll(edges);
 						/*
-						 * Sort the arcs again, as some have been added.
+						 * Sort the edges again, as some have been added.
 						 */
-						Collections.sort(candidateArcs, new Comparator<DotEdge>() {
+						Collections.sort(candidateEdges, new Comparator<DotEdge>() {
 
 							public int compare(DotEdge o1, DotEdge o2) {
 								int c = o1.getSource().getLabel().compareTo(o2.getSource().getLabel());
@@ -839,52 +1172,63 @@ public class LogSkeleton implements HTMLToString {
 						});
 					} else {
 						/*
-						 * No maximal clique was found, leave the arc as-is.
+						 * No maximal clique was found, leave the edge as-is.
 						 */
-						candidateArcs.remove(arc);
+						candidateEdges.remove(edge);
 					}
 				} else {
 					/*
-					 * Not an always-arc, leave the arc as-is.
+					 * Not an always-edge, leave the edge as-is.
 					 */
-					candidateArcs.remove(arc);
+					candidateEdges.remove(edge);
 				}
 			}
 		}
 
+		/*
+		 * Add a legend to the dot visualization.
+		 */
 		graph.setOption("labelloc", "b");
 		graph.setOption("nodesep", "0.5");
-		//		String label = "Event Log: " + (this.label == null ? "<not specified>" : this.label) + "\\l";
-		//		if (!required.isEmpty()) {
-		//			label += "Required Activities Filters: " + required + "\\l";
-		//		}
-		//		if (!forbidden.isEmpty()) {
-		//			label += "Forbidden Activities Filters: " + forbidden + "\\l";
-		//		}
-		//		if (!splitters.isEmpty()) {
-		//			label += "Activity Splitters: " + splitters + "\\l";
-		//		}
 		List<String> selectedActivities = new ArrayList<String>(configuration.getActivities());
 		Collections.sort(selectedActivities);
-		//		label += "Show Activities: " + activities + "\\l";
-		//		label += "Show Constraints: " + parameters.getVisualizers() + "\\l";
 		String label = "<table bgcolor=\"gold\" cellborder=\"0\" cellpadding=\"0\" columns=\"3\" style=\"rounded\">";
-		label +=
-
-				encodeHeader("Skeleton configuration");
+		label += encodeHeader("Skeleton configuration");
+		/*
+		 * Show name of log skeleton (that is, the name of the log).
+		 */
 		label += encodeRow("Event Log", this.label == null ? "<not specified>" : this.label);
 		if (!required.isEmpty()) {
+			/*
+			 * List required activities.
+			 */
 			label += encodeRow("Required activities", required.toString());
 		}
 		if (!forbidden.isEmpty()) {
+			/*
+			 * List forbidden activities
+			 */
 			label += encodeRow("Forbidden activities", forbidden.toString());
 		}
 		if (!splitters.isEmpty()) {
+			/*
+			 * List splitters.
+			 */
 			label += encodeRow("Splitters", splitters.toString());
 		}
+		/*
+		 * List selected activities.
+		 */
 		label += encodeRow("View activities", selectedActivities.toString());
+		/*
+		 * List selected relations.
+		 */
 		label += encodeRow("View relations", configuration.getRelations().toString());
-		if (equivalenceThreshold < 100 || responseThreshold < 100 || precedenceThreshold < 100 || notCoExistenceeThreshold < 100) {
+		/*
+		 * List noise levels for thresholds which are not set to 100.
+		 */
+		if (equivalenceThreshold < 100 || responseThreshold < 100 || precedenceThreshold < 100
+				|| notCoExistenceeThreshold < 100) {
 			String s = "";
 			String d = "";
 			if (equivalenceThreshold < 100) {
@@ -908,16 +1252,26 @@ public class LogSkeleton implements HTMLToString {
 		label += "</table>";
 		graph.setOption("fontsize", "8.0");
 		graph.setOption("label", "<" + label + ">");
-		//		graph.setOption("labeljust", "l");
+
+		/*
+		 * All done. Return this dot visualization.
+		 */
 		return graph;
 	}
 
+	/*
+	 * Returns a color which is slightly darker than the provided color.
+	 */
 	private String darker(String color) {
 		Color darkerColor = Color.decode(color).darker();
 		return "#" + Integer.toHexString(darkerColor.getRed()) + Integer.toHexString(darkerColor.getGreen())
 				+ Integer.toHexString(darkerColor.getBlue());
 	}
 
+	/*
+	 * Returns whether the provided edges have the same head and tail and the
+	 * same labels.
+	 */
 	private boolean isEqual(DotEdge e1, DotEdge e2) {
 		if (!isEqual(e1.getOption("arrowtail"), e2.getOption("arrowtail"))) {
 			return false;
@@ -937,6 +1291,9 @@ public class LogSkeleton implements HTMLToString {
 		return true;
 	}
 
+	/*
+	 * Returns whether two Strings (possibly null) are equal.
+	 */
 	private boolean isEqual(String s1, String s2) {
 		if (s1 == null) {
 			return s2 == null;
@@ -944,8 +1301,11 @@ public class LogSkeleton implements HTMLToString {
 		return s1.equals(s2);
 	}
 
+	/*
+	 * Returns a maximal clique of similar edges.
+	 */
 	private Set<DotEdge> getMaximalClique(Dot graph, Set<DotNode> sourceNodes, Set<DotNode> targetNodes,
-			String arrowtail, String arrowhead, String label, DotEdge baseArc, Set<List<Set<DotNode>>> checkedNodes) {
+			String arrowtail, String arrowhead, String label, DotEdge baseEdge, Set<List<Set<DotNode>>> checkedNodes) {
 		/*
 		 * Make sure a clique is not too small.
 		 */
@@ -973,28 +1333,28 @@ public class LogSkeleton implements HTMLToString {
 		/*
 		 * Collect all matching arcs that go from some source to some target.
 		 */
-		Set<DotEdge> arcs = new HashSet<DotEdge>();
-		for (DotEdge arc : graph.getEdges()) {
-			if (isEqual(arc, baseArc)) {
-				if (sourceNodes.contains(arc.getSource()) && targetNodes.contains(arc.getTarget())) {
-					arcs.add(arc);
+		Set<DotEdge> edges = new HashSet<DotEdge>();
+		for (DotEdge edge : graph.getEdges()) {
+			if (isEqual(edge, baseEdge)) {
+				if (sourceNodes.contains(edge.getSource()) && targetNodes.contains(edge.getTarget())) {
+					edges.add(edge);
 				}
 			}
 		}
 		/*
 		 * Check whether a maximal clique.
 		 */
-		if (arcs.size() == sourceNodes.size() * targetNodes.size()) {
+		if (edges.size() == sourceNodes.size() * targetNodes.size()) {
 			/*
 			 * Yes.
 			 */
-			return arcs;
+			return edges;
 		}
 		/*
 		 * No, look for maximal cliques that have one node (source or target)
 		 * less.
 		 */
-		Set<DotEdge> bestArcs = null; // Best solution so far.
+		Set<DotEdge> bestEdges = null; // Best solution so far.
 		if (sourceNodes.size() > targetNodes.size()) {
 			/*
 			 * More sources than targets. Removing a source yields a possible
@@ -1015,7 +1375,7 @@ public class LogSkeleton implements HTMLToString {
 
 				});
 				for (DotNode srcNode : sortedSourceNodes) {
-					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
+					if (bestEdges == null || (sourceNodes.size() - 1) * targetNodes.size() > bestEdges.size()) {
 						/*
 						 * May result in a bigger clique than the best found so
 						 * far. First, remove the node from the sources.
@@ -1033,14 +1393,14 @@ public class LogSkeleton implements HTMLToString {
 							/*
 							 * No, it was not. Check now.
 							 */
-							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, baseArc,
+							edges = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, baseEdge,
 									checkedNodes);
-							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
+							if (bestEdges == null || (edges != null && bestEdges.size() < edges.size())) {
 								/*
 								 * Found a bigger maximal clique than the best
 								 * found so far. Update.
 								 */
-								bestArcs = arcs;
+								bestEdges = edges;
 							}
 						}
 					}
@@ -1056,17 +1416,17 @@ public class LogSkeleton implements HTMLToString {
 
 				});
 				for (DotNode tgtNode : sortedTargetNodes) {
-					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
+					if (bestEdges == null || sourceNodes.size() * (targetNodes.size() - 1) > bestEdges.size()) {
 						Set<DotNode> nodes = new HashSet<DotNode>(targetNodes);
 						nodes.remove(tgtNode);
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, baseArc,
+							edges = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, baseEdge,
 									checkedNodes);
-							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
-								bestArcs = arcs;
+							if (bestEdges == null || (edges != null && bestEdges.size() < edges.size())) {
+								bestEdges = edges;
 							}
 						}
 					}
@@ -1086,17 +1446,17 @@ public class LogSkeleton implements HTMLToString {
 
 				});
 				for (DotNode tgtNode : sortedTargetNodes) {
-					if (bestArcs == null || sourceNodes.size() * (targetNodes.size() - 1) > bestArcs.size()) {
+					if (bestEdges == null || sourceNodes.size() * (targetNodes.size() - 1) > bestEdges.size()) {
 						Set<DotNode> nodes = new HashSet<DotNode>(targetNodes);
 						nodes.remove(tgtNode);
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(sourceNodes);
 						checked.add(nodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, baseArc,
+							edges = getMaximalClique(graph, sourceNodes, nodes, arrowtail, arrowhead, label, baseEdge,
 									checkedNodes);
-							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
-								bestArcs = arcs;
+							if (bestEdges == null || (edges != null && bestEdges.size() < edges.size())) {
+								bestEdges = edges;
 							}
 						}
 					}
@@ -1112,17 +1472,17 @@ public class LogSkeleton implements HTMLToString {
 
 				});
 				for (DotNode srcNode : sortedSourceNodes) {
-					if (bestArcs == null || (sourceNodes.size() - 1) * targetNodes.size() > bestArcs.size()) {
+					if (bestEdges == null || (sourceNodes.size() - 1) * targetNodes.size() > bestEdges.size()) {
 						Set<DotNode> nodes = new HashSet<DotNode>(sourceNodes);
 						nodes.remove(srcNode);
 						checked = new ArrayList<Set<DotNode>>();
 						checked.add(nodes);
 						checked.add(targetNodes);
 						if (!checkedNodes.contains(checked)) {
-							arcs = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, baseArc,
+							edges = getMaximalClique(graph, nodes, targetNodes, arrowtail, arrowhead, label, baseEdge,
 									checkedNodes);
-							if (bestArcs == null || (arcs != null && bestArcs.size() < arcs.size())) {
-								bestArcs = arcs;
+							if (bestEdges == null || (edges != null && bestEdges.size() < edges.size())) {
+								bestEdges = edges;
 							}
 						}
 					}
@@ -1132,22 +1492,34 @@ public class LogSkeleton implements HTMLToString {
 		/*
 		 * Return the biggest maximal clique found. Equals null if none found.
 		 */
-		return bestArcs;
+		return bestEdges;
 	}
 
+	/*
+	 * Encodes the legend header (title).
+	 */
 	private String encodeHeader(String title) {
 		return "<tr><td colspan=\"3\"><b>" + encodeHTML(title) + "</b></td></tr><hr/>";
 	}
 
+	/*
+	 * Encodes a row in the legend.
+	 */
 	private String encodeRow(String label, String value) {
 		return encodeRow(label, value, 0);
 	}
 
+	/*
+	 * Encodes a row in the legend.
+	 */
 	private String encodeRow(String label, String value, int padding) {
 		return "<tr><td align=\"right\"><i>" + label + "</i></td><td> : </td><td align=\"left\">" + encodeHTML(value)
 				+ "</td></tr>";
 	}
 
+	/*
+	 * Encodes a string as HTML.
+	 */
 	private String encodeHTML(String s) {
 		String s2 = s;
 		if (s.length() > 2 && s.startsWith("[") && s.endsWith("]")) {
@@ -1156,71 +1528,123 @@ public class LogSkeleton implements HTMLToString {
 		return s2.replaceAll("&", "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;");
 	}
 
-	public Dot createGraph(LogSkeletonRelation visualizer) {
+	/**
+	 * Returns a dot visualization for all activities and the provided relation
+	 * only.
+	 * 
+	 * @param relation
+	 *            The provided relation.
+	 * @return A dot visualization.
+	 */
+	public Dot createGraph(LogSkeletonRelation relation) {
 		BrowserConfiguration configuration = new BrowserConfiguration(null);
 		configuration.getActivities().addAll(countModel.getActivities());
-		configuration.getRelations().add(visualizer);
+		configuration.getRelations().add(relation);
 		return visualize(configuration);
 	}
 
-	public Dot createGraph(Set<LogSkeletonRelation> visualizers) {
+	/**
+	 * Returns a dot visualization for all activities and the provided relations
+	 * only.
+	 * 
+	 * @param relations
+	 *            The provided relations.
+	 * @return A dot visualization.
+	 */
+	public Dot createGraph(Set<LogSkeletonRelation> relations) {
 		BrowserConfiguration configuration = new BrowserConfiguration(null);
 		configuration.getActivities().addAll(countModel.getActivities());
-		configuration.getRelations().addAll(visualizers);
+		configuration.getRelations().addAll(relations);
 		return visualize(configuration);
 	}
 
+	/**
+	 * Returns a dot visualization for the provided configuration.
+	 * 
+	 * @param relation
+	 *            The provided configuration.
+	 * @return A dot visualization.
+	 */
 	public Dot createGraph(BrowserConfiguration configuration) {
 		return visualize(configuration);
 	}
 
+	/**
+	 * Returns a collection containing all activities.
+	 * 
+	 * @return A collection containing all activities.
+	 */
 	public Collection<String> getActivities() {
 		return countModel.getActivities();
 	}
 
-	public Set<String> getRequired() {
-		return required;
-	}
-
+	/**
+	 * Sets the set of required activities (to be included in the legend).
+	 * 
+	 * @param required
+	 *            The set of required activities.
+	 */
 	public void setRequired(Set<String> required) {
 		this.required = required;
 	}
 
-	public Set<String> getForbidden() {
-		return forbidden;
-	}
-
+	/**
+	 * Sets the set of forbidden activities (to be included in the legend).
+	 * 
+	 * @param forbidden
+	 *            The set of forbidden activities.
+	 */
 	public void setForbidden(Set<String> forbidden) {
 		this.forbidden = forbidden;
 	}
 
-	public List<List<String>> getSplitters() {
-		return splitters;
-	}
-
+	/**
+	 * Sets the set of splitters (to be included in the legend).
+	 * 
+	 * @param splitters
+	 *            The set of splitters.
+	 */
 	public void setSplitters(List<List<String>> splitters) {
 		this.splitters = splitters;
 	}
 
+	/**
+	 * Returns the label for this log skeleton.
+	 * 
+	 * @return The label for this log skeleton.
+	 */
 	public String getLabel() {
 		return label;
 	}
 
+	/**
+	 * Sets the label for this log skeleton (to be included in the legend and in
+	 * new windows showing log skeletons).
+	 * 
+	 * @param label
+	 */
 	public void setLabel(String label) {
 		this.label = label;
 	}
 
+	/**
+	 * Exports the log skeleton to a file.
+	 * 
+	 * @param writer
+	 *            The write to use when writing to the file.
+	 * @throws IOException
+	 */
 	public void exportToFile(CsvWriter writer) throws IOException {
 		writer.write(label);
 		writer.endRecord();
 		countModel.exportToFile(writer);
 		writer.write("equivalence");
 		for (int noise = 0; noise < 21; noise++) {
-			writer.write("" + sameCountsNoise.get(noise).size());
+			writer.write("" + equivalenceClasses.get(noise).size());
 		}
 		for (int noise = 0; noise < 21; noise++) {
 			writer.endRecord();
-			for (Collection<String> activities : sameCountsNoise.get(noise)) {
+			for (Collection<String> activities : equivalenceClasses.get(noise)) {
 				for (String activity : activities) {
 					writer.write(activity);
 				}
@@ -1301,11 +1725,10 @@ public class LogSkeleton implements HTMLToString {
 		if (reader.readRecord()) {
 			label = reader.get(0);
 		}
-		sameCountsNoise = new HashMap<Integer, Collection<Collection<String>>>();
+		equivalenceClasses = new HashMap<Integer, Collection<Collection<String>>>();
 		for (int noise = 0; noise < 21; noise++) {
-			sameCountsNoise.put(noise, new HashSet<Collection<String>>());
+			equivalenceClasses.put(noise, new HashSet<Collection<String>>());
 		}
-		sameCounts = sameCountsNoise.get(0);
 		countModel.importFromStream(reader);
 		if (reader.readRecord()) {
 			if (reader.get(0).equals("always together")) {
@@ -1318,7 +1741,7 @@ public class LogSkeleton implements HTMLToString {
 						}
 						Collections.sort(orderedActivities);
 						for (int noise = 0; noise < 21; noise++) {
-							sameCountsNoise.get(noise).add(orderedActivities);
+							equivalenceClasses.get(noise).add(orderedActivities);
 						}
 					}
 				}
@@ -1335,7 +1758,7 @@ public class LogSkeleton implements HTMLToString {
 								orderedActivities.add(reader.get(column));
 							}
 							Collections.sort(orderedActivities);
-							sameCountsNoise.get(noise).add(orderedActivities);
+							equivalenceClasses.get(noise).add(orderedActivities);
 						}
 					}
 				}
@@ -1518,22 +1941,18 @@ public class LogSkeleton implements HTMLToString {
 		}
 	}
 
-	public Set<String> getAlwaysBefore(String activity) {
-		if (precedences.containsKey(activity)) {
-			return new HashSet<String>(precedences.get(activity));
-		}
-		return new HashSet<String>();
-	}
-
-	public Set<String> getAlwaysAfter(String activity) {
-		if (responses.containsKey(activity)) {
-			return new HashSet<String>(responses.get(activity));
-		}
-		return new HashSet<String>();
-	}
-
+	/**
+	 * Sets the precedence threshold to the provided threshold.
+	 * 
+	 * @param precedenceThreshold
+	 *            The provided threshold.
+	 */
 	public void setPrecedenceThreshold(int precedenceThreshold) {
 		this.precedenceThreshold = precedenceThreshold;
+		/*
+		 * Copy the threshold into all (not) precedence relations. This
+		 * threshold may affect whether contains returns true or false.
+		 */
 		for (String activity : precedences.keySet()) {
 			precedences.get(activity).setThreshold(precedenceThreshold);
 		}
@@ -1542,12 +1961,18 @@ public class LogSkeleton implements HTMLToString {
 		}
 	}
 
-	public int getResponseThreshold() {
-		return responseThreshold;
-	}
-
+	/**
+	 * Sets the response threshold to the provided threshold.
+	 * 
+	 * @param responseThreshold
+	 *            The provided threshold.
+	 */
 	public void setResponseThreshold(int responseThreshold) {
 		this.responseThreshold = responseThreshold;
+		/*
+		 * Copy the threshold into all (not) response relations. This threshold
+		 * may affect whether contains returns true or false.
+		 */
 		for (String activity : responses.keySet()) {
 			responses.get(activity).setThreshold(responseThreshold);
 		}
@@ -1556,17 +1981,32 @@ public class LogSkeleton implements HTMLToString {
 		}
 	}
 
-	public int getNotCoExistenceThreshold() {
-		return notCoExistenceeThreshold;
-	}
-
+	/**
+	 * Sets the not-co-existence threshold to the provided threshold.
+	 * 
+	 * @param notCoOccurencethreshold
+	 *            The provided threshold.
+	 */
 	public void setNotCoExistenceThreshold(int notCoOccurencethreshold) {
 		this.notCoExistenceeThreshold = notCoOccurencethreshold;
+		/*
+		 * Copy the threshold into all Not Co-Existence relations. This
+		 * threshold may affect whether contains returns true or false.
+		 */
 		for (String activity : notCoExistences.keySet()) {
 			notCoExistences.get(activity).setThreshold(notCoOccurencethreshold);
 		}
 	}
 
+	/**
+	 * Returns whether the log skeleton contains more than 100 Not Co-Existence
+	 * relations to show. if so, this relation will not be shown by default.
+	 * 
+	 * @param isUseEquivalenceClass
+	 *            Whether the Not Co-Existence relation is restricted to the
+	 *            representatives of the Equivalence relation.
+	 * @return Whether the number of Not Co-Existence relation exceeds 100.
+	 */
 	public boolean hasManyNotCoExistenceArcs(boolean isUseEquivalenceClass) {
 		int nr = 0;
 		for (String fromActivity : countModel.getActivities()) {
@@ -1574,9 +2014,9 @@ public class LogSkeleton implements HTMLToString {
 				if (!fromActivity.equals(toActivity)) {
 					if (fromActivity.compareTo(toActivity) >= 0
 							&& (!isUseEquivalenceClass
-									|| fromActivity.equals(getSameCounts(fromActivity).iterator().next()))
+									|| fromActivity.equals(getEquivalenceClass(fromActivity).iterator().next()))
 							&& (!isUseEquivalenceClass
-									|| toActivity.equals(getSameCounts(toActivity).iterator().next()))
+									|| toActivity.equals(getEquivalenceClass(toActivity).iterator().next()))
 							&& notCoExistences.get(fromActivity).contains(toActivity)) {
 						nr++;
 					}
@@ -1592,12 +2032,13 @@ public class LogSkeleton implements HTMLToString {
 		return nr > 100;
 	}
 
-	public int getEquivalenceThreshold() {
-		return equivalenceThreshold;
-	}
-
+	/**
+	 * Sets the equivalence threshold to the provided threshold.
+	 * 
+	 * @param equivalenceThreshold
+	 *            The provided threshold.
+	 */
 	public void setEquivalenceThreshold(int equivalenceThreshold) {
 		this.equivalenceThreshold = equivalenceThreshold;
-		sameCounts = sameCountsNoise.get(100 - equivalenceThreshold);
 	}
 }
