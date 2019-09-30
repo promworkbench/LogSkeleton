@@ -21,7 +21,7 @@ import org.processmining.logskeleton.panels.PartitionerPanel;
 		userAccessible = true, //
 		icon = "prom_duck.png", //
 		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/17/partition-log-on-activity-sets/", //
-		help = "Partition Event Log on Activity Sets" //
+		help = "Partition Event Log on Activity Sets. Click the icon on the right for additional information." //
 ) //
 public class PartitionerPlugin extends PartitionerAlgorithm {
 

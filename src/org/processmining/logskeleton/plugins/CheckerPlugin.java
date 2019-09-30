@@ -21,7 +21,7 @@ import org.processmining.logskeleton.panels.CheckerPanel;
 		returnLabels = { "Filtered Event Log" }, //
 		returnTypes = { XLog.class }, //
 		userAccessible = true, //
-		help = "Filter Event Log on Log Skeleton" //
+		help = "Filter Event Log on Log Skeleton. Click the icon on the right for additional information." //
 ) //
 public class CheckerPlugin extends CheckerAlgorithm {
 

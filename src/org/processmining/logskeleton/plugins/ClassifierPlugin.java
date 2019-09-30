@@ -20,7 +20,7 @@ import org.processmining.logskeleton.panels.ClassifierPanel;
 		returnLabels = { "Classified Log" }, //
 		returnTypes = { XLog.class }, //
 		userAccessible = true, //
-		help = "Classify Log using Log Skeleton" //
+		help = "Classify Log using Log Skeleton.Click the icon on the right for additional information." //
 ) //
 public class ClassifierPlugin extends ClassifierAlgorithm {
 
