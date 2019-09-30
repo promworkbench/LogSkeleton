@@ -46,6 +46,7 @@ public class BuilderAlgorithm {
 		 * Create an initial log skeleton from the log count.
 		 */
 		LogSkeleton logSkeleton = new LogSkeleton(logCount);
+		logSkeleton.setHorizon(configuration.getHorizon());
 
 		/*
 		 * Add equivalence classes to the log skeleton based on the trace
@@ -239,7 +240,8 @@ public class BuilderAlgorithm {
 								.equals(newTraceCountList2Activities.get(traceCountList2))
 								&& 100 * distance(traceCountList1, traceCountList2) < noiseLevel * nofTraces) {
 							/*
-							 * Distance is too small for noise level. Join both equivalence classes.
+							 * Distance is too small for noise level. Join both
+							 * equivalence classes.
 							 */
 							newTraceCountList2Activities.get(traceCountList1)
 									.addAll(newTraceCountList2Activities.get(traceCountList2));
@@ -252,17 +254,18 @@ public class BuilderAlgorithm {
 			}
 
 			/*
-			 * Copy the equivalence classes for this noise level to the log skeleton.
+			 * Copy the equivalence classes for this noise level to the log
+			 * skeleton.
 			 */
 			for (Set<String> equivalenceClass : newTraceCountList2Activities.values()) {
 				logSkeleton.addEquivalenceClass(noiseLevel, equivalenceClass);
 			}
-			
+
 			/*
 			 * Replace the original map by the copy.
 			 */
 			traceCountList2Activities = newTraceCountList2Activities;
-			
+
 			/*
 			 * Set to false for next noise level.
 			 */
@@ -286,14 +289,16 @@ public class BuilderAlgorithm {
 	}
 
 	/*
-	 * Registers the (Not) Response/Precedence and Not Co-Existence in the log skeleton.
+	 * Registers the (Not) Response/Precedence and Not Co-Existence in the log
+	 * skeleton.
 	 */
 	private void createCausalDependencies(XLog log, BuilderConfiguration configuration, LogSkeletonCount count,
 			LogSkeleton logSkeleton) {
 		XEventClassifier classifier = new PrefixClassifier(configuration.getClassifier());
 		for (XTrace trace : log) {
 			/*
-			 * Add the entire trace (including artificial start and end) to the postset.
+			 * Add the entire trace (including artificial start and end) to the
+			 * postset.
 			 */
 			List<String> postset = new ArrayList<String>();
 			postset.add(LogSkeletonCount.STARTEVENT);
@@ -304,17 +309,35 @@ public class BuilderAlgorithm {
 			/*
 			 * Preset is initially empty.
 			 */
-			Set<String> preset = new HashSet<String>();
+			List<String> preset = new ArrayList<String>();
 			String prevActivity = null;
 			/*
 			 * For every activity: register the preset and the postset.
 			 */
 			while (!postset.isEmpty()) {
 				if (prevActivity != null) {
-					preset.add(prevActivity);
+					preset.add(0, prevActivity);
 				}
 				String activity = postset.remove(0);
-				logSkeleton.addPrePost(activity, preset, postset);
+				if (configuration.getHorizon() > 0) {
+					/*
+					 * Use horizon: Use only the first X activities in the
+					 * preset and the postset, where X is the current horizon.
+					 */
+					Set<String> horizonPreset = new HashSet<String>();
+					Set<String> horizonPostset = new HashSet<String>();
+					for (int i = 0; i < configuration.getHorizon(); i++) {
+						if (i < preset.size()) {
+							horizonPreset.add(preset.get(i));
+						}
+						if (i < postset.size()) {
+							horizonPostset.add(postset.get(i));
+						}
+						logSkeleton.addPrePost(activity, horizonPreset, horizonPostset);
+					}
+				} else {
+					logSkeleton.addPrePost(activity, preset, postset);
+				}
 				prevActivity = activity;
 			}
 		}

@@ -11,6 +11,7 @@ import org.processmining.logskeleton.inputs.BuilderInput;
 public class BuilderConfiguration implements ClassifierParameter {
 
 	private XEventClassifier classifier;
+	private int horizon;
 
 	public BuilderConfiguration(BuilderInput input) {
 		XLog log = input.getLog();
@@ -19,6 +20,7 @@ public class BuilderConfiguration implements ClassifierParameter {
 		} else {
 			classifier = new XEventAndClassifier(new XEventNameClassifier(), new XEventLifeTransClassifier());
 		}
+		horizon = 0;
 	}
 	
 	public BuilderConfiguration(CheckerConfiguration configuration) {
@@ -35,5 +37,13 @@ public class BuilderConfiguration implements ClassifierParameter {
 
 	public void setClassifier(XEventClassifier classifier) {
 		this.classifier = classifier;
+	}
+
+	public int getHorizon() {
+		return horizon;
+	}
+
+	public void setHorizon(int horizon) {
+		this.horizon = horizon;
 	}
 }

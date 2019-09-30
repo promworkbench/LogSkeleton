@@ -92,6 +92,11 @@ public class LogSkeleton implements HTMLToString {
 	 * Label for the log skeleton.
 	 */
 	private String label;
+	
+	/*
+	 * Horizon for the log skeleton.
+	 */
+	private int horizon;
 
 	/*
 	 * Thresholds for the log skeleton. A threshold of X corresponds to a noise
@@ -126,6 +131,7 @@ public class LogSkeleton implements HTMLToString {
 		setPrecedenceThreshold(100);
 		setResponseThreshold(100);
 		setNotCoExistenceThreshold(100);
+		setHorizon(0);
 	}
 
 	/*
@@ -1235,6 +1241,12 @@ public class LogSkeleton implements HTMLToString {
 		 */
 		label += encodeRow("View relations", configuration.getRelations().toString());
 		/*
+		 * Show horizon if not 0.
+		 */
+		if (horizon > 0) {
+			label += encodeRow("Horizon", "" + horizon);
+		}
+		/*
 		 * List noise levels for thresholds which are not set to 100.
 		 */
 		if (equivalenceThreshold < 100 || responseThreshold < 100 || precedenceThreshold < 100
@@ -1729,6 +1741,8 @@ public class LogSkeleton implements HTMLToString {
 			}
 			writer.endRecord();
 		}
+		writer.write("horizon");
+		writer.write("" + horizon);
 		writer.endRecord();
 	}
 
@@ -1950,6 +1964,12 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
+		
+		if (reader.readRecord()) {
+			if (reader.get(0).equals("horizon")) {
+				horizon = Integer.valueOf(reader.get(1));
+			}
+		}
 	}
 
 	/**
@@ -2051,5 +2071,9 @@ public class LogSkeleton implements HTMLToString {
 	 */
 	public void setEquivalenceThreshold(int equivalenceThreshold) {
 		this.equivalenceThreshold = equivalenceThreshold;
+	}
+
+	public void setHorizon(int horizon) {
+		this.horizon = horizon;
 	}
 }

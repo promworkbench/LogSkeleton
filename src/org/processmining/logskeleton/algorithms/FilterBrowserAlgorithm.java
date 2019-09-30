@@ -15,6 +15,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -40,8 +42,11 @@ import org.processmining.logskeleton.outputs.FilterBrowserOutput;
 import org.processmining.logskeleton.parameters.SplitterParameters;
 import org.processmining.logskeleton.plugins.BrowserPlugin;
 
+import com.fluxicon.slickerbox.components.NiceSlider;
+import com.fluxicon.slickerbox.components.NiceSlider.Orientation;
 import com.fluxicon.slickerbox.components.RoundedPanel;
 import com.fluxicon.slickerbox.components.SlickerButton;
+import com.fluxicon.slickerbox.factory.SlickerFactory;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
@@ -53,10 +58,10 @@ public class FilterBrowserAlgorithm {
 	private JComponent rightPanel = null;
 	private JPanel mainPanel = null;
 //	private RoundedPanel splitterPanel = null;
-	private List<List<String>> splitters;
-	private Set<String> positiveFilters;
-	private Set<String> negativeFilters;
-	private BrowserConfiguration browserConfiguration =  null;
+//	private List<List<String>> splitters;
+//	private Set<String> positiveFilters;
+//	private Set<String> negativeFilters;
+	private BrowserConfiguration browserConfiguration = null;
 	
 	public FilterBrowserOutput apply(PluginContext context, FilterBrowserInput input) {
 		return apply(context, input, new FilterBrowserConfiguration(input));
@@ -84,20 +89,21 @@ public class FilterBrowserAlgorithm {
 		mainPanel.setLayout(new TableLayout(size));
 		mainPanel.setOpaque(false);
 
-		splitters = new ArrayList<List<String>>();
-		positiveFilters = new HashSet<String>();
-		negativeFilters = new HashSet<String>();
+//		splitters = new ArrayList<List<String>>();
+//		positiveFilters = new HashSet<String>();
+//		negativeFilters = new HashSet<String>();
 
-		mainPanel.add(getControlPanel(classifier), "0, 0");
+		mainPanel.add(getControlPanel(configuration), "0, 0");
 
-		update(context, classifier);
+		update(context, configuration);
 
-		provideInfo(log, classifier);
+		provideInfo(log, configuration);
 		
 		return new FilterBrowserOutput(mainPanel);
 	}
 
-	private void provideInfo(XLog log, XEventClassifier classifier) {
+	private void provideInfo(XLog log, FilterBrowserConfiguration configuration) {
+		XEventClassifier classifier = configuration.getClassifier();
 		Map<Set<String>, Double> scores = new HashMap<Set<String>, Double>();
 		double maxScore = 0;
 		for (XTrace trace : log) {
@@ -121,13 +127,18 @@ public class FilterBrowserAlgorithm {
 		}
 	}
 	
-	private void update(PluginContext context, XEventClassifier classifier) {
+	private void update(PluginContext context, FilterBrowserConfiguration configuration) {
 		SplitterAlgorithm splitterAlgorithm = new SplitterAlgorithm();
 		SplitterParameters splitterParameters = new SplitterParameters();
 		XLog filteredLog = log;
+		int horizon = configuration.getHorizon();
+		XEventClassifier classifier = configuration.getClassifier();
+		Set<String> positiveFilters = configuration.getPositiveFilters();
+		Set<String> negativeFilters = configuration.getNegativeFilters();
+		List<List<String>> splitters = configuration.getSplitters();
 
 		if (!positiveFilters.isEmpty() || !negativeFilters.isEmpty()) {
-			filteredLog = filter(filteredLog, classifier, positiveFilters, negativeFilters);
+			filteredLog = filter(filteredLog, configuration);
 		}
 		for (List<String> splitter : splitters) {
 			splitterParameters.setDuplicateActivity(splitter.get(0));
@@ -142,6 +153,7 @@ public class FilterBrowserAlgorithm {
 		BuilderInput builderInput = new BuilderInput(filteredLog);
 		BuilderConfiguration builderConfiguration = new BuilderConfiguration(builderInput);
 		builderConfiguration.setClassifier(classifier);
+		builderConfiguration.setHorizon(horizon);
 		LogSkeleton logSkeleton = builderAlgorithm.apply(context, builderInput, builderConfiguration).getLogSkeleton();
 		logSkeleton.setRequired(positiveFilters);
 		logSkeleton.setForbidden(negativeFilters);
@@ -160,9 +172,12 @@ public class FilterBrowserAlgorithm {
 		mainPanel.repaint();
 	}
 
-	private XLog filter(XLog log, XEventClassifier classifier, Set<String> positiveFilters, Set<String> negativeFilters) {
+	private XLog filter(XLog log, FilterBrowserConfiguration configuration) {
 		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
 		XLog discardedLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XEventClassifier classifier = configuration.getClassifier();
+		Set<String> positiveFilters = configuration.getPositiveFilters();
+		Set<String> negativeFilters = configuration.getNegativeFilters();
 		for (XTrace trace : log) {
 			boolean ok = true;
 			Set<String> toMatch = new HashSet<String>(positiveFilters);
@@ -185,7 +200,8 @@ public class FilterBrowserAlgorithm {
 		return filteredLog;
 	}
 
-	private List<String> getActivities(XLog log, XEventClassifier classifier) {
+	private List<String> getActivities(XLog log, FilterBrowserConfiguration configuration) {
+		XEventClassifier classifier = configuration.getClassifier();
 		Set<String> activities = new HashSet<String>();
 		for (XTrace trace : log) {
 			for (XEvent event : trace) {
@@ -198,9 +214,13 @@ public class FilterBrowserAlgorithm {
 		return activityList;
 	}
 
-	private JComponent getControlPanel(final XEventClassifier classifier) {
+	private JComponent getControlPanel(final FilterBrowserConfiguration configuration) {
+		Set<String> positiveFilters = configuration.getPositiveFilters();
+		Set<String> negativeFilters = configuration.getNegativeFilters();
+		List<List<String>> splitters = configuration.getSplitters();
+
 		final JPanel controlPanel = new JPanel();
-		List<String> activities = getActivities(log, classifier);
+		List<String> activities = getActivities(log, configuration);
 		double controlSize[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL },
 				{ TableLayoutConstants.FILL, 30, 30 } };
 		controlPanel.setLayout(new TableLayout(controlSize));
@@ -210,7 +230,7 @@ public class FilterBrowserAlgorithm {
 
 		final JPanel filterPanel = new JPanel();
 		double filterSize[][] = { { TableLayoutConstants.FILL },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
 		filterPanel.setLayout(new TableLayout(filterSize));
 		filterPanel.setOpaque(false);
 		
@@ -246,6 +266,18 @@ public class FilterBrowserAlgorithm {
 		});
 		forbiddenActivityList.setPreferredSize(new Dimension(100, 100));
 		filterPanel.add(forbiddenActivityList, "0, 1");
+
+		final NiceSlider horizonSlider = SlickerFactory.instance().createNiceIntegerSlider(
+				"Horizon (0 means no horizon)", 0, 20, configuration.getHorizon(), Orientation.HORIZONTAL);
+		horizonSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				int value = horizonSlider.getSlider().getValue();
+				configuration.setHorizon(value);
+			}
+		});
+		horizonSlider.setPreferredSize(new Dimension(100, 30));
+		filterPanel.add(horizonSlider, "0, 2");
 
 		final RoundedPanel splitterPanel = new RoundedPanel(10, 5, 0);
 		splitterPanel.setPreferredSize(new Dimension(100, 100));
@@ -330,7 +362,7 @@ public class FilterBrowserAlgorithm {
 		final SlickerButton button = new SlickerButton("Apply settings");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				splitters = new ArrayList<List<String>>();
+				splitters.clear();
 				for (int row = 0; row < 16; row++) {
 					List<String> filter = new ArrayList<String>();
 					for (int col = 0; col < 2; col++) {
@@ -341,7 +373,7 @@ public class FilterBrowserAlgorithm {
 						splitters.add(filter);
 					}
 				}
-				update(context, classifier);
+				update(context, configuration);
 			}
 
 		});
