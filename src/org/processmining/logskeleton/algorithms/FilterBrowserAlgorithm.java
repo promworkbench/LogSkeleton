@@ -215,9 +215,9 @@ public class FilterBrowserAlgorithm {
 	}
 
 	private JComponent getControlPanel(final FilterBrowserConfiguration configuration) {
-		Set<String> positiveFilters = configuration.getPositiveFilters();
-		Set<String> negativeFilters = configuration.getNegativeFilters();
-		List<List<String>> splitters = configuration.getSplitters();
+		final Set<String> positiveFilters = configuration.getPositiveFilters();
+		final Set<String> negativeFilters = configuration.getNegativeFilters();
+		final List<List<String>> splitters = configuration.getSplitters();
 
 		final JPanel controlPanel = new JPanel();
 		List<String> activities = getActivities(log, configuration);
