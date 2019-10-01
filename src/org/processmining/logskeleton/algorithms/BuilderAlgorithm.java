@@ -333,8 +333,9 @@ public class BuilderAlgorithm {
 						if (i < postset.size()) {
 							horizonPostset.add(postset.get(i));
 						}
-						logSkeleton.addPrePost(activity, horizonPreset, horizonPostset);
 					}
+//					System.out.println("[BuilderAlgorithm] " + activity + ", " + horizonPreset + ", " + horizonPostset);
+					logSkeleton.addPrePost(activity, horizonPreset, horizonPostset);
 				} else {
 					logSkeleton.addPrePost(activity, preset, postset);
 				}

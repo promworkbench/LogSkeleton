@@ -92,7 +92,7 @@ public class LogSkeleton implements HTMLToString {
 	 * Label for the log skeleton.
 	 */
 	private String label;
-	
+
 	/*
 	 * Horizon for the log skeleton.
 	 */
@@ -834,7 +834,7 @@ public class LogSkeleton implements HTMLToString {
 		String notResponsePrecedenceColor = darker(lighterNotResponsePrecedenceColor);
 
 		System.out.println("[LogSkeleton] Creating relations");
-		
+
 		for (String fromActivity : activities) {
 			for (String toActivity : activities) {
 				if (configuration.getActivities().contains(fromActivity)
@@ -925,7 +925,11 @@ public class LogSkeleton implements HTMLToString {
 							/*
 							 * Show Not Response relation.
 							 */
-							headDecorator = "noneinvtee";
+							if (configuration.isUseInvertedArrows()) {
+								headDecorator = "noneinvtee";
+							} else {
+								headDecorator = "noneonormal";
+							}
 							headColor = notResponsePrecedenceColor;
 							int threshold = notResponses.get(toActivity).getMaxThreshold(fromActivity);
 							if (threshold < 100) {
@@ -941,7 +945,11 @@ public class LogSkeleton implements HTMLToString {
 							/*
 							 * Show Not Precedence relation.
 							 */
-							tailDecorator = "teenormal";
+							if (configuration.isUseInvertedArrows()) {
+								tailDecorator = "teenormal";
+							} else {
+								tailDecorator = "noneoinv";
+							}
 							tailColor = notResponsePrecedenceColor;
 							int threshold = notPrecedences.get(fromActivity).getMaxThreshold(toActivity);
 							if (threshold < 100) {
@@ -1964,7 +1972,7 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
-		
+
 		if (reader.readRecord()) {
 			if (reader.get(0).equals("horizon")) {
 				horizon = Integer.valueOf(reader.get(1));

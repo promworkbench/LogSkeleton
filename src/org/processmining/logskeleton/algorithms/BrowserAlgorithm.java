@@ -145,7 +145,7 @@ public class BrowserAlgorithm {
 //		tabbedPane.add("Basic options", basicPanel);
 
 		final JPanel advancedPanel = new JPanel();
-		double[][] advancedSize = { { 30, TableLayoutConstants.FILL }, { 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40 } };
+		double[][] advancedSize = { { 30, TableLayoutConstants.FILL }, { 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40, 40 } };
 		advancedPanel.setLayout(new TableLayout(advancedSize));
 		advancedPanel.setOpaque(false);
 		int y = 0;
@@ -265,6 +265,22 @@ public class BrowserAlgorithm {
 		checkBoxEdgeColors.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(checkBoxEdgeColors, "0, " + y);
 		advancedPanel.add(new JLabel("<html>Show relation colors"), "1, " + y);
+		y++;
+
+		final JCheckBox checkBoxInvertedArrows = SlickerFactory.instance().createCheckBox("", configuration.isUseInvertedArrows());
+		checkBoxInvertedArrows.setSelected(configuration.isUseInvertedArrows());
+		checkBoxInvertedArrows.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				configuration.setUseInvertedArrows(checkBoxInvertedArrows.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBoxInvertedArrows.setOpaque(false);
+		checkBoxInvertedArrows.setPreferredSize(new Dimension(100, 30));
+		advancedPanel.add(checkBoxInvertedArrows, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Show inverted arrows for Not Response and Not Precedence"), "1, " + y);
 		y++;
 
 		final JCheckBox checkBoxEquivalenceClass = SlickerFactory.instance().createCheckBox("",

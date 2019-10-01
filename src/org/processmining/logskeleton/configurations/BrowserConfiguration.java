@@ -20,6 +20,7 @@ public class BrowserConfiguration {
 	private boolean useEquivalenceClass;
 	private boolean useNeighbors;
 	private boolean useHeadTailLabels;
+	private boolean useInvertedArrows;
 	private int precedenceThreshold;
 	private int responseThreshold;
 	private int notCoExistenceThreshold;
@@ -40,6 +41,7 @@ public class BrowserConfiguration {
 		setUseEquivalenceClass(true);
 		setUseNeighbors(true);
 		setUseHeadTailLabels(true);
+		setUseInvertedArrows(false);
 		setPrecedenceThreshold(100);
 		setResponseThreshold(100);
 		setNotCoExistenceThreshold(100);
@@ -141,4 +143,13 @@ public class BrowserConfiguration {
 	public void setEquivalenceThreshold(int equivalenceThreshold) {
 		this.equivalenceThreshold = equivalenceThreshold;
 	}
+
+	public boolean isUseInvertedArrows() {
+		return useInvertedArrows;
+	}
+
+	public void setUseInvertedArrows(boolean useInvertedArrows) {
+		this.useInvertedArrows = useInvertedArrows;
+	}
+
 }
