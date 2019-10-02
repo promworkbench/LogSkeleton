@@ -72,18 +72,19 @@ public class BrowserAlgorithm {
 		mainPanel.setLayout(new TableLayout(mainSize));
 		mainPanel.setOpaque(false);
 
-//		JTabbedPane tabbedPane = new JTabbedPane();
+		//		JTabbedPane tabbedPane = new JTabbedPane();
 		final JPanel controlPanel = new JPanel();
-		double controlSize[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL }, { TableLayoutConstants.FILL, 30 } };
+		double controlSize[][] = { { TableLayoutConstants.FILL, TableLayoutConstants.FILL },
+				{ TableLayoutConstants.FILL, 30 } };
 		controlPanel.setLayout(new TableLayout(controlSize));
 		controlPanel.setOpaque(false);
-		
+
 		final JPanel basicPanel = new JPanel();
-		double basicSize[][] = { { 250 }, { TableLayoutConstants.FILL, TableLayoutConstants.FILL,
-			TableLayoutConstants.FILL } };
+		double basicSize[][] = { { 250 },
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL } };
 		basicPanel.setLayout(new TableLayout(basicSize));
 		basicPanel.setOpaque(false);
-		
+
 		DefaultListModel<String> activityModel = new DefaultListModel<String>();
 		int[] selectedIndices = new int[configuration.getActivities().size()];
 		int i = 0;
@@ -141,18 +142,19 @@ public class BrowserAlgorithm {
 		});
 		relationList.setPreferredSize(new Dimension(100, 100));
 		basicPanel.add(relationList, "0, 2");
-		
-//		tabbedPane.add("Basic options", basicPanel);
+
+		//		tabbedPane.add("Basic options", basicPanel);
 
 		final JPanel advancedPanel = new JPanel();
-		double[][] advancedSize = { { 30, TableLayoutConstants.FILL }, { 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40, 40 } };
+		double[][] advancedSize = { { 30, TableLayoutConstants.FILL },
+				{ 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40, 40 } };
 		advancedPanel.setLayout(new TableLayout(advancedSize));
 		advancedPanel.setOpaque(false);
 		int y = 0;
-		
+
 		advancedPanel.add(new JLabel("Select noise levels in %:"), "0, " + y + ", 1, " + y);
 		y++;
-		
+
 		final NiceSlider equivalenceSlider = SlickerFactory.instance().createNiceIntegerSlider("Equivalence", 0, 20,
 				100 - configuration.getEquivalenceThreshold(), Orientation.HORIZONTAL);
 		equivalenceSlider.addChangeListener(new ChangeListener() {
@@ -168,7 +170,7 @@ public class BrowserAlgorithm {
 		equivalenceSlider.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(equivalenceSlider, "0, " + y + ", 1, " + y);
 		y++;
-		
+
 		final NiceSlider responseSlider = SlickerFactory.instance().createNiceIntegerSlider("(Not) Response", 0, 20,
 				100 - configuration.getResponseThreshold(), Orientation.HORIZONTAL);
 		responseSlider.addChangeListener(new ChangeListener() {
@@ -184,7 +186,7 @@ public class BrowserAlgorithm {
 		responseSlider.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(responseSlider, "0, " + y + ", 1, " + y);
 		y++;
-		
+
 		final NiceSlider precedenceSlider = SlickerFactory.instance().createNiceIntegerSlider("(Not) Precedence", 0, 20,
 				100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
 		precedenceSlider.addChangeListener(new ChangeListener() {
@@ -200,9 +202,9 @@ public class BrowserAlgorithm {
 		precedenceSlider.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(precedenceSlider, "0, " + y + ", 1, " + y);
 		y++;
-		
-		final NiceSlider notCoExistenceSlider = SlickerFactory.instance().createNiceIntegerSlider("Not Co-Existence", 0, 20,
-				100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+
+		final NiceSlider notCoExistenceSlider = SlickerFactory.instance().createNiceIntegerSlider("Not Co-Existence", 0,
+				20, 100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
 		notCoExistenceSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
@@ -217,7 +219,7 @@ public class BrowserAlgorithm {
 		advancedPanel.add(notCoExistenceSlider, "0, " + y + ", 1, " + y);
 		y++;
 		y++;
-		
+
 		final JCheckBox checkBox = SlickerFactory.instance().createCheckBox("", configuration.isUseHyperArcs());
 		checkBox.setSelected(configuration.isUseHyperArcs());
 		checkBox.addActionListener(new ActionListener() {
@@ -231,7 +233,8 @@ public class BrowserAlgorithm {
 		checkBox.setOpaque(false);
 		checkBox.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(checkBox, "0, " + y);
-		advancedPanel.add(new JLabel("<html>Replace a clique of similar arcs<br>by a hyper arc (may be slow...)"), "1, " + y);
+		advancedPanel.add(new JLabel("<html>Replace a clique of similar arcs<br>by a hyper arc (may be slow...)"),
+				"1, " + y);
 		y++;
 
 		final JCheckBox checkBoxFalseConstraints = SlickerFactory.instance().createCheckBox("",
@@ -251,7 +254,8 @@ public class BrowserAlgorithm {
 		advancedPanel.add(new JLabel("<html>Ignore symmetric relations<br>when layering activities"), "1, " + y);
 		y++;
 
-		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("", configuration.isUseEdgeColors());
+		final JCheckBox checkBoxEdgeColors = SlickerFactory.instance().createCheckBox("",
+				configuration.isUseEdgeColors());
 		checkBoxEdgeColors.setSelected(configuration.isUseEdgeColors());
 		checkBoxEdgeColors.addActionListener(new ActionListener() {
 
@@ -267,7 +271,8 @@ public class BrowserAlgorithm {
 		advancedPanel.add(new JLabel("<html>Show relation colors"), "1, " + y);
 		y++;
 
-		final JCheckBox checkBoxInvertedArrows = SlickerFactory.instance().createCheckBox("", configuration.isUseInvertedArrows());
+		final JCheckBox checkBoxInvertedArrows = SlickerFactory.instance().createCheckBox("",
+				configuration.isUseInvertedArrows());
 		checkBoxInvertedArrows.setSelected(configuration.isUseInvertedArrows());
 		checkBoxInvertedArrows.addActionListener(new ActionListener() {
 
@@ -300,7 +305,8 @@ public class BrowserAlgorithm {
 		advancedPanel.add(new JLabel("<html>Show Not Co-Existence only<br>between representatives"), "1, " + y);
 		y++;
 
-		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("", configuration.isUseHeadTailLabels());
+		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("",
+				configuration.isUseHeadTailLabels());
 		checkBoxLabels.setSelected(configuration.isUseHeadTailLabels());
 		checkBoxLabels.addActionListener(new ActionListener() {
 
@@ -316,7 +322,8 @@ public class BrowserAlgorithm {
 		advancedPanel.add(new JLabel("<html>Replace head/tail labels<br>by arc labels"), "1, " + y);
 		y++;
 
-		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("", configuration.isUseNeighbors());
+		final JCheckBox checkBoxNeighbors = SlickerFactory.instance().createCheckBox("",
+				configuration.isUseNeighbors());
 		checkBoxNeighbors.setSelected(configuration.isUseNeighbors());
 		checkBoxNeighbors.addActionListener(new ActionListener() {
 
@@ -334,7 +341,7 @@ public class BrowserAlgorithm {
 
 		final SlickerButton basicButton = new SlickerButton("Basic options");
 		final SlickerButton advancedButton = new SlickerButton("Advanced options");
-		
+
 		basicButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controlPanel.remove(advancedPanel);
@@ -357,17 +364,15 @@ public class BrowserAlgorithm {
 			}
 
 		});
-		
+
 		controlPanel.add(basicButton, "0, 1");
 		controlPanel.add(advancedButton, "1, 1");
-		
+
 		controlPanel.add(basicPanel, "0, 0, 1, 0");
 		advancedButton.setEnabled(true);
 		basicButton.setEnabled(false);
-		
 
-
-//		tabbedPane.add("Advanced options", optionsPanel);
+		//		tabbedPane.add("Advanced options", optionsPanel);
 
 		//		final NiceSlider notCoExistenceThresholdSlider = SlickerFactory.instance().createNiceIntegerSlider(
 		//				"NCE Threshold", 80, 100, parameters.getPrecedenceThreshold(), Orientation.HORIZONTAL);
@@ -391,18 +396,18 @@ public class BrowserAlgorithm {
 		});
 		mainPanel.add(newButton, "0, 1");
 
-//		final SlickerButton optionsButton = new SlickerButton("Select options...");
-//		optionsButton.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				JFrame frame = new JFrame();
-//				frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
-//				frame.add(optionsPanel);
-//				frame.setTitle("Select options for " + model.getLabel());
-//				frame.setSize(460, 280);
-//				frame.setVisible(true);
-//			}
-//		});
-		
+		//		final SlickerButton optionsButton = new SlickerButton("Select options...");
+		//		optionsButton.addActionListener(new ActionListener() {
+		//			public void actionPerformed(ActionEvent e) {
+		//				JFrame frame = new JFrame();
+		//				frame.setIconImage(ImageLoader.load("rotule_30x35.png"));
+		//				frame.add(optionsPanel);
+		//				frame.setTitle("Select options for " + model.getLabel());
+		//				frame.setSize(460, 280);
+		//				frame.setVisible(true);
+		//			}
+		//		});
+
 		mainPanel.add(controlPanel, "1, 0, 1, 1");
 
 		//		updateLeft();
@@ -442,23 +447,28 @@ public class BrowserAlgorithm {
 			private static final long serialVersionUID = -1188986522911680121L;
 
 			public void repaint() {
-				// Prevent nesting of repaints, as resetView may trigger a new repaint.
-				if (!isRepainting) {
-					isRepainting = true;
-					System.out.println("[LogSkeletonBrowser] Repainting Dot panel...");
-					// Make sure all initialization has been done.
-					if (rightDotPanel != null) {
-						try {
-							// Without this, the dot panel disappears in the Filterd visualizer 
-							// when a drop-down menu is selected (?)
-							((DotPanel) rightDotPanel).resetView();
-						} catch (NoninvertibleTransformException e) {
-//							e.printStackTrace();
+				if (configuration.isUseResetView()) {
+					// Prevent nesting of repaints, as resetView may trigger a new repaint.
+					if (!isRepainting) {
+						isRepainting = true;
+						System.out.println("[LogSkeletonBrowser] Repainting Dot panel...");
+						// Make sure all initialization has been done.
+						if (rightDotPanel != null) {
+							try {
+								// Without this, the dot panel disappears in the Filterd visualizer 
+								// when a drop-down menu is selected (?)
+								System.out.println("[LogSkeletonBrowser] Reset view...");
+								((DotPanel) rightDotPanel).resetView();
+							} catch (NoninvertibleTransformException e) {
+								//							e.printStackTrace();
+							}
 						}
+						super.repaint();
+						isRepainting = false;
+						System.out.println("[LogSkeletonBrowser] Repainted Dot panel...");
 					}
+				} else {
 					super.repaint();
-					isRepainting = false;
-					System.out.println("[LogSkeletonBrowser] Repainted Dot panel...");
 				}
 			}
 		};

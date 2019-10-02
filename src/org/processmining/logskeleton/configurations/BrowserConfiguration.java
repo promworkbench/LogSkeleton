@@ -21,6 +21,7 @@ public class BrowserConfiguration {
 	private boolean useNeighbors;
 	private boolean useHeadTailLabels;
 	private boolean useInvertedArrows;
+	private boolean useResetView;
 	private int precedenceThreshold;
 	private int responseThreshold;
 	private int notCoExistenceThreshold;
@@ -42,6 +43,7 @@ public class BrowserConfiguration {
 		setUseNeighbors(true);
 		setUseHeadTailLabels(true);
 		setUseInvertedArrows(false);
+		setUseResetView(false);
 		setPrecedenceThreshold(100);
 		setResponseThreshold(100);
 		setNotCoExistenceThreshold(100);
@@ -150,6 +152,14 @@ public class BrowserConfiguration {
 
 	public void setUseInvertedArrows(boolean useInvertedArrows) {
 		this.useInvertedArrows = useInvertedArrows;
+	}
+
+	public boolean isUseResetView() {
+		return useResetView;
+	}
+
+	public void setUseResetView(boolean useResetView) {
+		this.useResetView = useResetView;
 	}
 
 }

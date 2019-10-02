@@ -928,7 +928,7 @@ public class LogSkeleton implements HTMLToString {
 							if (configuration.isUseInvertedArrows()) {
 								headDecorator = "noneinvtee";
 							} else {
-								headDecorator = "noneonormal";
+								headDecorator = "onormal";
 							}
 							headColor = notResponsePrecedenceColor;
 							int threshold = notResponses.get(toActivity).getMaxThreshold(fromActivity);
