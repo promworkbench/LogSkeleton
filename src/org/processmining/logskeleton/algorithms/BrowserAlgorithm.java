@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.NoninvertibleTransformException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -440,38 +439,7 @@ public class BrowserAlgorithm {
 			rightDotPanel = null;
 		}
 		System.out.println("[LogSkeletonBrowser] Updating Dot panel...");
-		rightDotPanel = new DotPanel(logSkeleton.visualize(configuration)) {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -1188986522911680121L;
-
-			public void repaint() {
-				if (configuration.isUseResetView()) {
-					// Prevent nesting of repaints, as resetView may trigger a new repaint.
-					if (!isRepainting) {
-						isRepainting = true;
-						System.out.println("[LogSkeletonBrowser] Repainting Dot panel...");
-						// Make sure all initialization has been done.
-						if (rightDotPanel != null) {
-							try {
-								// Without this, the dot panel disappears in the Filterd visualizer 
-								// when a drop-down menu is selected (?)
-								System.out.println("[LogSkeletonBrowser] Reset view...");
-								((DotPanel) rightDotPanel).resetView();
-							} catch (NoninvertibleTransformException e) {
-								//							e.printStackTrace();
-							}
-						}
-						super.repaint();
-						isRepainting = false;
-						System.out.println("[LogSkeletonBrowser] Repainted Dot panel...");
-					}
-				} else {
-					super.repaint();
-				}
-			}
-		};
+		rightDotPanel = new DotPanel(logSkeleton.visualize(configuration));
 		rightDotPanel.setOpaque(true);
 		rightDotPanel.setBackground(Color.white);
 		mainPanel.add(rightDotPanel, "0, 0");
