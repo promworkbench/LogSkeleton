@@ -343,7 +343,7 @@ public class BrowserAlgorithm {
 		advancedPanel.add(new JLabel("Enter fontname (and representation):"), "0, " + y + ", 1, " + y);
 		y++;
 
-		ProMTextField fontnameField = new ProMTextField(configuration.getFontname(), "Fontname (leave blank for default)");
+		final ProMTextField fontnameField = new ProMTextField(configuration.getFontname(), "Fontname (leave blank for default)");
 		fontnameField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				configuration.setFontname(fontnameField.getText());
@@ -353,7 +353,7 @@ public class BrowserAlgorithm {
 		advancedPanel.add(fontnameField, "0, " + y + ", 1, " + y);
 		y++;
 
-		ProMTextField fontnameRepresentationField = new ProMTextField(configuration.getFontnameRepresentation(), "Representation (leave blank for default)");
+		final ProMTextField fontnameRepresentationField = new ProMTextField(configuration.getFontnameRepresentation(), "Representation (leave blank for default)");
 		fontnameRepresentationField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				configuration.setFontnameRepresentation(fontnameRepresentationField.getText());

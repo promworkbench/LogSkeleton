@@ -1607,7 +1607,7 @@ public class LogSkeleton implements HTMLToString {
 	/**
 	 * Returns a dot visualization for the provided configuration.
 	 * 
-	 * @param relation
+	 * @param configuration
 	 *            The provided configuration.
 	 * @return A dot visualization.
 	 */
