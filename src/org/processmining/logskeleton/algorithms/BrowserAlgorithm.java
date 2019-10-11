@@ -340,6 +340,9 @@ public class BrowserAlgorithm {
 		y++;
 		y++;
 
+		/*
+		 * Add test fields to be able to change font (and representation).
+		 */
 		advancedPanel.add(new JLabel("Enter fontname (and representation):"), "0, " + y + ", 1, " + y);
 		y++;
 
