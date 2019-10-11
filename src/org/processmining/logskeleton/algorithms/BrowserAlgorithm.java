@@ -25,6 +25,7 @@ import org.deckfour.uitopia.ui.util.ImageLoader;
 import org.processmining.contexts.util.CompositePanel;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMList;
+import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.logskeleton.configurations.BrowserConfiguration;
 import org.processmining.logskeleton.inputs.BrowserInput;
 import org.processmining.logskeleton.models.LogSkeleton;
@@ -146,7 +147,7 @@ public class BrowserAlgorithm {
 
 		final JPanel advancedPanel = new JPanel();
 		double[][] advancedSize = { { 30, TableLayoutConstants.FILL },
-				{ 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40, 40 } };
+				{ 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40, 40, 30, 40, 30, 30 } };
 		advancedPanel.setLayout(new TableLayout(advancedSize));
 		advancedPanel.setOpaque(false);
 		int y = 0;
@@ -336,6 +337,30 @@ public class BrowserAlgorithm {
 		checkBoxNeighbors.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(checkBoxNeighbors, "0, " + y);
 		advancedPanel.add(new JLabel("<html>Show related (but unselected)<br>activities as well"), "1, " + y);
+		y++;
+		y++;
+
+		advancedPanel.add(new JLabel("Enter fontname (and representation):"), "0, " + y + ", 1, " + y);
+		y++;
+
+		ProMTextField fontnameField = new ProMTextField(configuration.getFontname(), "Fontname (leave blank for default)");
+		fontnameField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				configuration.setFontname(fontnameField.getText());
+				updateRight();
+			}
+		});
+		advancedPanel.add(fontnameField, "0, " + y + ", 1, " + y);
+		y++;
+
+		ProMTextField fontnameRepresentationField = new ProMTextField(configuration.getFontnameRepresentation(), "Representation (leave blank for default)");
+		fontnameRepresentationField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				configuration.setFontnameRepresentation(fontnameRepresentationField.getText());
+				updateRight();
+			}
+		});
+		advancedPanel.add(fontnameRepresentationField, "0, " + y + ", 1, " + y);
 		y++;
 
 		final SlickerButton basicButton = new SlickerButton("Basic options");

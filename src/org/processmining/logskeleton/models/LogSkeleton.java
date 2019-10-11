@@ -800,12 +800,16 @@ public class LogSkeleton implements HTMLToString {
 			/*
 			 * Create the dot node.
 			 */
+			System.out.println("[LogSkeleton] Set node label to " + activity);
 			DotNode node = graph.addNode("<<table align=\"center\" bgcolor=\"" + representativeColor + "\" border=\""
 					+ border
 					+ "\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
 					+ encodeHTML(activity) + "</b></font></td></tr><hr/><tr><td>" + representative + "</td><td>"
 					+ countModel.get(activity) + "</td>" + "<td>" + interval + "</td>" + "</tr></table>>");
 			node.setOption("shape", "none");
+			if (!configuration.getFontname().isEmpty()) {
+				node.setOption("fontname", configuration.getFontname());
+			}
 			map.put(activity, node);
 		}
 
@@ -979,6 +983,9 @@ public class LogSkeleton implements HTMLToString {
 						}
 						arc.setOption("arrowtail", tailDecorator + tailArrow);
 						arc.setOption("arrowhead", headDecorator + headArrow);
+						if (!configuration.getFontname().isEmpty()) {
+							arc.setOption("fontname", configuration.getFontname());
+						}
 
 						if (configuration.isUseFalseConstraints() && !isAsymmetric) {
 							/*
@@ -1214,6 +1221,14 @@ public class LogSkeleton implements HTMLToString {
 		 */
 		graph.setOption("labelloc", "b");
 		graph.setOption("nodesep", "0.5");
+		if (!configuration.getFontname().isEmpty()) {
+			System.out.println("[LogSkeleton] fontname = " + configuration.getFontname());
+			graph.setOption("fontname", configuration.getFontname());
+		}
+		if (!configuration.getFontnameRepresentation().isEmpty()) {
+			System.out.println("[LogSkeleton] fontnames = " + configuration.getFontnameRepresentation());
+			graph.setOption("fontnames", configuration.getFontnameRepresentation());
+		}
 		List<String> selectedActivities = new ArrayList<String>(configuration.getActivities());
 		Collections.sort(selectedActivities);
 		String label = "<table bgcolor=\"gold\" cellborder=\"0\" cellpadding=\"0\" columns=\"3\" style=\"rounded\">";

@@ -25,7 +25,9 @@ public class BrowserConfiguration {
 	private int responseThreshold;
 	private int notCoExistenceThreshold;
 	private int equivalenceThreshold;
-
+	private String fontname;
+	private String fontnameRepresentation;
+	
 	public BrowserConfiguration(BrowserInput input) {
 		activities = new HashSet<String>(input.getLogSkeleton().getActivities());
 		relations = new ArrayList<LogSkeletonRelation>(Arrays.asList(LogSkeletonRelation.values()));
@@ -46,6 +48,8 @@ public class BrowserConfiguration {
 		setResponseThreshold(100);
 		setNotCoExistenceThreshold(100);
 		setEquivalenceThreshold(100);
+		setFontname("");
+		setFontnameRepresentation("");
 	}
 	
 	public Set<String> getActivities() {
@@ -150,6 +154,22 @@ public class BrowserConfiguration {
 
 	public void setUseInvertedArrows(boolean useInvertedArrows) {
 		this.useInvertedArrows = useInvertedArrows;
+	}
+
+	public String getFontname() {
+		return fontname;
+	}
+
+	public void setFontname(String fontname) {
+		this.fontname = fontname;
+	}
+
+	public String getFontnameRepresentation() {
+		return fontnameRepresentation;
+	}
+
+	public void setFontnameRepresentation(String fontnames) {
+		this.fontnameRepresentation = fontnames;
 	}
 
 }
