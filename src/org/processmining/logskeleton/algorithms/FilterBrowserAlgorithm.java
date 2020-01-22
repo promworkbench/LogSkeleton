@@ -173,8 +173,8 @@ public class FilterBrowserAlgorithm {
 	}
 
 	private XLog filter(XLog log, FilterBrowserConfiguration configuration) {
-		XLog filteredLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
-		XLog discardedLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		XLog filteredLog = createLog(log);
+		XLog discardedLog = createLog(log);
 		XEventClassifier classifier = configuration.getClassifier();
 		Set<String> positiveFilters = configuration.getPositiveFilters();
 		Set<String> negativeFilters = configuration.getNegativeFilters();
@@ -200,6 +200,15 @@ public class FilterBrowserAlgorithm {
 		return filteredLog;
 	}
 
+	private XLog createLog(XLog log) {
+		XLog createdLog = XFactoryRegistry.instance().currentDefault().createLog(log.getAttributes());
+		createdLog.getExtensions().addAll(log.getExtensions());
+		createdLog.getGlobalEventAttributes().addAll(log.getGlobalEventAttributes());
+		createdLog.getGlobalTraceAttributes().addAll(log.getGlobalTraceAttributes());
+		createdLog.getClassifiers().addAll(log.getClassifiers());
+		return createdLog;
+	}
+	
 	private List<String> getActivities(XLog log, FilterBrowserConfiguration configuration) {
 		XEventClassifier classifier = configuration.getClassifier();
 		Set<String> activities = new HashSet<String>();
