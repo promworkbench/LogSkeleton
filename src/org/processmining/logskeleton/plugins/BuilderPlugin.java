@@ -20,7 +20,7 @@ import org.processmining.logskeleton.panels.BuilderPanel;
 		returnTypes = { LogSkeleton.class }, //
 		userAccessible = true, //
 		icon = "prom_duck.png", //
-		url = "https://www.win.tue.nl/~hverbeek/blog/2019/09/30/build-log-skeleton-from-event-log-2/", //
+		url = "http://www.win.tue.nl/~hverbeek/blog/2020/05/29/build-log-skeleton-from-event-log-3/", //
 		help = "Create Log Skeleton from Event Log. Click the icon on the right for additional information." //
 ) //
 public class BuilderPlugin extends BuilderAlgorithm {

@@ -1,5 +1,8 @@
 package org.processmining.logskeleton.configurations;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.deckfour.xes.classification.XEventAndClassifier;
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.classification.XEventLifeTransClassifier;
@@ -12,6 +15,7 @@ public class BuilderConfiguration implements ClassifierParameter {
 
 	private XEventClassifier classifier;
 	private int horizon;
+	private Set<String> boundaryActivities;
 
 	public BuilderConfiguration(BuilderInput input) {
 		XLog log = input.getLog();
@@ -21,6 +25,7 @@ public class BuilderConfiguration implements ClassifierParameter {
 			classifier = new XEventAndClassifier(new XEventNameClassifier(), new XEventLifeTransClassifier());
 		}
 		horizon = 0;
+		boundaryActivities = new HashSet<String>();
 	}
 	
 	public BuilderConfiguration(CheckerConfiguration configuration) {
@@ -45,5 +50,13 @@ public class BuilderConfiguration implements ClassifierParameter {
 
 	public void setHorizon(int horizon) {
 		this.horizon = horizon;
+	}
+
+	public Set<String> getBoundaryActivities() {
+		return boundaryActivities;
+	}
+
+	public void setBoundaryActivities(Set<String> boundaryActivities) {
+		this.boundaryActivities = boundaryActivities;
 	}
 }

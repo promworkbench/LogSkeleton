@@ -319,26 +319,49 @@ public class BuilderAlgorithm {
 					preset.add(0, prevActivity);
 				}
 				String activity = postset.remove(0);
-				if (configuration.getHorizon() > 0) {
-					/*
-					 * Use horizon: Use only the first X activities in the
-					 * preset and the postset, where X is the current horizon.
-					 */
-					Set<String> horizonPreset = new HashSet<String>();
-					Set<String> horizonPostset = new HashSet<String>();
-					for (int i = 0; i < configuration.getHorizon(); i++) {
-						if (i < preset.size()) {
-							horizonPreset.add(preset.get(i));
-						}
-						if (i < postset.size()) {
-							horizonPostset.add(postset.get(i));
-						}
+				Set<String> filteredPreset = new HashSet<String>();
+				for (int i = 0; i < preset.size(); i++) {
+					if (i > 0 && i == configuration.getHorizon()) {
+						break;
+					} else if (configuration.getBoundaryActivities().contains(preset.get(i))) {
+						filteredPreset.add(preset.get(i));
+						break;
+					} else {
+						filteredPreset.add(preset.get(i));
 					}
-//					System.out.println("[BuilderAlgorithm] " + activity + ", " + horizonPreset + ", " + horizonPostset);
-					logSkeleton.addPrePost(activity, horizonPreset, horizonPostset);
-				} else {
-					logSkeleton.addPrePost(activity, preset, postset);
 				}
+				Set<String> filteredPostset = new HashSet<String>();
+				for (int i = 0; i < postset.size(); i++) {
+					if (i > 0 && i == configuration.getHorizon()) {
+						break;
+					} else if (configuration.getBoundaryActivities().contains(postset.get(i))) {
+						filteredPostset.add(postset.get(i));
+						break;
+					} else {
+						filteredPostset.add(postset.get(i));
+					}
+				}
+				logSkeleton.addPrePost(activity,  filteredPreset, filteredPostset);
+//				if (configuration.getHorizon() > 0) {
+//					/*
+//					 * Use horizon: Use only the first X activities in the
+//					 * preset and the postset, where X is the current horizon.
+//					 */
+//					Set<String> horizonPreset = new HashSet<String>();
+//					Set<String> horizonPostset = new HashSet<String>();
+//					for (int i = 0; i < configuration.getHorizon(); i++) {
+//						if (i < preset.size()) {
+//							horizonPreset.add(preset.get(i));
+//						}
+//						if (i < postset.size()) {
+//							horizonPostset.add(postset.get(i));
+//						}
+//					}
+//					System.out.println("[BuilderAlgorithm] " + activity + ", " + horizonPreset + ", " + horizonPostset);
+//					logSkeleton.addPrePost(activity, horizonPreset, horizonPostset);
+//				} else {
+//					logSkeleton.addPrePost(activity, preset, postset);
+//				}
 				prevActivity = activity;
 			}
 		}

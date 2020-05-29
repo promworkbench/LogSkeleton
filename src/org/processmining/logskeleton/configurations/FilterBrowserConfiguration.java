@@ -19,6 +19,7 @@ public class FilterBrowserConfiguration implements ClassifierParameter {
 	private List<List<String>> splitters;
 	private Set<String> positiveFilters;
 	private Set<String> negativeFilters;
+	private Set<String> boundaryActivities;
 	private int horizon;
 
 	public FilterBrowserConfiguration(FilterBrowserInput input) {
@@ -32,6 +33,7 @@ public class FilterBrowserConfiguration implements ClassifierParameter {
 		splitters = new ArrayList<List<String>>();
 		positiveFilters = new HashSet<String>();
 		negativeFilters = new HashSet<String>();
+		boundaryActivities = new HashSet<String>();
 	}
 	
 	public XEventClassifier getClassifier() {
@@ -72,5 +74,13 @@ public class FilterBrowserConfiguration implements ClassifierParameter {
 
 	public void setNegativeFilters(Set<String> negativeFilters) {
 		this.negativeFilters = negativeFilters;
+	}
+
+	public Set<String> getBoundaryActivities() {
+		return boundaryActivities;
+	}
+
+	public void setBoundaryActivities(Set<String> boundaryActivities) {
+		this.boundaryActivities = boundaryActivities;
 	}
 }

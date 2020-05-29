@@ -135,6 +135,7 @@ public class FilterBrowserAlgorithm {
 		XEventClassifier classifier = configuration.getClassifier();
 		Set<String> positiveFilters = configuration.getPositiveFilters();
 		Set<String> negativeFilters = configuration.getNegativeFilters();
+		Set<String> boundaryActivities = configuration.getBoundaryActivities();
 		List<List<String>> splitters = configuration.getSplitters();
 
 		if (!positiveFilters.isEmpty() || !negativeFilters.isEmpty()) {
@@ -154,6 +155,7 @@ public class FilterBrowserAlgorithm {
 		BuilderConfiguration builderConfiguration = new BuilderConfiguration(builderInput);
 		builderConfiguration.setClassifier(classifier);
 		builderConfiguration.setHorizon(horizon);
+		builderConfiguration.setBoundaryActivities(boundaryActivities);
 		LogSkeleton logSkeleton = builderAlgorithm.apply(context, builderInput, builderConfiguration).getLogSkeleton();
 		logSkeleton.setRequired(positiveFilters);
 		logSkeleton.setForbidden(negativeFilters);
@@ -226,6 +228,7 @@ public class FilterBrowserAlgorithm {
 	private JComponent getControlPanel(final FilterBrowserConfiguration configuration) {
 		final Set<String> positiveFilters = configuration.getPositiveFilters();
 		final Set<String> negativeFilters = configuration.getNegativeFilters();
+		final Set<String> boundaryActivities = configuration.getBoundaryActivities();
 		final List<List<String>> splitters = configuration.getSplitters();
 
 		final JPanel controlPanel = new JPanel();
@@ -239,7 +242,7 @@ public class FilterBrowserAlgorithm {
 
 		final JPanel filterPanel = new JPanel();
 		double filterSize[][] = { { TableLayoutConstants.FILL },
-				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
+				{ TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL, 30 } };
 		filterPanel.setLayout(new TableLayout(filterSize));
 		filterPanel.setOpaque(false);
 		
@@ -276,6 +279,23 @@ public class FilterBrowserAlgorithm {
 		forbiddenActivityList.setPreferredSize(new Dimension(100, 100));
 		filterPanel.add(forbiddenActivityList, "0, 1");
 
+		DefaultListModel<String> boundaryActivityModel = new DefaultListModel<String>();
+		for (String activity : activities) {
+			boundaryActivityModel.addElement(activity);
+		}
+		final ProMList<String> boundaryActivityList = new ProMList<String>("Select boundary activities",
+				boundaryActivityModel);
+		boundaryActivityList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		boundaryActivityList.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				List<String> selectedActivities = boundaryActivityList.getSelectedValuesList();
+				boundaryActivities.clear();
+				boundaryActivities.addAll(selectedActivities);
+			}
+		});
+		boundaryActivityList.setPreferredSize(new Dimension(100, 100));
+		filterPanel.add(boundaryActivityList, "0, 2");
+
 		final NiceSlider horizonSlider = SlickerFactory.instance().createNiceIntegerSlider(
 				"Horizon (0 means no horizon)", 0, 20, configuration.getHorizon(), Orientation.HORIZONTAL);
 		horizonSlider.addChangeListener(new ChangeListener() {
@@ -286,7 +306,7 @@ public class FilterBrowserAlgorithm {
 			}
 		});
 		horizonSlider.setPreferredSize(new Dimension(100, 30));
-		filterPanel.add(horizonSlider, "0, 2");
+		filterPanel.add(horizonSlider, "0, 3");
 
 		final RoundedPanel splitterPanel = new RoundedPanel(10, 5, 0);
 		splitterPanel.setPreferredSize(new Dimension(100, 100));
