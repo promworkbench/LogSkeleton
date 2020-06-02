@@ -147,7 +147,7 @@ public class BrowserAlgorithm {
 
 		final JPanel advancedPanel = new JPanel();
 		double[][] advancedSize = { { 30, TableLayoutConstants.FILL },
-				{ 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40, 40, 30, 40, 30, 30 } };
+				{ 40, 30, 30, 30, 30, 40, 40, 40, 40, 40, 40, 40, 40, 40, 30, 40, 30, 30 } };
 		advancedPanel.setLayout(new TableLayout(advancedSize));
 		advancedPanel.setOpaque(false);
 		int y = 0;
@@ -303,6 +303,23 @@ public class BrowserAlgorithm {
 		checkBoxEquivalenceClass.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(checkBoxEquivalenceClass, "0, " + y);
 		advancedPanel.add(new JLabel("<html>Show Not Co-Existence only<br>between representatives"), "1, " + y);
+		y++;
+
+		final JCheckBox checkBoxNCEReductions = SlickerFactory.instance().createCheckBox("",
+				configuration.isUseNCEReductions());
+		checkBoxNCEReductions.setSelected(configuration.isUseNCEReductions());
+		checkBoxNCEReductions.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				configuration.setUseNCEReductions(checkBoxNCEReductions.isSelected());
+				updateRight();
+			}
+
+		});
+		checkBoxNCEReductions.setOpaque(false);
+		checkBoxNCEReductions.setPreferredSize(new Dimension(100, 30));
+		advancedPanel.add(checkBoxNCEReductions, "0, " + y);
+		advancedPanel.add(new JLabel("<html>Only Not Co-Existence only<br>if no precendent"), "1, " + y);
 		y++;
 
 		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("",

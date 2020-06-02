@@ -18,6 +18,7 @@ public class BrowserConfiguration {
 	private boolean useFalseConstraints;
 	private boolean useEdgeColors;
 	private boolean useEquivalenceClass;
+	private boolean useNCEReductions;
 	private boolean useNeighbors;
 	private boolean useHeadTailLabels;
 	private boolean useInvertedArrows;
@@ -40,7 +41,8 @@ public class BrowserConfiguration {
 		setUseHyperArcs(false);
 		setUseFalseConstraints(true);
 		setUseEdgeColors(true);
-		setUseEquivalenceClass(true);
+		setUseEquivalenceClass(false);
+		setUseNCEReductions(true);
 		setUseNeighbors(true);
 		setUseHeadTailLabels(true);
 		setUseInvertedArrows(false);
@@ -170,6 +172,14 @@ public class BrowserConfiguration {
 
 	public void setFontnameRepresentation(String fontnames) {
 		this.fontnameRepresentation = fontnames;
+	}
+
+	public boolean isUseNCEReductions() {
+		return useNCEReductions;
+	}
+
+	public void setUseNCEReductions(boolean useNCEReductions) {
+		this.useNCEReductions = useNCEReductions;
 	}
 
 }
