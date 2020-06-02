@@ -20,7 +20,7 @@ import org.processmining.logskeleton.inputs.VisualizerInput;
 		returnTypes = { JComponent.class }, //
 		userAccessible = true, //
 		icon = "prom_duck.png", //
-		url = "http://www.win.tue.nl/~hverbeek/blog/2020/05/29/visualize-log-as-log-skeleton-6/", //
+		url = "http://www.win.tue.nl/~hverbeek/blog/2020/06/02/visualize-log-as-log-skeleton-7/", //
 		help = "Log Skeleton Visualizer" //
 ) //
 @Visualizer
