@@ -86,6 +86,7 @@ public class LogSkeleton implements HTMLToString {
 	 */
 	private Set<String> required;
 	private Set<String> forbidden;
+	private Set<String> boundary;
 	private List<List<String>> splitters;
 
 	/*
@@ -125,6 +126,7 @@ public class LogSkeleton implements HTMLToString {
 		notCoExistences = new HashMap<String, ThresholdSet>();
 		required = new HashSet<String>();
 		forbidden = new HashSet<String>();
+		boundary = new HashSet<String>();
 		splitters = new ArrayList<List<String>>();
 		label = null;
 		setEquivalenceThreshold(100);
@@ -1249,6 +1251,12 @@ public class LogSkeleton implements HTMLToString {
 			 */
 			label += encodeRow("Forbidden activities", forbidden.toString());
 		}
+		if (!boundary.isEmpty()) {
+			/*
+			 * List boundary activities
+			 */
+			label += encodeRow("Boundary activities", boundary.toString());
+		}
 		if (!splitters.isEmpty()) {
 			/*
 			 * List splitters.
@@ -1644,6 +1652,16 @@ public class LogSkeleton implements HTMLToString {
 		this.forbidden = forbidden;
 	}
 
+	/**
+	 * Sets the set of boundary activities (to be included in the legend).
+	 * 
+	 * @param forbidden
+	 *            The set of forbidden activities.
+	 */
+	public void setBoundary(Set<String> boundary) {
+		this.boundary = boundary;
+	}
+	
 	/**
 	 * Sets the set of splitters (to be included in the legend).
 	 * 

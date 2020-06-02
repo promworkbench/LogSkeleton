@@ -159,6 +159,7 @@ public class FilterBrowserAlgorithm {
 		LogSkeleton logSkeleton = builderAlgorithm.apply(context, builderInput, builderConfiguration).getLogSkeleton();
 		logSkeleton.setRequired(positiveFilters);
 		logSkeleton.setForbidden(negativeFilters);
+		logSkeleton.setBoundary(boundaryActivities);
 		logSkeleton.setSplitters(splitters);
 		BrowserPlugin visualizerPlugin = new BrowserPlugin();
 		if (rightPanel != null) {
