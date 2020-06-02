@@ -873,7 +873,8 @@ public class LogSkeleton implements HTMLToString {
 											.equals(getEquivalenceClass(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(toActivity).contains(fromActivity)) {
 								boolean doShow = configuration.isUseNCEReductions()
-										? showNotCoExistence(fromActivity, toActivity, activities)
+										? showNotCoExistence(fromActivity, toActivity, activities,
+												configuration.getActivities())
 										: true;
 								if (doShow) {
 									/*
@@ -896,7 +897,8 @@ public class LogSkeleton implements HTMLToString {
 											.equals(getEquivalenceClass(toActivity, activities).iterator().next()))
 									&& notCoExistences.get(fromActivity).contains(toActivity)) {
 								boolean doShow = configuration.isUseNCEReductions()
-										? showNotCoExistence(fromActivity, toActivity, activities)
+										? showNotCoExistence(fromActivity, toActivity, activities,
+												configuration.getActivities())
 										: true;
 								if (doShow) {
 									/*
@@ -1301,55 +1303,31 @@ public class LogSkeleton implements HTMLToString {
 		return graph;
 	}
 
-	private boolean showNotCoExistence(String fromActivity, String toActivity, Set<String> activities) {
+	/*
+	 * Returns whether the Not Co-Existence relation from fromActivity to toActivity should be shown.
+	 */
+	private boolean showNotCoExistence(String fromActivity, String toActivity, Set<String> activities,
+			Set<String> selectedActivities) {
 		for (String activity : precedences.get(fromActivity)) {
-//			String rep = getEquivalenceClass(activity, activities).iterator().next();
-//			if (rep.equals(fromActivity)) {
-//				break;
-//			}
-			if (notCoExistences.get(activity).contains(toActivity)) {
-				return false;
-			}
-			if (notCoExistences.get(toActivity).contains(activity)) {
-				return false;
+			if (selectedActivities.contains(activity)) {
+				if (notCoExistences.get(activity).contains(toActivity)) {
+					return false;
+				}
+				if (notCoExistences.get(toActivity).contains(activity)) {
+					return false;
+				}
 			}
 		}
 		for (String activity : precedences.get(toActivity)) {
-//			String rep = getEquivalenceClass(activity, activities).iterator().next();
-//			if (rep.equals(toActivity)) {
-//				break;
-//			}
-			if (notCoExistences.get(activity).contains(fromActivity)) {
-				return false;
-			}
-			if (notCoExistences.get(fromActivity).contains(activity)) {
-				return false;
+			if (selectedActivities.contains(activity)) {
+				if (notCoExistences.get(activity).contains(fromActivity)) {
+					return false;
+				}
+				if (notCoExistences.get(fromActivity).contains(activity)) {
+					return false;
+				}
 			}
 		}
-//		for (String activity : responses.get(fromActivity)) {
-//			String rep = getEquivalenceClass(activity, activities).iterator().next();
-//			if (rep.equals(fromActivity)) {
-//				break;
-//			}
-//			if (notCoExistences.get(activity).contains(toActivity)) {
-//				return false;
-//			}
-//			if (notCoExistences.get(toActivity).contains(activity)) {
-//				return false;
-//			}
-//		}
-//		for (String activity : responses.get(toActivity)) {
-//			String rep = getEquivalenceClass(activity, activities).iterator().next();
-//			if (rep.equals(toActivity)) {
-//				break;
-//			}
-//			if (notCoExistences.get(activity).contains(fromActivity)) {
-//				return false;
-//			}
-//			if (notCoExistences.get(fromActivity).contains(activity)) {
-//				return false;
-//			}
-//		}
 		return true;
 	}
 
