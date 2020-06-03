@@ -26,6 +26,7 @@ import org.processmining.contexts.util.CompositePanel;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
+import org.processmining.logskeleton.components.BrowserComponent;
 import org.processmining.logskeleton.configurations.BrowserConfiguration;
 import org.processmining.logskeleton.inputs.BrowserInput;
 import org.processmining.logskeleton.models.LogSkeleton;
@@ -47,7 +48,7 @@ public class BrowserAlgorithm {
 	private BrowserConfiguration configuration;
 	private JComponent leftDotPanel = null;
 	private JComponent rightDotPanel = null;
-	private JPanel mainPanel = null;
+	private BrowserComponent mainPanel = null;
 	private boolean isRepainting = false;
 
 	public BrowserOutput apply(PluginContext context, BrowserInput input, final BrowserConfiguration configuration) {
@@ -55,7 +56,7 @@ public class BrowserAlgorithm {
 		this.logSkeleton = input.getLogSkeleton();
 		this.configuration = configuration;
 
-		mainPanel = new CompositePanel() {
+		mainPanel = new BrowserComponent() {
 			/**
 			 * 
 			 */

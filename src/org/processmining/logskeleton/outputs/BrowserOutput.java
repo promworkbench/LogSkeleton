@@ -1,16 +1,16 @@
 package org.processmining.logskeleton.outputs;
 
-import javax.swing.JComponent;
+import org.processmining.logskeleton.components.BrowserComponent;
 
 public class BrowserOutput {
 
-	private JComponent component;
+	private BrowserComponent component;
 
-	public BrowserOutput(JComponent component) {
+	public BrowserOutput(BrowserComponent component) {
 		this.component = component;
 	}
 	
-	public JComponent getComponent() {
+	public BrowserComponent getComponent() {
 		return component;
 	}
 }

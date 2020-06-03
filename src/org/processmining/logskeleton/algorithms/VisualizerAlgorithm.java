@@ -13,6 +13,7 @@ import org.processmining.contexts.util.CompositePanel;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.logskeleton.classifiers.PrefixClassifier;
+import org.processmining.logskeleton.components.VisualizerComponent;
 import org.processmining.logskeleton.configurations.FilterBrowserConfiguration;
 import org.processmining.logskeleton.configurations.VisualizerConfiguration;
 import org.processmining.logskeleton.inputs.FilterBrowserInput;
@@ -29,14 +30,14 @@ public class VisualizerAlgorithm {
 	private PluginContext context;
 	private XLog log;
 	private XEventClassifier classifier;
-	private JComponent mainPanel;
+	private VisualizerComponent mainPanel;
 	private JComponent bottomPanel = null;
 	
 	public VisualizerOutput apply(PluginContext context, VisualizerInput input, VisualizerConfiguration configuration) {
 		this.context = context;
 		this.log = input.getLog();
 		
-		mainPanel = new CompositePanel() {
+		mainPanel = new VisualizerComponent() {
 			/**
 			 * 
 			 */

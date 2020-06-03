@@ -1,16 +1,16 @@
 package org.processmining.logskeleton.outputs;
 
-import javax.swing.JComponent;
+import org.processmining.logskeleton.components.VisualizerComponent;
 
 public class VisualizerOutput {
 
-	private JComponent component;
+	private VisualizerComponent component;
 
-	public VisualizerOutput(JComponent component) {
+	public VisualizerOutput(VisualizerComponent component) {
 		this.component = component;
 	}
 	
-	public JComponent getComponent() {
+	public VisualizerComponent getComponent() {
 		return component;
 	}
 }

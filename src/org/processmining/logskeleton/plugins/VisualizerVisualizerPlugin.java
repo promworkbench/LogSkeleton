@@ -3,6 +3,7 @@ package org.processmining.logskeleton.plugins;
 import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
+import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
@@ -13,7 +14,7 @@ import org.processmining.logskeleton.inputs.VisualizerInput;
 
 @Plugin( //
 		name = "Visualize Log as Log Skeleton", //
-		parameterLabels = { "Event Log", "Configuration" }, //
+		parameterLabels = { "Event Log", "Configuration", "Visualizer Component" }, //
 		returnLabels = { "Log Skeleton Visualizer" }, //
 		returnTypes = { VisualizerComponent.class }, //
 		userAccessible = true, //
@@ -21,7 +22,8 @@ import org.processmining.logskeleton.inputs.VisualizerInput;
 		url = "http://www.win.tue.nl/~hverbeek/blog/2020/06/02/visualize-log-as-log-skeleton-7/", //
 		help = "Log Skeleton Visualizer" //
 ) //
-public class VisualizerPlugin extends VisualizerAlgorithm {
+@Visualizer
+public class VisualizerVisualizerPlugin extends VisualizerAlgorithm {
 
 	@UITopiaVariant( //
 			affiliation = UITopiaVariant.EHV, //
@@ -46,5 +48,12 @@ public class VisualizerPlugin extends VisualizerAlgorithm {
 		VisualizerInput input = new VisualizerInput(log);
 		return apply(context, input, configuration).getComponent();
 	}
-		
+	
+	@PluginVariant( //
+			variantLabel = "Visualize Log as Log Skeleton using Visualizer Component", //
+			requiredParameterLabels = { 2 } //
+	) //
+	public VisualizerComponent run(PluginContext context, VisualizerComponent component) {
+		return component;
+	}
 }
