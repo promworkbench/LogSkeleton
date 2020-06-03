@@ -319,7 +319,7 @@ public class BrowserAlgorithm {
 		checkBoxNCEReductions.setOpaque(false);
 		checkBoxNCEReductions.setPreferredSize(new Dimension(100, 30));
 		advancedPanel.add(checkBoxNCEReductions, "0, " + y);
-		advancedPanel.add(new JLabel("<html>Only Not Co-Existence only<br>if no precendent"), "1, " + y);
+		advancedPanel.add(new JLabel("<html>Show Not Co-Existence only<br>if no precedent"), "1, " + y);
 		y++;
 
 		final JCheckBox checkBoxLabels = SlickerFactory.instance().createCheckBox("",
