@@ -23,7 +23,9 @@ public class CheckerAlgorithm {
 		XLog log = input.getLog();
 		LogSkeleton logSkeleton = input.getLogSkeleton();
 		
+		System.out.println("[CheckerAlgorithm] log " + XConceptExtension.instance().extractName(log));
 		for (XTrace trace : log) {
+			System.out.println("[CheckerAlgorithm] trace " + XConceptExtension.instance().extractName(trace));
 			traceLog.clear();
 			traceLog.add(trace);
 			LogSkeletonCount traceCount = algorithm.count(traceLog, builderConfiguration);
