@@ -554,6 +554,7 @@ public class LogSkeleton implements HTMLToString {
 				return violations;
 			}
 		}
+		System.out.println("[LogSkeleton] violations: " + violations);
 		return violations;
 	}
 
