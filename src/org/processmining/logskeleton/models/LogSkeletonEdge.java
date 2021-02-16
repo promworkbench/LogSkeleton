@@ -3,24 +3,24 @@ package org.processmining.logskeleton.models;
 public class LogSkeletonEdge {
 
 	/*
-	 * Source node.
+	 * Head node.
 	 */
-	private LogSkeletonNode source;
+	private LogSkeletonNode headNode;
 	
 	/*
-	 * Target node.
+	 * Tail node.
 	 */
-	private LogSkeletonNode target;
+	private LogSkeletonNode tailNode;
 	
 	/*
 	 * Head type.
 	 */
-	private LogSkeletonEdgeType head;
+	private LogSkeletonEdgeType headType;
 	
 	/*
 	 * Tail type.
 	 */
-	private LogSkeletonEdgeType tail;
+	private LogSkeletonEdgeType tailType;
 	
 	/*
 	 * Head label.
@@ -50,36 +50,36 @@ public class LogSkeletonEdge {
 	/*
 	 * Getters and setters.
 	 */
-	public LogSkeletonNode getSource() {
-		return source;
+	public LogSkeletonNode getTailNode() {
+		return tailNode;
 	}
 
-	public void setSource(LogSkeletonNode source) {
-		this.source = source;
+	public void setTailNode(LogSkeletonNode source) {
+		this.tailNode = source;
 	}
 
-	public LogSkeletonNode getTarget() {
-		return target;
+	public LogSkeletonNode getHeadNode() {
+		return headNode;
 	}
 
-	public void setTarget(LogSkeletonNode target) {
-		this.target = target;
+	public void setHeadNode(LogSkeletonNode target) {
+		this.headNode = target;
 	}
 	
-	public LogSkeletonEdgeType getHead() {
-		return head;
+	public LogSkeletonEdgeType getHeadType() {
+		return headType;
 	}
 	
-	public void setHead(LogSkeletonEdgeType head) {
-		this.head = head;
+	public void setHeadType(LogSkeletonEdgeType head) {
+		this.headType = head;
 	}
 
-	public LogSkeletonEdgeType getTail() {
-		return tail;
+	public LogSkeletonEdgeType getTailType() {
+		return tailType;
 	}
 
-	public void setTail(LogSkeletonEdgeType tail) {
-		this.tail = tail;
+	public void setTailType(LogSkeletonEdgeType tail) {
+		this.tailType = tail;
 	}
 
 	public String getHeadLabel() {

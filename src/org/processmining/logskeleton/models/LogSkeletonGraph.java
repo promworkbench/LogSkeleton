@@ -1,8 +1,10 @@
 package org.processmining.logskeleton.models;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class LogSkeletonGraph {
@@ -14,8 +16,10 @@ public class LogSkeletonGraph {
 	
 	/*
 	 * Edges in the graph. 
+	 * The list of nodes contains first the tail node and second the head node. 
+	 * This, way, we prevent multiple edges from the source node to the target node.
 	 */
-	private Set<LogSkeletonEdge> edges;
+	private Map<List<LogSkeletonNode>, LogSkeletonEdge> edges;
 	
 	/*
 	 * Graph title.
@@ -39,7 +43,7 @@ public class LogSkeletonGraph {
 	
 	public LogSkeletonGraph() {
 		setNodes(new HashSet<LogSkeletonNode>());
-		setEdges(new HashSet<LogSkeletonEdge>());
+		setEdges(new HashMap<List<LogSkeletonNode>, LogSkeletonEdge>());
 		setLegendLines(new ArrayList<LogSkeletonLegendLine>());
 	}
 
@@ -54,11 +58,11 @@ public class LogSkeletonGraph {
 		this.nodes = nodes;
 	}
 
-	public Set<LogSkeletonEdge> getEdges() {
+	public Map<List<LogSkeletonNode>, LogSkeletonEdge> getEdges() {
 		return edges;
 	}
 
-	public void setEdges(Set<LogSkeletonEdge> edges) {
+	public void setEdges(Map<List<LogSkeletonNode>, LogSkeletonEdge> edges) {
 		this.edges = edges;
 	}
 

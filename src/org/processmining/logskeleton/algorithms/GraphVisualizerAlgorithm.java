@@ -20,10 +20,37 @@ import org.processmining.plugins.graphviz.dot.DotNode;
 
 public class GraphVisualizerAlgorithm {
 
+	private Map<LogSkeletonNode, DotNode> map;
+	private Dot dotGraph;
+	
 	public Dot apply(LogSkeletonGraph graph, BrowserConfiguration configuration) {
-		Map<LogSkeletonNode, DotNode> map = new HashMap<LogSkeletonNode, DotNode>();
-		Dot dotGraph = new Dot();
-
+		map = new HashMap<LogSkeletonNode, DotNode>();
+		dotGraph = new Dot();
+		
+		/*
+		 * Add the nodes to Dot.
+		 */
+		addNodes(graph, configuration);
+		
+		/*
+		 * Add the edges to Dot.
+		 */
+		addEdges(graph, configuration);
+		
+		/*
+		 * Replaces cliques of edges in Dot by an hyper arc (if possible).
+		 */
+		addHyperArcs(graph, configuration);
+		
+		/*
+		 * Add legend to Dot.
+		 */
+		addLegend(graph, configuration);
+		
+		return dotGraph;
+	}
+	
+	private void addNodes(LogSkeletonGraph graph, BrowserConfiguration configuration) {
 		for (LogSkeletonNode node : graph.getNodes()) {
 			DotNode dotNode = dotGraph.addNode("<<table align=\"center\" bgcolor=\"" + node.getBackgroundColor()
 					+ "\" border=\"" + (node.hasBorder() ? "1" : "0")
@@ -38,14 +65,16 @@ public class GraphVisualizerAlgorithm {
 			}
 			map.put(node, dotNode);
 		}
+	}
 
-		for (LogSkeletonEdge edge : graph.getEdges()) {
-			DotEdge dotEdge = dotGraph.addEdge(map.get(edge.getSource()), map.get(edge.getTarget()));
+	private void addEdges(LogSkeletonGraph graph, BrowserConfiguration configuration) {
+		for (LogSkeletonEdge edge : graph.getEdges().values()) {
+			DotEdge dotEdge = dotGraph.addEdge(map.get(edge.getTailNode()), map.get(edge.getHeadNode()));
 			dotEdge.setOption("dir", "both");
 			String headDecorator = "";
 			String tailDecorator = "";
-			if (edge.getHead() != null) {
-				switch (edge.getHead()) {
+			if (edge.getHeadType() != null) {
+				switch (edge.getHeadType()) {
 					case ALWAYS : {
 						headDecorator = "normal";
 						break;
@@ -64,8 +93,8 @@ public class GraphVisualizerAlgorithm {
 					}
 				}
 			}
-			if (edge.getTail() != null) {
-				switch (edge.getTail()) {
+			if (edge.getTailType() != null) {
+				switch (edge.getTailType()) {
 					case ALWAYS : {
 						tailDecorator = "noneinv";
 						break;
@@ -132,6 +161,9 @@ public class GraphVisualizerAlgorithm {
 				dotEdge.setLabel(label);
 			}
 		}
+	}
+	
+	private void addHyperArcs(LogSkeletonGraph graph, BrowserConfiguration configuration) {
 
 		if (configuration.isUseHyperArcs()) {
 			/*
@@ -174,22 +206,22 @@ public class GraphVisualizerAlgorithm {
 					/*
 					 * Get the cluster for this edge.
 					 */
-					DotNode sourceNode = edge.getSource();
-					DotNode targetNode = edge.getTarget();
-					Set<DotNode> sourceNodes = new HashSet<DotNode>();
-					sourceNodes.add(sourceNode);
-					Set<DotNode> targetNodes = new HashSet<DotNode>();
-					targetNodes.add(targetNode);
+					DotNode tailNode = edge.getSource();
+					DotNode headNode = edge.getTarget();
+					Set<DotNode> tailNodes = new HashSet<DotNode>();
+					tailNodes.add(tailNode);
+					Set<DotNode> headNodes = new HashSet<DotNode>();
+					headNodes.add(headNode);
 					boolean changed = true;
 					while (changed) {
 						changed = false;
 						for (DotEdge anotherEdge : dotGraph.getEdges()) {
 							if (isEqual(edge, anotherEdge)) {
-								if (sourceNodes.contains(anotherEdge.getSource())) {
-									changed = changed || targetNodes.add(anotherEdge.getTarget());
+								if (tailNodes.contains(anotherEdge.getSource())) {
+									changed = changed || headNodes.add(anotherEdge.getTarget());
 								}
-								if (targetNodes.contains(anotherEdge.getTarget())) {
-									changed = changed || sourceNodes.add(anotherEdge.getSource());
+								if (headNodes.contains(anotherEdge.getTarget())) {
+									changed = changed || tailNodes.add(anotherEdge.getSource());
 								}
 							}
 						}
@@ -198,18 +230,18 @@ public class GraphVisualizerAlgorithm {
 					/*
 					 * Get a biggest maximal clique in the cluster.
 					 */
-					Set<DotEdge> edges = getMaximalClique(dotGraph, sourceNodes, targetNodes, edge.getOption("arrowtail"),
+					Set<DotEdge> edges = getMaximalClique(dotGraph, tailNodes, headNodes, edge.getOption("arrowtail"),
 							edge.getOption("arrowhead"), edge.getLabel(), edge, new HashSet<List<Set<DotNode>>>());
 
 					if (edges != null) {
 						/*
 						 * A maximal clique was found. Update the sources and targets to this clique.
 						 */
-						sourceNodes.clear();
-						targetNodes.clear();
+						tailNodes.clear();
+						headNodes.clear();
 						for (DotEdge anotherEdge : edges) {
-							sourceNodes.add(anotherEdge.getSource());
-							targetNodes.add(anotherEdge.getTarget());
+							tailNodes.add(anotherEdge.getSource());
+							headNodes.add(anotherEdge.getTarget());
 						}
 						/*
 						 * Add a connector node to the graph.
@@ -219,7 +251,7 @@ public class GraphVisualizerAlgorithm {
 						/*
 						 * Add edges from and to the new connector node.
 						 */
-						for (DotNode node : sourceNodes) {
+						for (DotNode node : tailNodes) {
 							DotEdge anotherEdge = dotGraph.addEdge(node, connector);
 							anotherEdge.setOption("dir", "both");
 							anotherEdge.setOption("arrowtail", edge.getOption("arrowtail"));
@@ -247,7 +279,7 @@ public class GraphVisualizerAlgorithm {
 							}
 							candidateEdges.add(anotherEdge);
 						}
-						for (DotNode node : targetNodes) {
+						for (DotNode node : headNodes) {
 							DotEdge anotherEdge = dotGraph.addEdge(connector, node);
 							anotherEdge.setOption("dir", "both");
 							anotherEdge.setOption("arrowtail", "none");
@@ -311,6 +343,9 @@ public class GraphVisualizerAlgorithm {
 				}
 			}
 		}
+	}
+	
+	private void addLegend(LogSkeletonGraph graph, BrowserConfiguration configuration) {
 
 		/*
 		 * Add a legend to the dot visualization.
@@ -335,8 +370,6 @@ public class GraphVisualizerAlgorithm {
 		label += "</table>";
 		dotGraph.setOption("fontsize", "8.0");
 		dotGraph.setOption("label", "<" + label + ">");
-
-		return dotGraph;
 	}
 
 	/*

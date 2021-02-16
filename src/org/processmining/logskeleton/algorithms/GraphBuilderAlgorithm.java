@@ -167,66 +167,66 @@ public class GraphBuilderAlgorithm {
 			 * Extend the selected activities with activities that are related (through some
 			 * selected non-redundant relation) to a selected activity.
 			 */
-			for (String fromActivity : logSkeleton.getActivities()) {
-				for (String toActivity : logSkeleton.getActivities()) {
-					if ((configuration.getActivities().contains(fromActivity)
-							|| configuration.getActivities().contains(toActivity))
-							&& (!activities.contains(fromActivity) || !activities.contains(toActivity))) {
+			for (String tailActivity : logSkeleton.getActivities()) {
+				for (String headActivity : logSkeleton.getActivities()) {
+					if ((configuration.getActivities().contains(tailActivity)
+							|| configuration.getActivities().contains(headActivity))
+							&& (!activities.contains(tailActivity) || !activities.contains(headActivity))) {
 						if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
-							if (logSkeleton.hasNonRedundantResponse(fromActivity, toActivity)) {
+							if (logSkeleton.hasNonRedundantResponse(tailActivity, headActivity)) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Response relation, and one of them is selected. Include the other as well.
 								 */
-								activities.add(fromActivity);
-								activities.add(toActivity);
+								activities.add(tailActivity);
+								activities.add(headActivity);
 								continue;
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.PRECEDENCE)) {
-							if (logSkeleton.hasNonRedundantPrecedence(fromActivity, toActivity)) {
+							if (logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity)) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Precedence relation, and one of them is selected. Include the other as well.
 								 */
-								activities.add(fromActivity);
-								activities.add(toActivity);
+								activities.add(tailActivity);
+								activities.add(headActivity);
 								continue;
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NOTRESPONSE)) {
-							if (logSkeleton.hasNonRedundantNotResponse(fromActivity, toActivity)) {
+							if (logSkeleton.hasNonRedundantNotResponse(tailActivity, headActivity)) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Not Response relation, and one of them is selected. Include the other as
 								 * well.
 								 */
-								activities.add(fromActivity);
-								activities.add(toActivity);
+								activities.add(tailActivity);
+								activities.add(headActivity);
 								continue;
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NOTPRECEDENCE)) {
-							if (logSkeleton.hasNonRedundantNotPrecedence(fromActivity, toActivity)) {
+							if (logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity)) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Not Precedence relation, and one of them is selected. Include the other as
 								 * well.
 								 */
-								activities.add(fromActivity);
-								activities.add(toActivity);
+								activities.add(tailActivity);
+								activities.add(headActivity);
 								continue;
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NOTCOEXISTENCE)) {
-							if (logSkeleton.hasNonRedundantNotCoExistence(fromActivity, toActivity, configuration)) {
+							if (logSkeleton.hasNonRedundantNotCoExistence(tailActivity, headActivity, configuration)) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Not Co-Existence relation, and one of them is selected. Include the other as
 								 * well.
 								 */
-								activities.add(fromActivity);
-								activities.add(toActivity);
+								activities.add(tailActivity);
+								activities.add(headActivity);
 								continue;
 							}
 						}
@@ -288,23 +288,25 @@ public class GraphBuilderAlgorithm {
 
 	private void addEdges(LogSkeleton logSkeleton, BrowserConfiguration configuration) {
 
-		for (String fromActivity : activities) {
-			for (String toActivity : activities) {
-				if (configuration.getActivities().contains(fromActivity)
-						|| configuration.getActivities().contains(toActivity)) {
+		for (String tailActivity : activities) {
+			for (String headActivity : activities) {
+				if (configuration.getActivities().contains(tailActivity)
+						|| configuration.getActivities().contains(headActivity)) {
 					LogSkeletonEdge edge = new LogSkeletonEdge();
-					edge.setSource(nodeMap.get(fromActivity));
-					edge.setTarget(nodeMap.get(toActivity));
+					LogSkeletonNode headNode = nodeMap.get(tailActivity);
+					LogSkeletonNode tailNode = nodeMap.get(headActivity);
+					edge.setTailNode(headNode);
+					edge.setHeadNode(tailNode);
 					edge.setHeadColor(defaultColor);
 					edge.setTailColor(defaultColor);
 					if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
-						if (edge.getTail() == null && logSkeleton.hasNonRedundantResponse(fromActivity, toActivity)) {
+						if (edge.getTailType() == null && logSkeleton.hasNonRedundantResponse(tailActivity, headActivity)) {
 							/*
 							 * Add Response on tail.
 							 */
-							edge.setTail(LogSkeletonEdgeType.ALWAYS);
+							edge.setTailType(LogSkeletonEdgeType.ALWAYS);
 							edge.setSymmetric(false);
-							int threshold = logSkeleton.getMaxThresholdResponse(fromActivity, toActivity);
+							int threshold = logSkeleton.getMaxThresholdResponse(tailActivity, headActivity);
 							if (threshold < 100) {
 								edge.setTailLabel("." + threshold);
 								edge.setTailColor(lighterResponsePrecedenceColor);
@@ -315,13 +317,13 @@ public class GraphBuilderAlgorithm {
 						}
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.PRECEDENCE)) {
-						if (edge.getHead() == null && logSkeleton.hasNonRedundantPrecedence(fromActivity, toActivity)) {
+						if (edge.getHeadType() == null && logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity)) {
 							/*
 							 * Add Precedence on head.
 							 */
-							edge.setHead(LogSkeletonEdgeType.ALWAYS);
+							edge.setHeadType(LogSkeletonEdgeType.ALWAYS);
 							edge.setSymmetric(false);
-							int threshold = logSkeleton.getMaxThresholdPrecedence(fromActivity, toActivity);
+							int threshold = logSkeleton.getMaxThresholdPrecedence(tailActivity, headActivity);
 							if (threshold < 100) {
 								edge.setHeadLabel("." + threshold);
 								edge.setHeadColor(lighterResponsePrecedenceColor);
@@ -333,18 +335,18 @@ public class GraphBuilderAlgorithm {
 						}
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.NOTCOEXISTENCE)) {
-						if (!fromActivity.equals(toActivity)) {
-							if (edge.getHead() == null && fromActivity.compareTo(toActivity) >= 0 && logSkeleton
-									.hasNonRedundantNotCoExistence(toActivity, fromActivity, configuration)) {
+						if (!tailActivity.equals(headActivity)) {
+							if (edge.getHeadType() == null && tailActivity.compareTo(headActivity) >= 0 && logSkeleton
+									.hasNonRedundantNotCoExistence(headActivity, tailActivity, configuration)) {
 								boolean doShow = configuration.isUseNCEReductions() ? logSkeleton.showNotCoExistence(
-										fromActivity, toActivity, activities, configuration.getActivities()) : true;
+										tailActivity, headActivity, activities, configuration.getActivities()) : true;
 								if (doShow) {
 									/*
 									 * Add Not Co-Existence on head.
 									 */
-									edge.setHead(LogSkeletonEdgeType.EXCLUSIVE);
+									edge.setHeadType(LogSkeletonEdgeType.EXCLUSIVE);
 									edge.setSymmetric(true);
-									int threshold = logSkeleton.getMaxThresholdNotCoExistence(toActivity, fromActivity);
+									int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity, tailActivity);
 									if (threshold < 100) {
 										edge.setHeadLabel("." + threshold);
 										edge.setHeadColor(lighterNotCoExistenceColor);
@@ -354,17 +356,17 @@ public class GraphBuilderAlgorithm {
 									}
 								}
 							}
-							if (edge.getTail() == null && fromActivity.compareTo(toActivity) >= 0 && logSkeleton
-									.hasNonRedundantNotCoExistence(fromActivity, toActivity, configuration)) {
+							if (edge.getTailType() == null && tailActivity.compareTo(headActivity) >= 0 && logSkeleton
+									.hasNonRedundantNotCoExistence(tailActivity, headActivity, configuration)) {
 								boolean doShow = configuration.isUseNCEReductions() ? logSkeleton.showNotCoExistence(
-										fromActivity, toActivity, activities, configuration.getActivities()) : true;
+										tailActivity, headActivity, activities, configuration.getActivities()) : true;
 								if (doShow) {
 									/*
 									 * Add Not Co-Existence on tail.
 									 */
-									edge.setTail(LogSkeletonEdgeType.EXCLUSIVE);
+									edge.setTailType(LogSkeletonEdgeType.EXCLUSIVE);
 									edge.setSymmetric(true);
-									int threshold = logSkeleton.getMaxThresholdNotCoExistence(fromActivity, toActivity);
+									int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity, headActivity);
 									if (threshold < 100) {
 										edge.setTailLabel("." + threshold);
 										edge.setTailColor(lighterNotCoExistenceColor);
@@ -377,14 +379,14 @@ public class GraphBuilderAlgorithm {
 						}
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.NOTRESPONSE)) {
-						if (!fromActivity.equals(toActivity) && edge.getHead() == null
-								&& logSkeleton.hasNonRedundantNotResponse(fromActivity, toActivity)) {
+						if (!tailActivity.equals(headActivity) && edge.getHeadType() == null
+								&& logSkeleton.hasNonRedundantNotResponse(tailActivity, headActivity)) {
 							/*
 							 * Add Not Response on head.
 							 */
-							edge.setHead(LogSkeletonEdgeType.NEVER);
+							edge.setHeadType(LogSkeletonEdgeType.NEVER);
 							edge.setSymmetric(false);
-							int threshold = logSkeleton.getMaxThresholdNotResponse(fromActivity, toActivity);
+							int threshold = logSkeleton.getMaxThresholdNotResponse(tailActivity, headActivity);
 							if (threshold < 100) {
 								edge.setHeadLabel("." + threshold);
 								edge.setHeadColor(lighterNotResponsePrecedenceColor);
@@ -395,14 +397,14 @@ public class GraphBuilderAlgorithm {
 						}
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.NOTPRECEDENCE)) {
-						if (!fromActivity.equals(toActivity) && edge.getTail() == null
-								&& logSkeleton.hasNonRedundantNotPrecedence(fromActivity, toActivity)) {
+						if (!tailActivity.equals(headActivity) && edge.getTailType() == null
+								&& logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity)) {
 							/*
 							 * Add Not Precedence on tail.
 							 */
-							edge.setTail(LogSkeletonEdgeType.NEVER);
+							edge.setTailType(LogSkeletonEdgeType.NEVER);
 							edge.setSymmetric(false);
-							int threshold = logSkeleton.getMaxThresholdNotPrecedence(fromActivity, toActivity);
+							int threshold = logSkeleton.getMaxThresholdNotPrecedence(tailActivity, headActivity);
 							if (threshold < 100) {
 								edge.setTailLabel("." + threshold);
 								edge.setTailColor(lighterNotResponsePrecedenceColor);
@@ -412,13 +414,16 @@ public class GraphBuilderAlgorithm {
 							}
 						}
 					}
-					if (edge.getHead() != null || edge.getTail() != null) {
+					if (edge.getHeadType() != null || edge.getTailType() != null) {
 						/*
 						 * Some non-redundant relation found, add to graph.
 						 */
-						graph.getEdges().add(edge);
-						nodeMap.get(fromActivity).getOutgoing().put(nodeMap.get(toActivity), edge);
-						nodeMap.get(toActivity).getIncoming().put(nodeMap.get(fromActivity), edge);
+						List<LogSkeletonNode> nodes = new ArrayList<LogSkeletonNode>();
+						nodes.add(headNode);
+						nodes.add(tailNode);
+						graph.getEdges().put(nodes, edge);
+						headNode.getOutgoing().put(tailNode, edge);
+						tailNode.getIncoming().put(headNode, edge);
 					}
 				}
 			}
