@@ -137,8 +137,11 @@ public class GraphVisualizerAlgorithm {
 	}
 
 	private void addNodes(LogSkeletonGraph graph, BrowserConfiguration configuration) {
-		List<LogSkeletonNode> nodes = new ArrayList<LogSkeletonNode>(graph.getNodes());
-		Collections.sort(nodes, new Comparator<LogSkeletonNode>() {
+		/*
+		 * Sort the nodes on their labels. 
+		 */
+		List<LogSkeletonNode> sortedNodes = new ArrayList<LogSkeletonNode>(graph.getNodes());
+		Collections.sort(sortedNodes, new Comparator<LogSkeletonNode>() {
 
 			public int compare(LogSkeletonNode arg0, LogSkeletonNode arg1) {
 				// TODO Auto-generated method stub
@@ -146,7 +149,7 @@ public class GraphVisualizerAlgorithm {
 			}
 			
 		});
-		for (LogSkeletonNode node : nodes) {
+		for (LogSkeletonNode node : sortedNodes) {
 			/*
 			 * Get a color for this activity.
 			 */
@@ -175,20 +178,23 @@ public class GraphVisualizerAlgorithm {
 	}
 
 	private void addEdges(LogSkeletonGraph graph, BrowserConfiguration configuration) {
-		List<LogSkeletonEdge> edges = new ArrayList(graph.getEdges().values());
-		Collections.sort(edges, new Comparator<LogSkeletonEdge>() {
+		/*
+		 * Sort the edges on the labels of their tails and heads.
+		 */
+		List<LogSkeletonEdge> sortedEdges = new ArrayList<LogSkeletonEdge>(graph.getEdges().values());
+		Collections.sort(sortedEdges, new Comparator<LogSkeletonEdge>() {
 
 			public int compare(LogSkeletonEdge o1, LogSkeletonEdge o2) {
 				// TODO Auto-generated method stub
 				int c =  o1.getTailNode().getLabel().compareTo(o2.getTailNode().getLabel());
-				if (c != 0) {
-					return c;
+				if (c == 0) {
+					c = o1.getHeadNode().getLabel().compareTo(o2.getHeadNode().getLabel());
 				}
-				return o1.getHeadNode().getLabel().compareTo(o2.getHeadNode().getLabel());
+				return c;
 			}
 			
 		});
-		for (LogSkeletonEdge edge : edges) {
+		for (LogSkeletonEdge edge : sortedEdges) {
 			DotEdge dotEdge = dotGraph.addEdge(map.get(edge.getTailNode()), map.get(edge.getHeadNode()));
 			dotEdge.setOption("dir", "both");
 			String headDecorator = "";
