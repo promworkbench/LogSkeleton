@@ -40,6 +40,7 @@ public class LogSkeletonEdge {
 	public LogSkeletonEdge() {
 		setHeadPercentage(100);
 		setTailPercentage(100);
+		setSymmetric(false);
 	}
 	
 	/*

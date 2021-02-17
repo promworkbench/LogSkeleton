@@ -62,7 +62,8 @@ public class GraphBuilderAlgorithm {
 		addNodes(logSkeleton, configuration);
 
 		/*
-		 * Add an edge between two activities if there is a relation between both activities.
+		 * Add an edge between two activities if there is a relation between both
+		 * activities.
 		 */
 		addEdges(logSkeleton, configuration);
 
@@ -160,9 +161,13 @@ public class GraphBuilderAlgorithm {
 			node.setLabel(activity);
 
 			/*
-			 * Get the representative for this activity.
+			 * Get the representative for this activity: The activity in the equivalence
+			 * class that is lexicographically the smallest
 			 */
-			String representative = logSkeleton.getEquivalenceClass(activity, activities).iterator().next();
+			List<String> equivalenceClass = new ArrayList<String>(
+					logSkeleton.getEquivalenceClass(activity, activities));
+			Collections.sort(equivalenceClass);
+			String representative = equivalenceClass.iterator().next();
 			node.setLabelRepresentative(representative);
 
 			/*
@@ -177,9 +182,8 @@ public class GraphBuilderAlgorithm {
 			node.setHigh(logSkeleton.getMax(activity));
 
 			/*
-			 * Determine the border width for this activity: 
-			 * - 1 if selected 
-			 * - 0 if not selected (but included).
+			 * Determine the border width for this activity: - 1 if selected - 0 if not
+			 * selected (but included).
 			 * 
 			 */
 			node.setSelected(configuration.getActivities().contains(activity));
@@ -202,7 +206,8 @@ public class GraphBuilderAlgorithm {
 					edge.setTailNode(headNode);
 					edge.setHeadNode(tailNode);
 					if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
-						if (edge.getTailType() == null && logSkeleton.hasNonRedundantResponse(tailActivity, headActivity)) {
+						if (edge.getTailType() == null
+								&& logSkeleton.hasNonRedundantResponse(tailActivity, headActivity)) {
 							/*
 							 * Add Response on tail.
 							 */
@@ -215,7 +220,8 @@ public class GraphBuilderAlgorithm {
 						}
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.PRECEDENCE)) {
-						if (edge.getHeadType() == null && logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity)) {
+						if (edge.getHeadType() == null
+								&& logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity)) {
 							/*
 							 * Add Precedence on head.
 							 */
@@ -239,7 +245,8 @@ public class GraphBuilderAlgorithm {
 									 */
 									edge.setHeadType(LogSkeletonEdgeType.EXCLUSIVE);
 									edge.setSymmetric(true);
-									int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity, tailActivity);
+									int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity,
+											tailActivity);
 									if (threshold < 100) {
 										edge.setHeadPercentage(threshold);
 									}
@@ -255,7 +262,8 @@ public class GraphBuilderAlgorithm {
 									 */
 									edge.setTailType(LogSkeletonEdgeType.EXCLUSIVE);
 									edge.setSymmetric(true);
-									int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity, headActivity);
+									int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity,
+											headActivity);
 									if (threshold < 100) {
 										edge.setTailPercentage(threshold);
 									}
