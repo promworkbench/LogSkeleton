@@ -23,30 +23,25 @@ public class LogSkeletonEdge {
 	private LogSkeletonEdgeType tailType;
 	
 	/*
-	 * Head label.
+	 * Head percentage.
 	 */
-	private String headLabel;
+	private int headPercentage;
 	
 	/*
-	 * Tail label.
+	 * Tail percentage.
 	 */
-	private String tailLabel;
-	
-	/*
-	 * Head color.
-	 */
-	private String headColor;
-	
-	/*
-	 * Tail color.
-	 */
-	private String tailColor;
+	private int tailPercentage;
 	
 	/*
 	 * Whether symmetric.
 	 */
 	private boolean isSymmetric;
 
+	public LogSkeletonEdge() {
+		setHeadPercentage(100);
+		setTailPercentage(100);
+	}
+	
 	/*
 	 * Getters and setters.
 	 */
@@ -82,36 +77,20 @@ public class LogSkeletonEdge {
 		this.tailType = tail;
 	}
 
-	public String getHeadLabel() {
-		return headLabel;
+	public int getHeadPercentage() {
+		return headPercentage;
 	}
 
-	public void setHeadLabel(String headLabel) {
-		this.headLabel = headLabel;
+	public void setHeadPercentage(int headPercentage) {
+		this.headPercentage = headPercentage;
 	}
 
-	public String getTailLabel() {
-		return tailLabel;
+	public int getTailPercentage() {
+		return tailPercentage;
 	}
 
-	public void setTailLabel(String tailLabel) {
-		this.tailLabel = tailLabel;
-	}
-
-	public String getHeadColor() {
-		return headColor;
-	}
-
-	public void setHeadColor(String headColor) {
-		this.headColor = headColor;
-	}
-
-	public String getTailColor() {
-		return tailColor;
-	}
-
-	public void setTailColor(String tailColor) {
-		this.tailColor = tailColor;
+	public void setTailPercentage(int tailPercentage) {
+		this.tailPercentage = tailPercentage;
 	}
 
 	public boolean isSymmetric() {

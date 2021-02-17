@@ -1,5 +1,6 @@
 package org.processmining.logskeleton.algorithms;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,38 +23,135 @@ public class GraphVisualizerAlgorithm {
 
 	private Map<LogSkeletonNode, DotNode> map;
 	private Dot dotGraph;
-	
+
+	/*
+	 * Colors to use.
+	 */
+	private String[] colors;
+
+	/*
+	 * Index of next free color.
+	 */
+	private int colorIndex;
+
+	/*
+	 * Map from representatives to colors.
+	 */
+	private Map<String, String> colorMap;
+
+	/*
+	 * For edges without a relation.
+	 */
+	private String defaultColor;
+	/*
+	 * For edges with a Non Co-Existence relation.
+	 */
+	private String lighterNotCoExistenceColor;
+	private String notCoExistenceColor;
+	/*
+	 * For edges with a Response or Precedence relation.
+	 */
+	private String lighterResponsePrecedenceColor;
+	private String responsePrecedenceColor;
+	/*
+	 * For edges with a Not Response or Not Precedence relation.
+	 */
+	private String lighterNotResponsePrecedenceColor;
+	private String notResponsePrecedenceColor;
+
 	public Dot apply(LogSkeletonGraph graph, BrowserConfiguration configuration) {
 		map = new HashMap<LogSkeletonNode, DotNode>();
 		dotGraph = new Dot();
+
+		/*
+		 * Initialize the colors.
+		 */
+		initializeColors();
 		
 		/*
 		 * Add the nodes to Dot.
 		 */
 		addNodes(graph, configuration);
-		
+
 		/*
 		 * Add the edges to Dot.
 		 */
 		addEdges(graph, configuration);
-		
+
 		/*
 		 * Replaces cliques of edges in Dot by an hyper arc (if possible).
 		 */
 		addHyperArcs(graph, configuration);
-		
+
 		/*
 		 * Add legend to Dot.
 		 */
 		addLegend(graph, configuration);
-		
+
 		return dotGraph;
 	}
-	
+
+	private void initializeColors() {
+		/*
+		 * Create a color scheme (based on Set312) containing 99 different colors
+		 * (including gradients). Color 100 is white and is used as fallback color.
+		 */
+		String[] set312Colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462",
+				"#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
+		colors = new String[100];
+		for (int i = 0; i < 99; i++) {
+			int m = i / 12;
+			int d = i % 12;
+			if (m == 0) {
+				// Basic color, no gradient.
+				colors[i] = set312Colors[i];
+			} else {
+				// Extended color, gradient.
+				colors[i] = set312Colors[d] + ":" + set312Colors[(d + m) % 12];
+			}
+		}
+		// Fall-back color
+		colors[99] = "white";
+
+		colorMap = new HashMap<String, String>();
+		
+		/*
+		 * For edges without a relation.
+		 */
+		defaultColor = darker("#d9d9d9");
+		/*
+		 * For edges with a Non Co-Existence relation.
+		 */
+		lighterNotCoExistenceColor = "#fdb462";
+		notCoExistenceColor = darker(lighterNotCoExistenceColor);
+		/*
+		 * For edges with a Response or Precedence relation.
+		 */
+		lighterResponsePrecedenceColor = "#80b1d3";
+		responsePrecedenceColor = darker(lighterResponsePrecedenceColor);
+		/*
+		 * For edges with a Not Response or Not Precedence relation.
+		 */
+		lighterNotResponsePrecedenceColor = "#fb8072";
+		notResponsePrecedenceColor = darker(lighterNotResponsePrecedenceColor);
+	}
+
 	private void addNodes(LogSkeletonGraph graph, BrowserConfiguration configuration) {
 		for (LogSkeletonNode node : graph.getNodes()) {
-			DotNode dotNode = dotGraph.addNode("<<table align=\"center\" bgcolor=\"" + node.getBackgroundColor()
-					+ "\" border=\"" + (node.hasBorder() ? "1" : "0")
+			/*
+			 * Get a color for this activity.
+			 */
+			String representative = node.getLabelRepresentative();
+			String representativeColor = colorMap.get(representative);
+			if (representativeColor == null) {
+				representativeColor = colors[colorIndex];
+				colorMap.put(representative, representativeColor);
+				if (colorIndex < colors.length - 1) {
+					colorIndex++;
+				}
+			}
+			DotNode dotNode = dotGraph.addNode("<<table align=\"center\" bgcolor=\"" + representativeColor
+					+ "\" border=\"" + (node.isSelected() ? "1" : "0")
 					+ "\" cellborder=\"0\" cellpadding=\"2\" columns=\"*\" style=\"rounded\"><tr><td colspan=\"3\"><font point-size=\"24\"><b>"
 					+ encodeHTML(node.getLabel()) + "</b></font></td></tr><hr/><tr><td>"
 					+ encodeHTML(node.getLabelRepresentative()) + "</td><td>" + node.getCount() + "</td>" + "<td>"
@@ -73,10 +171,17 @@ public class GraphVisualizerAlgorithm {
 			dotEdge.setOption("dir", "both");
 			String headDecorator = "";
 			String tailDecorator = "";
+			String headColor = defaultColor;
+			String tailColor = defaultColor;
 			if (edge.getHeadType() != null) {
 				switch (edge.getHeadType()) {
 					case ALWAYS : {
 						headDecorator = "normal";
+						if (edge.getHeadPercentage() == 100) {
+							headColor = responsePrecedenceColor;
+						} else {
+							headColor = lighterResponsePrecedenceColor;
+						}
 						break;
 					}
 					case NEVER : {
@@ -85,10 +190,20 @@ public class GraphVisualizerAlgorithm {
 						} else {
 							headDecorator = "onormal";
 						}
+						if (edge.getHeadPercentage() == 100) {
+							headColor = notResponsePrecedenceColor;
+						} else {
+							headColor = lighterNotResponsePrecedenceColor;
+						}
 						break;
 					}
 					case EXCLUSIVE : {
 						headDecorator = "nonetee";
+						if (edge.getHeadPercentage() == 100) {
+							headColor = notCoExistenceColor;
+						} else {
+							headColor = lighterNotCoExistenceColor;
+						}
 						break;
 					}
 				}
@@ -97,6 +212,11 @@ public class GraphVisualizerAlgorithm {
 				switch (edge.getTailType()) {
 					case ALWAYS : {
 						tailDecorator = "noneinv";
+						if (edge.getTailPercentage() == 100) {
+							tailColor = responsePrecedenceColor;
+						} else {
+							tailColor = lighterResponsePrecedenceColor;
+						}
 						break;
 					}
 					case NEVER : {
@@ -105,10 +225,20 @@ public class GraphVisualizerAlgorithm {
 						} else {
 							tailDecorator = "noneoinv";
 						}
+						if (edge.getTailPercentage() == 100) {
+							tailColor = notResponsePrecedenceColor;
+						} else {
+							tailColor = lighterNotResponsePrecedenceColor;
+						}
 						break;
 					}
 					case EXCLUSIVE : {
 						tailDecorator = "nonetee";
+						if (edge.getTailPercentage() == 100) {
+							tailColor = notCoExistenceColor;
+						} else {
+							tailColor = lighterNotCoExistenceColor;
+						}
 						break;
 					}
 				}
@@ -126,13 +256,11 @@ public class GraphVisualizerAlgorithm {
 				dotEdge.setOption("constraint", "false");
 			}
 
-			if (configuration.isUseEdgeColors() && (edge.getHeadColor() != null || edge.getTailColor() != null)) {
+			if (configuration.isUseEdgeColors()) {
 				/*
 				 * Color the edges.
 				 */
-				String color = (edge.getTailColor() == null ? graph.getDefaultEdgeColor() : edge.getTailColor())
-						+ ";0.5:" + (edge.getHeadColor() == null ? graph.getDefaultEdgeColor() : edge.getHeadColor())
-						+ ";0.5";
+				String color = tailColor + ";0.5:" + headColor + ";0.5";
 				dotEdge.setOption("color", color);
 			}
 
@@ -140,29 +268,29 @@ public class GraphVisualizerAlgorithm {
 				/*
 				 * Show labels seperatley at head/tail
 				 */
-				if (edge.getHeadLabel() != null) {
-					dotEdge.setOption("headlabel", edge.getHeadLabel());
+				if (edge.getHeadPercentage() != 100) {
+					dotEdge.setOption("headlabel", "." + edge.getHeadPercentage());
 				}
-				if (edge.getTailLabel() != null) {
-					dotEdge.setOption("taillabel", edge.getTailLabel());
+				if (edge.getTailPercentage() != 100) {
+					dotEdge.setOption("taillabel", "." + edge.getTailPercentage());
 				}
-			} else if (edge.getHeadLabel() != null || edge.getTailLabel() != null) {
+			} else if (edge.getHeadPercentage() != 100 || edge.getTailPercentage() != 100) {
 				/*
 				 * Show labels combined at middle of arc
 				 */
 				String label = "";
-				if (edge.getTailLabel() != null) {
-					label += edge.getTailLabel();
+				if (edge.getTailPercentage() != 100) {
+					label += "." + edge.getTailPercentage();
 				}
 				label += "&rarr;";
-				if (edge.getHeadLabel() != null) {
-					label += edge.getHeadLabel();
+				if (edge.getHeadPercentage() != 100) {
+					label += "." + edge.getHeadPercentage();
 				}
 				dotEdge.setLabel(label);
 			}
 		}
 	}
-	
+
 	private void addHyperArcs(LogSkeletonGraph graph, BrowserConfiguration configuration) {
 
 		if (configuration.isUseHyperArcs()) {
@@ -344,7 +472,7 @@ public class GraphVisualizerAlgorithm {
 			}
 		}
 	}
-	
+
 	private void addLegend(LogSkeletonGraph graph, BrowserConfiguration configuration) {
 
 		/*
@@ -626,5 +754,14 @@ public class GraphVisualizerAlgorithm {
 		 * Return the biggest maximal clique found. Equals null if none found.
 		 */
 		return bestEdges;
+	}
+
+	/*
+	 * Returns a color which is slightly darker than the provided color.
+	 */
+	private String darker(String color) {
+		Color darkerColor = Color.decode(color).darker();
+		return "#" + Integer.toHexString(darkerColor.getRed()) + Integer.toHexString(darkerColor.getGreen())
+				+ Integer.toHexString(darkerColor.getBlue());
 	}
 }

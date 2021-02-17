@@ -1,6 +1,5 @@
 package org.processmining.logskeleton.algorithms;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,21 +20,6 @@ import org.processmining.logskeleton.models.LogSkeletonRelation;
 public class GraphBuilderAlgorithm {
 
 	/*
-	 * Colors to use.
-	 */
-	private String[] colors;
-	
-	/*
-	 * Index of next free color.
-	 */
-	private int colorIndex;
-	
-	/*
-	 * Map from representatives to colors.
-	 */
-	private Map<String, String> colorMap;
-	
-	/*
 	 * Set of activities in the graph.
 	 */
 	private Set<String> activities;
@@ -50,36 +34,8 @@ public class GraphBuilderAlgorithm {
 	 */
 	private Map<String, LogSkeletonNode> nodeMap;
 
-	/*
-	 * For edges without a relation.
-	 */
-	private String defaultColor;
-	/*
-	 * For edges with a Non Co-Existence relation.
-	 */
-	private String lighterNotCoExistenceColor;
-	private String notCoExistenceColor;
-	/*
-	 * For edges with a Response or Precedence relation.
-	 */
-	private String lighterResponsePrecedenceColor;
-	private String responsePrecedenceColor;
-	/*
-	 * For edges with a Not Response or Not Precedence relation.
-	 */
-	private String lighterNotResponsePrecedenceColor;
-	private String notResponsePrecedenceColor;
-
 	public LogSkeletonGraph apply(LogSkeleton logSkeleton, BrowserConfiguration configuration) {
 		graph = new LogSkeletonGraph();
-
-		initializeColors();
-
-		/*
-		 * Initialization
-		 */
-		colorIndex = 0;
-		colorMap = new HashMap<String, String>();
 
 		/*
 		 * Get all selected activities. Retain only those that are actually present.
@@ -117,49 +73,6 @@ public class GraphBuilderAlgorithm {
 
 		return graph;
 	}
-
-	private void initializeColors() {
-		/*
-		 * Create a color scheme (based on Set312) containing 99 different colors
-		 * (including gradients). Color 100 is white and is used as fallback color.
-		 */
-		String[] set312Colors = new String[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462",
-				"#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
-		colors = new String[100];
-		for (int i = 0; i < 99; i++) {
-			int m = i / 12;
-			int d = i % 12;
-			if (m == 0) {
-				// Basic color, no gradient.
-				colors[i] = set312Colors[i];
-			} else {
-				// Extended color, gradient.
-				colors[i] = set312Colors[d] + ":" + set312Colors[(d + m) % 12];
-			}
-		}
-		// Fall-back color
-		colors[99] = "white";
-
-		/*
-		 * For edges without a relation.
-		 */
-		defaultColor = darker("#d9d9d9");
-		/*
-		 * For edges with a Non Co-Existence relation.
-		 */
-		lighterNotCoExistenceColor = "#fdb462";
-		notCoExistenceColor = darker(lighterNotCoExistenceColor);
-		/*
-		 * For edges with a Response or Precedence relation.
-		 */
-		lighterResponsePrecedenceColor = "#80b1d3";
-		responsePrecedenceColor = darker(lighterResponsePrecedenceColor);
-		/*
-		 * For edges with a Not Response or Not Precedence relation.
-		 */
-		lighterNotResponsePrecedenceColor = "#fb8072";
-		notResponsePrecedenceColor = darker(lighterNotResponsePrecedenceColor);
-}
 
 	private void addNeighbors(LogSkeleton logSkeleton, BrowserConfiguration configuration) {
 		if (configuration.isUseNeighbors()) {
@@ -247,19 +160,10 @@ public class GraphBuilderAlgorithm {
 			node.setLabel(activity);
 
 			/*
-			 * Get a color for this activity.
+			 * Get the representative for this activity.
 			 */
 			String representative = logSkeleton.getEquivalenceClass(activity, activities).iterator().next();
 			node.setLabelRepresentative(representative);
-			String representativeColor = colorMap.get(representative);
-			if (representativeColor == null) {
-				representativeColor = colors[colorIndex];
-				colorMap.put(representative, representativeColor);
-				if (colorIndex < colors.length - 1) {
-					colorIndex++;
-				}
-			}
-			node.setBackgroundColor(representativeColor);
 
 			/*
 			 * Get the count for this activity.
@@ -278,7 +182,7 @@ public class GraphBuilderAlgorithm {
 			 * - 0 if not selected (but included).
 			 * 
 			 */
-			node.setBorder(configuration.getActivities().contains(activity));
+			node.setSelected(configuration.getActivities().contains(activity));
 
 			nodeMap.put(activity, node);
 
@@ -297,8 +201,6 @@ public class GraphBuilderAlgorithm {
 					LogSkeletonNode tailNode = nodeMap.get(headActivity);
 					edge.setTailNode(headNode);
 					edge.setHeadNode(tailNode);
-					edge.setHeadColor(defaultColor);
-					edge.setTailColor(defaultColor);
 					if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
 						if (edge.getTailType() == null && logSkeleton.hasNonRedundantResponse(tailActivity, headActivity)) {
 							/*
@@ -308,11 +210,7 @@ public class GraphBuilderAlgorithm {
 							edge.setSymmetric(false);
 							int threshold = logSkeleton.getMaxThresholdResponse(tailActivity, headActivity);
 							if (threshold < 100) {
-								edge.setTailLabel("." + threshold);
-								edge.setTailColor(lighterResponsePrecedenceColor);
-							} else {
-								edge.setTailLabel(null);
-								edge.setTailColor(responsePrecedenceColor);
+								edge.setTailPercentage(threshold);
 							}
 						}
 					}
@@ -325,12 +223,7 @@ public class GraphBuilderAlgorithm {
 							edge.setSymmetric(false);
 							int threshold = logSkeleton.getMaxThresholdPrecedence(tailActivity, headActivity);
 							if (threshold < 100) {
-								edge.setHeadLabel("." + threshold);
-								edge.setHeadColor(lighterResponsePrecedenceColor);
-							} else {
-								edge.setHeadLabel(null);
-								;
-								edge.setHeadColor(responsePrecedenceColor);
+								edge.setHeadPercentage(threshold);
 							}
 						}
 					}
@@ -348,11 +241,7 @@ public class GraphBuilderAlgorithm {
 									edge.setSymmetric(true);
 									int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity, tailActivity);
 									if (threshold < 100) {
-										edge.setHeadLabel("." + threshold);
-										edge.setHeadColor(lighterNotCoExistenceColor);
-									} else {
-										edge.setHeadLabel(null);
-										edge.setHeadColor(notCoExistenceColor);
+										edge.setHeadPercentage(threshold);
 									}
 								}
 							}
@@ -368,11 +257,7 @@ public class GraphBuilderAlgorithm {
 									edge.setSymmetric(true);
 									int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity, headActivity);
 									if (threshold < 100) {
-										edge.setTailLabel("." + threshold);
-										edge.setTailColor(lighterNotCoExistenceColor);
-									} else {
-										edge.setTailLabel(null);
-										edge.setTailColor(notCoExistenceColor);
+										edge.setTailPercentage(threshold);
 									}
 								}
 							}
@@ -388,11 +273,7 @@ public class GraphBuilderAlgorithm {
 							edge.setSymmetric(false);
 							int threshold = logSkeleton.getMaxThresholdNotResponse(tailActivity, headActivity);
 							if (threshold < 100) {
-								edge.setHeadLabel("." + threshold);
-								edge.setHeadColor(lighterNotResponsePrecedenceColor);
-							} else {
-								edge.setHeadLabel(null);
-								edge.setHeadColor(notResponsePrecedenceColor);
+								edge.setHeadPercentage(threshold);
 							}
 						}
 					}
@@ -406,11 +287,7 @@ public class GraphBuilderAlgorithm {
 							edge.setSymmetric(false);
 							int threshold = logSkeleton.getMaxThresholdNotPrecedence(tailActivity, headActivity);
 							if (threshold < 100) {
-								edge.setTailLabel("." + threshold);
-								edge.setTailColor(lighterNotResponsePrecedenceColor);
-							} else {
-								edge.setTailLabel(null);
-								edge.setTailColor(notResponsePrecedenceColor);
+								edge.setTailPercentage(threshold);
 							}
 						}
 					}
@@ -506,15 +383,6 @@ public class GraphBuilderAlgorithm {
 			}
 			graph.getLegendLines().add(new LogSkeletonLegendLine("Noise levels", s));
 		}
-	}
-
-	/*
-	 * Returns a color which is slightly darker than the provided color.
-	 */
-	private String darker(String color) {
-		Color darkerColor = Color.decode(color).darker();
-		return "#" + Integer.toHexString(darkerColor.getRed()) + Integer.toHexString(darkerColor.getGreen())
-				+ Integer.toHexString(darkerColor.getBlue());
 	}
 
 }

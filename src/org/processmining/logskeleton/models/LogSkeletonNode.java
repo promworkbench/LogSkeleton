@@ -41,14 +41,9 @@ public class LogSkeletonNode {
 	private int high;
 	
 	/*
-	 * Background color for the node.
+	 * Whether the node was selected by the user.
 	 */
-	private String backgroundColor;
-	
-	/*
-	 * Whether the node should have a border.
-	 */
-	private boolean border;
+	private boolean selected;
 	
 	public LogSkeletonNode() {
 		setOutgoing(new HashMap<LogSkeletonNode, LogSkeletonEdge>());
@@ -114,19 +109,11 @@ public class LogSkeletonNode {
 		this.high = high;
 	}
 
-	public String getBackgroundColor() {
-		return backgroundColor;
+	public boolean isSelected() {
+		return selected;
 	}
 
-	public void setBackgroundColor(String backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	public boolean hasBorder() {
-		return border;
-	}
-
-	public void setBorder(boolean border) {
-		this.border = border;
+	public void setSelected(boolean selected) {
+		this.selected = selected;
 	}
 }

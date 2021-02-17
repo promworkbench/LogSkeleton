@@ -32,11 +32,6 @@ public class LogSkeletonGraph {
 	private List<LogSkeletonLegendLine> legendLines;
 	
 	/*
-	 * Default edge color.
-	 */
-	private String defaultEdgeColor;
-	
-	/*
 	 * Log skeleton.
 	 */
 	private LogSkeleton logSkeleton;
@@ -80,14 +75,6 @@ public class LogSkeletonGraph {
 
 	public void setLegendLines(List<LogSkeletonLegendLine> legendLines) {
 		this.legendLines = legendLines;
-	}
-
-	public String getDefaultEdgeColor() {
-		return defaultEdgeColor;
-	}
-
-	public void setDefaultEdgeColor(String defaultEdgeColor) {
-		this.defaultEdgeColor = defaultEdgeColor;
 	}
 
 	public LogSkeleton getLogSkeleton() {
