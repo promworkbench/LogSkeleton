@@ -1219,6 +1219,14 @@ public class LogSkeleton implements HTMLToString {
 				&& !getRedundant(fromActivity, notPrecedences, countModel.getActivities()).contains(toActivity);
 	}
 
+	public boolean hasNotResponse(String fromActivity, String toActivity) {
+		return notResponses.get(toActivity).contains(fromActivity);
+	}
+
+	public boolean hasNotPrecedence(String fromActivity, String toActivity) {
+		return notPrecedences.get(fromActivity).contains(toActivity);
+	}
+
 	public boolean hasNonRedundantNotCoExistence(String fromActivity, String toActivity,
 			BrowserConfiguration configuration) {
 		return !fromActivity.equals(toActivity) 

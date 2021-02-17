@@ -137,7 +137,16 @@ public class GraphVisualizerAlgorithm {
 	}
 
 	private void addNodes(LogSkeletonGraph graph, BrowserConfiguration configuration) {
-		for (LogSkeletonNode node : graph.getNodes()) {
+		List<LogSkeletonNode> nodes = new ArrayList<LogSkeletonNode>(graph.getNodes());
+		Collections.sort(nodes, new Comparator<LogSkeletonNode>() {
+
+			public int compare(LogSkeletonNode arg0, LogSkeletonNode arg1) {
+				// TODO Auto-generated method stub
+				return arg0.getLabel().compareTo(arg1.getLabel());
+			}
+			
+		});
+		for (LogSkeletonNode node : nodes) {
 			/*
 			 * Get a color for this activity.
 			 */
@@ -166,7 +175,20 @@ public class GraphVisualizerAlgorithm {
 	}
 
 	private void addEdges(LogSkeletonGraph graph, BrowserConfiguration configuration) {
-		for (LogSkeletonEdge edge : graph.getEdges().values()) {
+		List<LogSkeletonEdge> edges = new ArrayList(graph.getEdges().values());
+		Collections.sort(edges, new Comparator<LogSkeletonEdge>() {
+
+			public int compare(LogSkeletonEdge o1, LogSkeletonEdge o2) {
+				// TODO Auto-generated method stub
+				int c =  o1.getTailNode().getLabel().compareTo(o2.getTailNode().getLabel());
+				if (c != 0) {
+					return c;
+				}
+				return o1.getHeadNode().getLabel().compareTo(o2.getHeadNode().getLabel());
+			}
+			
+		});
+		for (LogSkeletonEdge edge : edges) {
 			DotEdge dotEdge = dotGraph.addEdge(map.get(edge.getTailNode()), map.get(edge.getHeadNode()));
 			dotEdge.setOption("dir", "both");
 			String headDecorator = "";
