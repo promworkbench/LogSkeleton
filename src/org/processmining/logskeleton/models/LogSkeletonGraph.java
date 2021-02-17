@@ -31,11 +31,6 @@ public class LogSkeletonGraph {
 	 */
 	private List<LogSkeletonLegendLine> legendLines;
 	
-	/*
-	 * Log skeleton.
-	 */
-	private LogSkeleton logSkeleton;
-	
 	public LogSkeletonGraph() {
 		setNodes(new HashSet<LogSkeletonNode>());
 		setEdges(new HashMap<List<LogSkeletonNode>, LogSkeletonEdge>());
@@ -75,13 +70,5 @@ public class LogSkeletonGraph {
 
 	public void setLegendLines(List<LogSkeletonLegendLine> legendLines) {
 		this.legendLines = legendLines;
-	}
-
-	public LogSkeleton getLogSkeleton() {
-		return logSkeleton;
-	}
-
-	public void setLogSkeleton(LogSkeleton logSkeleton) {
-		this.logSkeleton = logSkeleton;
 	}
 }
