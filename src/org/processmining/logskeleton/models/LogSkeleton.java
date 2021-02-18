@@ -227,7 +227,9 @@ public class LogSkeleton implements HTMLToString {
 			if (equivalenceClass.contains(activity)) {
 				Collection<String> filteredEquivalenceClass = new HashSet<String>(equivalenceClass);
 				filteredEquivalenceClass.retainAll(activities);
-				return filteredEquivalenceClass;
+				List<String> sorted = new ArrayList<String>(filteredEquivalenceClass);
+				Collections.sort(sorted);
+				return sorted;
 			}
 		}
 		return null;

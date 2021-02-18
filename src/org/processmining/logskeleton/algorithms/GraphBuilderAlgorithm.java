@@ -166,7 +166,7 @@ public class GraphBuilderAlgorithm {
 			 */
 			List<String> equivalenceClass = new ArrayList<String>(
 					logSkeleton.getEquivalenceClass(activity, activities));
-			Collections.sort(equivalenceClass);
+//			Collections.sort(equivalenceClass);
 			String representative = equivalenceClass.iterator().next();
 			node.setLabelRepresentative(representative);
 
