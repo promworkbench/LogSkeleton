@@ -210,7 +210,7 @@ public class LogSkeleton implements HTMLToString {
 	}
 
 	/**
-	 * Returns the intersection of the provided set of activities and the
+	 * Returns the sorted intersection of the provided set of activities and the
 	 * equivalence class for the provided activity for the current threshold.
 	 * 
 	 * This is useful if the representative of an equivalence class is not shown. As
@@ -227,6 +227,10 @@ public class LogSkeleton implements HTMLToString {
 			if (equivalenceClass.contains(activity)) {
 				Collection<String> filteredEquivalenceClass = new HashSet<String>(equivalenceClass);
 				filteredEquivalenceClass.retainAll(activities);
+				/*
+				 * Sort the resulting collection. The first element in the collection should be
+				 * the representative.
+				 */
 				List<String> sorted = new ArrayList<String>(filteredEquivalenceClass);
 				Collections.sort(sorted);
 				return sorted;
@@ -616,11 +620,11 @@ public class LogSkeleton implements HTMLToString {
 	 */
 	public Dot visualize(BrowserConfiguration configuration) {
 		GraphBuilderAlgorithm builder = new GraphBuilderAlgorithm();
-		LogSkeletonGraph graph = builder.apply(this,  configuration);
+		LogSkeletonGraph graph = builder.apply(this, configuration);
 		GraphVisualizerAlgorithm visualizer = new GraphVisualizerAlgorithm();
 		return visualizer.apply(graph, configuration);
 	}
-	
+
 	/*
 	 * Returns whether the Not Co-Existence relation from fromActivity to toActivity
 	 * should be shown.
@@ -1104,7 +1108,7 @@ public class LogSkeleton implements HTMLToString {
 	public int getPrecedenceThreshold() {
 		return precedenceThreshold;
 	}
-	
+
 	/**
 	 * Sets the response threshold to the provided threshold.
 	 * 
@@ -1128,7 +1132,7 @@ public class LogSkeleton implements HTMLToString {
 	public int getResponseThreshold() {
 		return responseThreshold;
 	}
-	
+
 	/**
 	 * Sets the not-co-existence threshold to the provided threshold.
 	 * 
@@ -1149,7 +1153,7 @@ public class LogSkeleton implements HTMLToString {
 	public int getNotCoExistenceThreshold() {
 		return notCoExistenceeThreshold;
 	}
-	
+
 	/**
 	 * Returns whether the log skeleton contains more than 100 Not Co-Existence
 	 * relations to show. if so, this relation will not be shown by default.
@@ -1196,7 +1200,7 @@ public class LogSkeleton implements HTMLToString {
 	public int getEquivalenceThreshold() {
 		return equivalenceThreshold;
 	}
-	
+
 	public void setHorizon(int horizon) {
 		this.horizon = horizon;
 	}
@@ -1231,7 +1235,7 @@ public class LogSkeleton implements HTMLToString {
 
 	public boolean hasNonRedundantNotCoExistence(String fromActivity, String toActivity,
 			BrowserConfiguration configuration) {
-		return !fromActivity.equals(toActivity) 
+		return !fromActivity.equals(toActivity)
 				&& (!configuration.isUseEquivalenceClass() || fromActivity
 						.equals(getEquivalenceClass(fromActivity, countModel.getActivities()).iterator().next()))
 				&& (!configuration.isUseEquivalenceClass() || toActivity
@@ -1287,7 +1291,7 @@ public class LogSkeleton implements HTMLToString {
 	public List<List<String>> getSplitters() {
 		return splitters;
 	}
-	
+
 	public int getHorizon() {
 		return horizon;
 	}

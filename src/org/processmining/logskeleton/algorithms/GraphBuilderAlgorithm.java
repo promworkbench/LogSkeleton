@@ -161,13 +161,10 @@ public class GraphBuilderAlgorithm {
 			node.setLabel(activity);
 
 			/*
-			 * Get the representative for this activity: The activity in the equivalence
-			 * class that is lexicographically the smallest
+			 * Get the representative for this activity: The first activity in the
+			 * equivalence class (which is sorted using the lexicographical order)
 			 */
-			List<String> equivalenceClass = new ArrayList<String>(
-					logSkeleton.getEquivalenceClass(activity, activities));
-//			Collections.sort(equivalenceClass);
-			String representative = equivalenceClass.iterator().next();
+			String representative = logSkeleton.getEquivalenceClass(activity, activities).iterator().next();
 			node.setLabelRepresentative(representative);
 
 			/*
@@ -290,7 +287,7 @@ public class GraphBuilderAlgorithm {
 					if (configuration.getRelations().contains(LogSkeletonRelation.NOTPRECEDENCE)) {
 						if (!tailActivity.equals(headActivity) && edge.getTailType() == null
 								&& (logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity)
-										|| (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS 
+										|| (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
 												&& logSkeleton.hasNotPrecedence(tailActivity, tailActivity)))) {
 							/*
 							 * Add Not Precedence on tail.
