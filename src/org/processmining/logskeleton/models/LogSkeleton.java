@@ -629,7 +629,7 @@ public class LogSkeleton implements HTMLToString {
 	 * Returns whether the Not Co-Existence relation from fromActivity to toActivity
 	 * should be shown.
 	 */
-	public boolean showNotCoExistence(String fromActivity, String toActivity, Set<String> selectedActivities) {
+	public boolean showNotCoExistence(String fromActivity, String toActivity, Collection<String> selectedActivities) {
 		for (String activity : precedences.get(fromActivity)) {
 			if (selectedActivities.contains(activity)) {
 				if (notCoExistences.get(activity).contains(toActivity)) {
@@ -1204,24 +1204,28 @@ public class LogSkeleton implements HTMLToString {
 		this.horizon = horizon;
 	}
 
-	public boolean hasNonRedundantResponse(String fromActivity, String toActivity) {
+	public boolean hasNonRedundantResponse(String fromActivity, String toActivity,
+			Collection<String> activities) {
 		return responses.get(fromActivity).contains(toActivity)
-				&& !getRedundant(fromActivity, responses, countModel.getActivities()).contains(toActivity);
+				&& !getRedundant(fromActivity, responses, activities).contains(toActivity);
 	}
 
-	public boolean hasNonRedundantPrecedence(String fromActivity, String toActivity) {
+	public boolean hasNonRedundantPrecedence(String fromActivity, String toActivity,
+			Collection<String> activities) {
 		return precedences.get(toActivity).contains(fromActivity)
-				&& !getRedundant(toActivity, precedences, countModel.getActivities()).contains(fromActivity);
+				&& !getRedundant(toActivity, precedences, activities).contains(fromActivity);
 	}
 
-	public boolean hasNonRedundantNotResponse(String fromActivity, String toActivity) {
+	public boolean hasNonRedundantNotResponse(String fromActivity, String toActivity,
+			Collection<String> activities) {
 		return notResponses.get(toActivity).contains(fromActivity)
-				&& !getRedundant(toActivity, notResponses, countModel.getActivities()).contains(fromActivity);
+				&& !getRedundant(toActivity, notResponses, activities).contains(fromActivity);
 	}
 
-	public boolean hasNonRedundantNotPrecedence(String fromActivity, String toActivity) {
+	public boolean hasNonRedundantNotPrecedence(String fromActivity, String toActivity,
+			Collection<String> activities) {
 		return notPrecedences.get(fromActivity).contains(toActivity)
-				&& !getRedundant(fromActivity, notPrecedences, countModel.getActivities()).contains(toActivity);
+				&& !getRedundant(fromActivity, notPrecedences, activities).contains(toActivity);
 	}
 
 	public boolean hasNotResponse(String fromActivity, String toActivity) {
@@ -1232,7 +1236,7 @@ public class LogSkeleton implements HTMLToString {
 		return notPrecedences.get(fromActivity).contains(toActivity);
 	}
 
-	public boolean hasNonRedundantNotCoExistence(String fromActivity, String toActivity,
+	public boolean hasNonRedundantNotCoExistence(String fromActivity, String toActivity, Collection<String> activities,
 			BrowserConfiguration configuration) {
 		if (fromActivity.equals(toActivity)) {
 			/*
@@ -1255,15 +1259,15 @@ public class LogSkeleton implements HTMLToString {
 			 * Show relation if between representatives.
 			 */
 			b = b || (fromActivity
-					.equals(getEquivalenceClass(fromActivity, configuration.getActivities()).iterator().next())
+					.equals(getEquivalenceClass(fromActivity, activities).iterator().next())
 					&& toActivity
-							.equals(getEquivalenceClass(toActivity, configuration.getActivities()).iterator().next()));
+							.equals(getEquivalenceClass(toActivity, activities).iterator().next()));
 		}
 		if (configuration.isUseNCEReductions()) {
 			/*
 			 * Show relation if both activities have no preceding activity with a similar Not Co-Existence relation.
 			 */
-			b = b || showNotCoExistence(fromActivity, toActivity, configuration.getActivities());
+			b = b || showNotCoExistence(fromActivity, toActivity, activities);
 		}
 		return b;
 	}

@@ -87,7 +87,7 @@ public class GraphBuilderAlgorithm {
 							|| configuration.getActivities().contains(headActivity))
 							&& (!activities.contains(tailActivity) || !activities.contains(headActivity))) {
 						if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
-							if (logSkeleton.hasNonRedundantResponse(tailActivity, headActivity)) {
+							if (logSkeleton.hasNonRedundantResponse(tailActivity, headActivity, logSkeleton.getActivities())) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Response relation, and one of them is selected. Include the other as well.
@@ -98,7 +98,7 @@ public class GraphBuilderAlgorithm {
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.PRECEDENCE)) {
-							if (logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity)) {
+							if (logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity, logSkeleton.getActivities())) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Precedence relation, and one of them is selected. Include the other as well.
@@ -109,7 +109,7 @@ public class GraphBuilderAlgorithm {
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NOTRESPONSE)) {
-							if (logSkeleton.hasNonRedundantNotResponse(tailActivity, headActivity)) {
+							if (logSkeleton.hasNonRedundantNotResponse(tailActivity, headActivity, logSkeleton.getActivities())) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Not Response relation, and one of them is selected. Include the other as
@@ -121,7 +121,7 @@ public class GraphBuilderAlgorithm {
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NOTPRECEDENCE)) {
-							if (logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity)) {
+							if (logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity, logSkeleton.getActivities())) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Not Precedence relation, and one of them is selected. Include the other as
@@ -133,7 +133,7 @@ public class GraphBuilderAlgorithm {
 							}
 						}
 						if (configuration.getRelations().contains(LogSkeletonRelation.NOTCOEXISTENCE)) {
-							if (logSkeleton.hasNonRedundantNotCoExistence(tailActivity, headActivity, configuration)) {
+							if (logSkeleton.hasNonRedundantNotCoExistence(tailActivity, headActivity, logSkeleton.getActivities(), configuration)) {
 								/*
 								 * fromActivity and toActivity are related through the selected non-redundant
 								 * Not Co-Existence relation, and one of them is selected. Include the other as
@@ -204,7 +204,7 @@ public class GraphBuilderAlgorithm {
 					edge.setHeadNode(tailNode);
 					if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
 						if (edge.getTailType() == null
-								&& logSkeleton.hasNonRedundantResponse(tailActivity, headActivity)) {
+								&& logSkeleton.hasNonRedundantResponse(tailActivity, headActivity, activities)) {
 							/*
 							 * Add Response on tail.
 							 */
@@ -218,7 +218,7 @@ public class GraphBuilderAlgorithm {
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.PRECEDENCE)) {
 						if (edge.getHeadType() == null
-								&& logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity)) {
+								&& logSkeleton.hasNonRedundantPrecedence(tailActivity, headActivity, activities)) {
 							/*
 							 * Add Precedence on head.
 							 */
@@ -233,7 +233,7 @@ public class GraphBuilderAlgorithm {
 					if (configuration.getRelations().contains(LogSkeletonRelation.NOTCOEXISTENCE)) {
 						if (!tailActivity.equals(headActivity)) {
 							if (edge.getHeadType() == null && tailActivity.compareTo(headActivity) >= 0 && logSkeleton
-									.hasNonRedundantNotCoExistence(headActivity, tailActivity, configuration)) {
+									.hasNonRedundantNotCoExistence(headActivity, tailActivity, activities, configuration)) {
 								/*
 								 * Add Not Co-Existence on head.
 								 */
@@ -245,7 +245,7 @@ public class GraphBuilderAlgorithm {
 								}
 							}
 							if (edge.getTailType() == null && tailActivity.compareTo(headActivity) >= 0 && logSkeleton
-									.hasNonRedundantNotCoExistence(tailActivity, headActivity, configuration)) {
+									.hasNonRedundantNotCoExistence(tailActivity, headActivity, activities, configuration)) {
 								/*
 								 * Add Not Co-Existence on tail.
 								 */
@@ -260,7 +260,7 @@ public class GraphBuilderAlgorithm {
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.NOTRESPONSE)) {
 						if (!tailActivity.equals(headActivity) && edge.getHeadType() == null
-								&& (logSkeleton.hasNonRedundantNotResponse(tailActivity, headActivity)
+								&& (logSkeleton.hasNonRedundantNotResponse(tailActivity, headActivity, activities)
 										|| (edge.getTailType() == LogSkeletonEdgeType.ALWAYS
 												&& logSkeleton.hasNotResponse(tailActivity, headActivity)))) {
 							/*
@@ -276,7 +276,7 @@ public class GraphBuilderAlgorithm {
 					}
 					if (configuration.getRelations().contains(LogSkeletonRelation.NOTPRECEDENCE)) {
 						if (!tailActivity.equals(headActivity) && edge.getTailType() == null
-								&& (logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity)
+								&& (logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity, activities)
 										|| (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
 												&& logSkeleton.hasNotPrecedence(tailActivity, tailActivity)))) {
 							/*
