@@ -629,8 +629,7 @@ public class LogSkeleton implements HTMLToString {
 	 * Returns whether the Not Co-Existence relation from fromActivity to toActivity
 	 * should be shown.
 	 */
-	public boolean showNotCoExistence(String fromActivity, String toActivity, Set<String> activities,
-			Set<String> selectedActivities) {
+	public boolean showNotCoExistence(String fromActivity, String toActivity, Set<String> selectedActivities) {
 		for (String activity : precedences.get(fromActivity)) {
 			if (selectedActivities.contains(activity)) {
 				if (notCoExistences.get(activity).contains(toActivity)) {
@@ -1235,13 +1234,23 @@ public class LogSkeleton implements HTMLToString {
 
 	public boolean hasNonRedundantNotCoExistence(String fromActivity, String toActivity,
 			BrowserConfiguration configuration) {
-		return !fromActivity.equals(toActivity)
-				&& (!configuration.isUseEquivalenceClass() || fromActivity
-						.equals(getEquivalenceClass(fromActivity, countModel.getActivities()).iterator().next()))
-				&& (!configuration.isUseEquivalenceClass() || toActivity
-						.equals(getEquivalenceClass(toActivity, countModel.getActivities()).iterator().next()))
-				&& notCoExistences.get(fromActivity).contains(toActivity);
-
+		if (fromActivity.equals(toActivity)) {
+			return false;
+		}
+		if (!notCoExistences.get(fromActivity).contains(toActivity)) {
+			return false;
+		}
+		boolean b = !(configuration.isUseEquivalenceClass() || configuration.isUseNCEReductions());
+		if (configuration.isUseEquivalenceClass()) {
+			b = b || (fromActivity
+					.equals(getEquivalenceClass(fromActivity, countModel.getActivities()).iterator().next())
+					&& toActivity
+							.equals(getEquivalenceClass(toActivity, countModel.getActivities()).iterator().next()));
+		}
+		if (configuration.isUseNCEReductions()) {
+			b = b || showNotCoExistence(fromActivity, toActivity, configuration.getActivities());
+		}
+		return b;
 	}
 
 	public int getMin(String activity) {

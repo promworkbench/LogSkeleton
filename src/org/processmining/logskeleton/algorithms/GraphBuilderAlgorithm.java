@@ -234,36 +234,26 @@ public class GraphBuilderAlgorithm {
 						if (!tailActivity.equals(headActivity)) {
 							if (edge.getHeadType() == null && tailActivity.compareTo(headActivity) >= 0 && logSkeleton
 									.hasNonRedundantNotCoExistence(headActivity, tailActivity, configuration)) {
-								boolean doShow = configuration.isUseNCEReductions() ? logSkeleton.showNotCoExistence(
-										tailActivity, headActivity, activities, configuration.getActivities()) : true;
-								if (doShow) {
-									/*
-									 * Add Not Co-Existence on head.
-									 */
-									edge.setHeadType(LogSkeletonEdgeType.EXCLUSIVE);
-									edge.setSymmetric(true);
-									int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity,
-											tailActivity);
-									if (threshold < 100) {
-										edge.setHeadPercentage(threshold);
-									}
+								/*
+								 * Add Not Co-Existence on head.
+								 */
+								edge.setHeadType(LogSkeletonEdgeType.EXCLUSIVE);
+								edge.setSymmetric(true);
+								int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity, tailActivity);
+								if (threshold < 100) {
+									edge.setHeadPercentage(threshold);
 								}
 							}
 							if (edge.getTailType() == null && tailActivity.compareTo(headActivity) >= 0 && logSkeleton
 									.hasNonRedundantNotCoExistence(tailActivity, headActivity, configuration)) {
-								boolean doShow = configuration.isUseNCEReductions() ? logSkeleton.showNotCoExistence(
-										tailActivity, headActivity, activities, configuration.getActivities()) : true;
-								if (doShow) {
-									/*
-									 * Add Not Co-Existence on tail.
-									 */
-									edge.setTailType(LogSkeletonEdgeType.EXCLUSIVE);
-									edge.setSymmetric(true);
-									int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity,
-											headActivity);
-									if (threshold < 100) {
-										edge.setTailPercentage(threshold);
-									}
+								/*
+								 * Add Not Co-Existence on tail.
+								 */
+								edge.setTailType(LogSkeletonEdgeType.EXCLUSIVE);
+								edge.setSymmetric(true);
+								int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity, headActivity);
+								if (threshold < 100) {
+									edge.setTailPercentage(threshold);
 								}
 							}
 						}
