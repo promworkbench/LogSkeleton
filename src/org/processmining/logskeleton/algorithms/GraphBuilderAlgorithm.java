@@ -278,7 +278,7 @@ public class GraphBuilderAlgorithm {
 						if (!tailActivity.equals(headActivity) && edge.getTailType() == null
 								&& (logSkeleton.hasNonRedundantNotPrecedence(tailActivity, headActivity, activities)
 										|| (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
-												&& logSkeleton.hasNotPrecedence(tailActivity, tailActivity)))) {
+												&& logSkeleton.hasNotPrecedence(tailActivity, headActivity)))) {
 							/*
 							 * Add Not Precedence on tail.
 							 */
