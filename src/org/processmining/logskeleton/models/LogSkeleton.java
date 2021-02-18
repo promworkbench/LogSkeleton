@@ -1235,19 +1235,34 @@ public class LogSkeleton implements HTMLToString {
 	public boolean hasNonRedundantNotCoExistence(String fromActivity, String toActivity,
 			BrowserConfiguration configuration) {
 		if (fromActivity.equals(toActivity)) {
+			/*
+			 * An activity cannot be not-co-existent with itself.
+			 */
 			return false;
 		}
 		if (!notCoExistences.get(fromActivity).contains(toActivity)) {
+			/*
+			 * No Not Co-Existent relation at all.
+			 */
 			return false;
 		}
+		/*
+		 * By default, show a Not Co-Existent relation if no option for reduction has been selected.
+		 */
 		boolean b = !(configuration.isUseEquivalenceClass() || configuration.isUseNCEReductions());
 		if (configuration.isUseEquivalenceClass()) {
+			/*
+			 * Show relation if between representatives.
+			 */
 			b = b || (fromActivity
 					.equals(getEquivalenceClass(fromActivity, countModel.getActivities()).iterator().next())
 					&& toActivity
 							.equals(getEquivalenceClass(toActivity, countModel.getActivities()).iterator().next()));
 		}
 		if (configuration.isUseNCEReductions()) {
+			/*
+			 * Show relation if both activities have no preceding activity with a similar Not Co-Existence relation.
+			 */
 			b = b || showNotCoExistence(fromActivity, toActivity, configuration.getActivities());
 		}
 		return b;
