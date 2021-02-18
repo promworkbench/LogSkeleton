@@ -1255,9 +1255,9 @@ public class LogSkeleton implements HTMLToString {
 			 * Show relation if between representatives.
 			 */
 			b = b || (fromActivity
-					.equals(getEquivalenceClass(fromActivity, countModel.getActivities()).iterator().next())
+					.equals(getEquivalenceClass(fromActivity, configuration.getActivities()).iterator().next())
 					&& toActivity
-							.equals(getEquivalenceClass(toActivity, countModel.getActivities()).iterator().next()));
+							.equals(getEquivalenceClass(toActivity, configuration.getActivities()).iterator().next()));
 		}
 		if (configuration.isUseNCEReductions()) {
 			/*
