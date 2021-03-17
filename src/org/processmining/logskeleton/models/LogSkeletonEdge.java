@@ -101,4 +101,8 @@ public class LogSkeletonEdge {
 	public void setSymmetric(boolean isSymmetric) {
 		this.isSymmetric = isSymmetric;
 	}
+	
+	public String toString() {
+		return "[" + tailNode.getLabel() + "," + headNode.getLabel() + "]";
+	}
 }
