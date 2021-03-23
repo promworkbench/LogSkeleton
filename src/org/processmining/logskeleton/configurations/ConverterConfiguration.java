@@ -9,10 +9,10 @@ public class ConverterConfiguration {
 	private boolean merge;
 	
 	public ConverterConfiguration() {
-		setInterval(false);
-		setEquivalence(false);
+		setInterval(true);
+		setEquivalence(true);
 		setAlways(true);
-		setExclusive(false);
+		setExclusive(true);
 		setMerge(true);
 	}
 	
