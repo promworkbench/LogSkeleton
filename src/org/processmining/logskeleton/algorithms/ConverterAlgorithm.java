@@ -103,34 +103,54 @@ public class ConverterAlgorithm {
 			// Equivalence
 			for (LogSkeletonNode node : graph.getNodes()) {
 				if (node.getLabelRepresentative().equals(node.getLabel())) {
-					Transition t1 = net.addTransition("t1" + node.getLabel());
-					t1.setInvisible(true);
-					for (LogSkeletonNode node2 : graph.getNodes()) {
-						boolean ok = false;
-						if (node2.getHigh() <= 1) {
+					/*
+					 * Found a representative. Check this equivalence class. First, get all required
+					 * nodes.
+					 */
+					Set<LogSkeletonNode> requiredNodes = new HashSet<LogSkeletonNode>();
+					for (LogSkeletonNode candidateRequiredNode : graph.getNodes()) {
+						if (candidateRequiredNode.getLabelRepresentative().equals(node.getLabel())) {
 							/*
-							 * Check if there is an equivalent preceding node that has always after/before
-							 * with this node. If so, this edge will take care of the equivalence check with that node.
+							 * Candidate node is part of this equivalence class. OK.
 							 */
-							for (LogSkeletonEdge edge : node2.getIncoming().values()) {
-								if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS
-										&& edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
-										&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
-									ok = true;
-									break;
+							boolean isRequired = true;
+							if (candidateRequiredNode.getHigh() <= 1) {
+								/*
+								 * Check if there is an equivalent preceding node that has always after/before
+								 * with this node. If so, this edge will take care of the equivalence check with
+								 * that node.
+								 */
+								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
+									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS
+											&& edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
+											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
+										/*
+										 * Not needed as candidate. The preceding node will take care of the equivalence
+										 * of this node.
+										 */
+										isRequired = false;
+										break;
+									}
 								}
 							}
+							if (isRequired) {
+								requiredNodes.add(candidateRequiredNode);
+							}
 						}
-						if (ok) {
-							continue;
-						}
-						if (node2.getLabelRepresentative().equals(node.getLabel())) {
-							Transition t = configuration.isMerge() ? transitions.get(node2)
-									: net.addTransition(node2.getLabel());
-							Place p1 = net.addPlace("p1" + node2.getLabel());
+					}
+					if (requiredNodes.size() > 1) {
+						Transition t1 = net.addTransition("t1" + node.getLabel());
+						t1.setInvisible(true);
+						for (LogSkeletonNode requiredNode : requiredNodes) {
+							Transition t = configuration.isMerge() ? transitions.get(requiredNode)
+									: net.addTransition(requiredNode.getLabel());
+							Place p1 = net.addPlace("p1" + requiredNode.getLabel());
 							net.addArc(t, p1);
 							net.addArc(p1, t1);
 						}
+					} else {
+						System.out.println("[ConverterAlgorithm] Equivalence class for " + node.getLabel()
+								+ " has only a single required node.");
 					}
 				}
 			}
