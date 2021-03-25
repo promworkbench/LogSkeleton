@@ -35,6 +35,11 @@ public class ConverterAlgorithm {
 		net.addArc(startPlace, startTransition);
 		net.addArc(endTransition, endPlace);
 
+		Marking startMarking = new Marking();
+		startMarking.add(startPlace);
+		Marking endMarking = new Marking();
+		endMarking.add(endPlace);
+
 		if (configuration.isMerge()) {
 			// Add a transition for every node.
 			for (LogSkeletonNode node : graph.getNodes()) {
@@ -63,23 +68,41 @@ public class ConverterAlgorithm {
 						|| node.getLabel().equals(LogSkeletonCount.ENDEVENT)) {
 					continue;
 				}
-				if (!node.getLabel().equals(node.getLabelRepresentative())) {
+				if (configuration.isEquivalence() && !node.getLabel().equals(node.getLabelRepresentative())) {
 					continue;
 				}
 				Transition t = configuration.isMerge() ? transitions.get(node) : net.addTransition(node.getLabel());
 				Place p1 = net.addPlace("p1" + node.getLabel());
+				Place p3 = net.addPlace("p3" + node.getLabel());
 				net.addArc(p1, t);
+				net.addArc(t, p3);
+				for (int i = 0; i < node.getHigh(); i++) {
+					if (configuration.isMarking()) {
+						endMarking.add(p3);
+					} else {
+						net.addArc(p3, endTransition);
+					}
+				}
 				if (node.getLow() == node.getHigh()) {
 					for (int i = 0; i < node.getHigh(); i++) {
-						net.addArc(startTransition, p1);
+						if (configuration.isMarking()) {
+							startMarking.add(p1);
+						} else {
+							net.addArc(startTransition, p1);
+						}
 					}
 				} else if (node.getLow() == 0) {
 					for (int i = 0; i < node.getHigh(); i++) {
-						net.addArc(startTransition, p1);
+						if (configuration.isMarking()) {
+							startMarking.add(p1);
+						} else {
+							net.addArc(startTransition, p1);
+						}
 					}
 					Transition t1 = net.addTransition("t1" + node.getLabel());
 					t1.setInvisible(true);
 					net.addArc(p1, t1);
+					net.addArc(t1, p3);
 				} else {
 					Place p2 = net.addPlace("p2" + node.getLabel());
 					Transition t1 = net.addTransition("t1" + node.getLabel());
@@ -87,14 +110,23 @@ public class ConverterAlgorithm {
 					Transition t2 = net.addTransition("t2" + node.getLabel());
 					t2.setInvisible(true);
 					for (int i = 0; i < node.getLow(); i++) {
-						net.addArc(startTransition, p1);
+						if (configuration.isMarking()) {
+							startMarking.add(p1);
+						} else {
+							net.addArc(startTransition, p1);
+						}
 					}
 					for (int i = node.getLow(); i < node.getHigh(); i++) {
-						net.addArc(startTransition, p2);
+						if (configuration.isMarking()) {
+							startMarking.add(p2);
+						} else {
+							net.addArc(startTransition, p2);
+						}
 					}
 					net.addArc(p2, t2);
 					net.addArc(t2, p1);
 					net.addArc(p2, t1);
+					net.addArc(t1, p3);
 				}
 			}
 		}
@@ -114,7 +146,7 @@ public class ConverterAlgorithm {
 							 * Candidate node is part of this equivalence class. OK.
 							 */
 							boolean isRequired = true;
-							if (candidateRequiredNode.getHigh() <= 1) {
+							if (configuration.isAlways() && candidateRequiredNode.getHigh() <= 1) {
 								/*
 								 * Check if there is an equivalent preceding node that has always after/before
 								 * with this node. If so, this edge will take care of the equivalence check with
@@ -173,28 +205,86 @@ public class ConverterAlgorithm {
 							net.addArc(p1, th);
 						} else if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS
 								&& edge.getHeadType() != LogSkeletonEdgeType.ALWAYS) {
-							net.addArc(tt, p1);
-							net.addArc(p1, th);
+							Transition t3 = net.addTransition("t3" + edge.toString());
+							t3.setInvisible(true);
 							Transition t4 = net.addTransition("t4" + edge.toString());
 							t4.setInvisible(true);
+							Place p2 = net.addPlace("p2" + edge.toString());
+							Place p3 = net.addPlace("p3" + edge.toString());
+							if (configuration.isMarking()) {
+								startMarking.add(p2);
+							} else {
+								net.addArc(startTransition, p2);
+							}
+							net.addArc(p2, tt);
+							net.addArc(p2, t4);
+							net.addArc(p2, t3);
+							net.addArc(tt, p1);
 							net.addArc(t4, p1);
+							net.addArc(p1, th);
+							net.addArc(th, p3);
+							net.addArc(t3, p3);
+							if (configuration.isMarking()) {
+								endMarking.add(p3);
+							} else {
+								net.addArc(p3, endTransition);
+							}
 						} else if (edge.getTailType() != LogSkeletonEdgeType.ALWAYS
 								&& edge.getHeadType() == LogSkeletonEdgeType.ALWAYS) {
-							net.addArc(tt, p1);
-							net.addArc(p1, th);
+							Transition t3 = net.addTransition("t3" + edge.toString());
+							t3.setInvisible(true);
 							Transition t5 = net.addTransition("t5" + edge.toString());
 							t5.setInvisible(true);
+							Place p2 = net.addPlace("p2" + edge.toString());
+							Place p3 = net.addPlace("p3" + edge.toString());
+							if (configuration.isMarking()) {
+								startMarking.add(p2);
+							} else {
+								net.addArc(startTransition, p2);
+							}
+							net.addArc(p2, tt);
+							net.addArc(p2, t3);
+							net.addArc(tt, p1);
+							net.addArc(p1, th);
 							net.addArc(p1, t5);
+							net.addArc(t3, p3);
+							net.addArc(th, p3);
+							net.addArc(t5, p3);
+							if (configuration.isMarking()) {
+								endMarking.add(p3);
+							} else {
+								net.addArc(p3, endTransition);
+							}
 						} else if (edge.getTailType() == LogSkeletonEdgeType.NEVER
 								|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) {
-							net.addArc(tt, p1);
-							net.addArc(p1, th);
+							Transition t3 = net.addTransition("t3" + edge.toString());
+							t3.setInvisible(true);
 							Transition t4 = net.addTransition("t4" + edge.toString());
 							t4.setInvisible(true);
-							net.addArc(t4, p1);
 							Transition t5 = net.addTransition("t5" + edge.toString());
 							t5.setInvisible(true);
+							Place p2 = net.addPlace("p2" + edge.toString());
+							Place p3 = net.addPlace("p3" + edge.toString());
+							if (configuration.isMarking()) {
+								startMarking.add(p2);
+							} else {
+								net.addArc(startTransition, p2);
+							}
+							net.addArc(p2, tt);
+							net.addArc(p2, t4);
+							net.addArc(p2, t3);
+							net.addArc(tt, p1);
+							net.addArc(t4, p1);
+							net.addArc(p1, th);
 							net.addArc(p1, t5);
+							net.addArc(t3, p3);
+							net.addArc(th, p3);
+							net.addArc(t5, p3);
+							if (configuration.isMarking()) {
+								endMarking.add(p3);
+							} else {
+								net.addArc(p3, endTransition);
+							}
 						}
 					} else {
 						Transition t1 = net.addTransition("t1" + edge.toString());
@@ -208,7 +298,11 @@ public class ConverterAlgorithm {
 						Place p2 = net.addPlace("p2" + edge.toString());
 						Place p3 = net.addPlace("p3" + edge.toString());
 						Place p5 = net.addPlace("p5" + edge.toString());
-						net.addArc(startTransition, p2);
+						if (configuration.isMarking()) {
+							startMarking.add(p2);
+						} else {
+							net.addArc(startTransition, p2);
+						}
 						net.addArc(p2, t3);
 						net.addArc(p2, t7);
 						net.addArc(t7, p5);
@@ -220,7 +314,11 @@ public class ConverterAlgorithm {
 						net.addArc(t3, p3);
 						net.addArc(th, p3);
 						net.addArc(p3, t2);
-						net.addArc(p3, endTransition);
+						if (configuration.isMarking()) {
+							endMarking.add(p3);
+						} else {
+							net.addArc(p3, endTransition);
+						}
 						if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS
 								&& edge.getHeadType() == LogSkeletonEdgeType.ALWAYS) {
 							net.addArc(p1, th);
@@ -357,13 +455,9 @@ public class ConverterAlgorithm {
 			}
 		}
 
-		Marking startMarking = new Marking();
-		startMarking.add(startPlace);
 		context.getProvidedObjectManager().createProvidedObject("Initial marking for " + net.getLabel(), startMarking,
 				Marking.class, context);
 		context.addConnection(new InitialMarkingConnection(net, startMarking));
-		Marking endMarking = new Marking();
-		endMarking.add(endPlace);
 		context.getProvidedObjectManager().createProvidedObject("Final marking for " + net.getLabel(), endMarking,
 				Marking.class, context);
 		context.addConnection(new FinalMarkingConnection(net, endMarking));

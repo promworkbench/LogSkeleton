@@ -7,13 +7,15 @@ public class ConverterConfiguration {
 	private boolean always;
 	private boolean exclusive;
 	private boolean merge;
+	private boolean marking;
 	
 	public ConverterConfiguration() {
-		setInterval(false);
+		setInterval(true);
 		setEquivalence(true);
 		setAlways(true);
 		setExclusive(true);
 		setMerge(true);
+		setMarking(true);
 	}
 	
 	public boolean isInterval() {
@@ -54,6 +56,14 @@ public class ConverterConfiguration {
 
 	public void setExclusive(boolean exclusive) {
 		this.exclusive = exclusive;
+	}
+
+	public boolean isMarking() {
+		return marking;
+	}
+
+	public void setMarking(boolean marking) {
+		this.marking = marking;
 	}
 	
 }
