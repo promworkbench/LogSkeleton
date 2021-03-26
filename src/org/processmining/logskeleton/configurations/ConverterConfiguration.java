@@ -8,6 +8,7 @@ public class ConverterConfiguration {
 	private boolean exclusive;
 	private boolean merge;
 	private boolean marking;
+	private boolean skip;
 	
 	public ConverterConfiguration() {
 		setInterval(true);
@@ -16,6 +17,7 @@ public class ConverterConfiguration {
 		setExclusive(true);
 		setMerge(true);
 		setMarking(true);
+		setSkip(true);
 	}
 	
 	public boolean isInterval() {
@@ -64,6 +66,14 @@ public class ConverterConfiguration {
 
 	public void setMarking(boolean marking) {
 		this.marking = marking;
+	}
+
+	public boolean isSkip() {
+		return skip;
+	}
+
+	public void setSkip(boolean skip) {
+		this.skip = skip;
 	}
 	
 }
