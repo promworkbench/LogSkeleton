@@ -46,10 +46,10 @@ public class BrowserConfiguration {
 		setUseNeighbors(true);
 		setUseHeadTailLabels(true);
 		setUseInvertedArrows(false);
-		setPrecedenceThreshold(100);
-		setResponseThreshold(100);
-		setNotCoExistenceThreshold(100);
-		setEquivalenceThreshold(100);
+		setPrecedenceThreshold(input.getLogSkeleton().getPrecedenceThreshold());
+		setResponseThreshold(input.getLogSkeleton().getResponseThreshold());
+		setNotCoExistenceThreshold(input.getLogSkeleton().getNotCoExistenceThreshold());
+		setEquivalenceThreshold(input.getLogSkeleton().getEquivalenceThreshold());
 		setFontname("");
 		setFontnameRepresentation("");
 	}
