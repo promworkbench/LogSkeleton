@@ -260,6 +260,10 @@ public class ConverterAlgorithm {
 							Place p2 = net.addPlace("p2" + edge.toString());
 							net.addArc(st, p2);
 							net.addArc(p2, sh);
+						} else if (sh != null) {
+							net.addArc(p1, sh);
+						} else if (st != null) {
+							net.addArc(st, p1);
 						}
 					} else if (edge.getTailType() == LogSkeletonEdgeType.NEVER
 							|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) {
