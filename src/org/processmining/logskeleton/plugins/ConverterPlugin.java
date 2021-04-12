@@ -17,7 +17,7 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 		name = "Convert Log Skeleton to Petri Net", //
 		icon = "prom_duck.png", //
 		url = "https://www.win.tue.nl/~hverbeek/", //
-		parameterLabels = { "Log Skeleton" }, //
+		parameterLabels = { "Log Skeleton", "Configuration" }, //
 		returnLabels = { "Petri Net" }, //
 		returnTypes = { Petrinet.class }, //
 		userAccessible = true, //
@@ -39,4 +39,16 @@ public class ConverterPlugin extends ConverterAlgorithm {
 		LogSkeletonGraph graph = builder.apply(skeleton, new BrowserConfiguration(new BrowserInput(skeleton)));
 		return apply(context, graph, new ConverterConfiguration());
 	}
+	
+	@PluginVariant( //
+			variantLabel = "Convert Log Skeleton to Petri Net using Provided Configuration", //
+			requiredParameterLabels = { 0, 1 } //
+	) //
+	public Petrinet run(PluginContext context, LogSkeleton skeleton, ConverterConfiguration configuration) {
+		GraphBuilderAlgorithm builder = new GraphBuilderAlgorithm();
+		LogSkeletonGraph graph = builder.apply(skeleton, new BrowserConfiguration(new BrowserInput(skeleton)));
+		return apply(context, graph, configuration);
+	}
+	
+	
 }
