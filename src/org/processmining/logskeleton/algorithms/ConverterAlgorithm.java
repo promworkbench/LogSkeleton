@@ -262,7 +262,7 @@ public class ConverterAlgorithm {
 							net.addArc(p2, sh);
 						}
 					} else if (edge.getTailType() == LogSkeletonEdgeType.NEVER
-							&& edge.getHeadType() == LogSkeletonEdgeType.NEVER) {
+							|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) {
 						Transition t3 = net.addTransition("t3" + edge.toString());
 						t3.setInvisible(true);
 						Place p2 = net.addPlace("p2" + edge.toString());
