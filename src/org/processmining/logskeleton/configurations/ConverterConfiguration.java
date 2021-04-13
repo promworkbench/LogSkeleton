@@ -17,7 +17,7 @@ public class ConverterConfiguration {
 		setExclusive(true);
 		setMerge(true);
 		setMarking(true);
-		setSkip(true);
+		setSkip(false);
 	}
 	
 	public boolean isInterval() {
