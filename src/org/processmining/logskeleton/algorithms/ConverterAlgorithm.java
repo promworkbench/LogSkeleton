@@ -147,7 +147,7 @@ public class ConverterAlgorithm {
 							 * OK.
 							 */
 							boolean isRequired = true;
-							if (configuration.isAlwaysAfter() && candidateRequiredNode.getHigh() <= 1) {
+							if (false && configuration.isAlwaysAfter() && candidateRequiredNode.getHigh() <= 1) {
 								/*
 								 * Check if there is an equivalent preceding
 								 * node that has always after with this
@@ -167,7 +167,7 @@ public class ConverterAlgorithm {
 									}
 								}
 							}
-							if (configuration.isAlwaysBefore() && candidateRequiredNode.getHigh() <= 1) {
+							if (false && configuration.isAlwaysBefore() && candidateRequiredNode.getHigh() <= 1) {
 								/*
 								 * Check if there is an equivalent preceding
 								 * node that has always before with this
@@ -187,7 +187,7 @@ public class ConverterAlgorithm {
 									}
 								}
 							}
-							if (configuration.isNever() && candidateRequiredNode.getHigh() <= 1) {
+							if (false && configuration.isNever() && candidateRequiredNode.getHigh() <= 1) {
 								/*
 								 * Check if there is an equivalent preceding
 								 * node that has never after/before with this
@@ -403,7 +403,7 @@ public class ConverterAlgorithm {
 							: net.addTransition(edge.getTailNode().getLabel());
 					Transition th = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
-					if (edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 && edge.getTailNode()
+					if (false && edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 && edge.getTailNode()
 							.getLabelRepresentative().equals(edge.getHeadNode().getLabelRepresentative())) {
 						Place p1 = net.addPlace("p1e" + edge.toString());
 						net.addArc(tt, p1);
@@ -443,7 +443,7 @@ public class ConverterAlgorithm {
 							: net.addTransition(edge.getTailNode().getLabel());
 					Transition th = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
-					if (edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 && edge.getTailNode()
+					if (false && edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 && edge.getTailNode()
 							.getLabelRepresentative().equals(edge.getHeadNode().getLabelRepresentative())) {
 						Place p1 = net.addPlace("p1e" + edge.toString());
 						net.addArc(tt, p1);
@@ -465,7 +465,7 @@ public class ConverterAlgorithm {
 						net.addArc(p1, t1);
 						net.addArc(t1, p2);
 						net.addArc(p1, th);
-						if (edge.getTailNode().getHigh() <= 1) {
+						if (edge.getHeadNode().getHigh() <= 1) {
 							net.addArc(th, p2);
 						} else {
 							net.addArc(th, p1);
@@ -484,7 +484,7 @@ public class ConverterAlgorithm {
 							: net.addTransition(edge.getTailNode().getLabel());
 					Transition th = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
-					if (edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 && edge.getTailNode()
+					if (false && edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 && edge.getTailNode()
 							.getLabelRepresentative().equals(edge.getHeadNode().getLabelRepresentative())) {
 						Place p1 = net.addPlace("p1e" + edge.toString());
 						net.addArc(tt, p1);
