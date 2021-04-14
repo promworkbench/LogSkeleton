@@ -14,13 +14,13 @@ public class ConverterConfiguration {
 	private boolean skip;
 	
 	public ConverterConfiguration() {
-		setInterval(true);
-		setEquivalence(true);
+		setInterval(false);
+		setEquivalence(false);
 		setAlways(false);
 		setAlwaysAfter(true);
 		setAlwaysBefore(true);
-		setNever(true);
-		setExclusive(true);
+		setNever(false);
+		setExclusive(false);
 		setMerge(true);
 		setMarking(true);
 		setSkip(false);
