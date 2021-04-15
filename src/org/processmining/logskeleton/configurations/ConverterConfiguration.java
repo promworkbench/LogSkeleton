@@ -4,7 +4,6 @@ public class ConverterConfiguration {
 
 	private boolean interval;
 	private boolean equivalence;
-	private boolean always;
 	private boolean alwaysAfter;
 	private boolean alwaysBefore;
 	private boolean never;
@@ -16,7 +15,6 @@ public class ConverterConfiguration {
 	public ConverterConfiguration() {
 		setInterval(true);
 		setEquivalence(true);
-		setAlways(false);
 		setAlwaysAfter(true);
 		setAlwaysBefore(true);
 		setNever(true);
@@ -40,14 +38,6 @@ public class ConverterConfiguration {
 
 	public void setEquivalence(boolean equivalence) {
 		this.equivalence = equivalence;
-	}
-
-	public boolean isAlways() {
-		return always;
-	}
-
-	public void setAlways(boolean always) {
-		this.always = always;
 	}
 
 	public boolean isMerge() {
