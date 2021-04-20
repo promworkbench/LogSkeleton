@@ -316,6 +316,15 @@ public class ConverterAlgorithm {
 						Place p1 = net.addPlace("p1e" + edge.toString());
 						net.addArc(tt, p1);
 						net.addArc(p1, th);
+					} else if (edge.getTailNode().getLabelRepresentative()
+									.equals(edge.getHeadNode().getLabelRepresentative())) {
+						/*
+						 * Simplification: Both the tail and the head activity always occur
+						 * equally often. The p1 place between them will do.
+						 */
+						Place p1 = net.addPlace("p1e" + edge.toString());
+						net.addArc(tt, p1);
+						net.addArc(p1, th);
 					} else {
 						/*
 						 * Place p1 models that the constraint is not satisfied: We need to do the head
@@ -392,6 +401,21 @@ public class ConverterAlgorithm {
 						} else {
 							/*
 							 * Both the tail and the head activity occur at most once, and always occur
+							 * equally often. The p1 place between them will do.
+							 */
+							Place p1 = net.addPlace("p1e" + edge.toString());
+							net.addArc(tt, p1);
+							net.addArc(p1, th);
+						}
+					} else if (edge.getTailNode().getLabelRepresentative()
+									.equals(edge.getHeadNode().getLabelRepresentative())) {
+						if (configuration.isAlwaysAfter()) {
+							/*
+							 * Avoid duplication: addAlwaysAfter() will take care of this.
+							 */
+						} else {
+							/*
+							 * Simplification: Both the tail and the head activity always occur
 							 * equally often. The p1 place between them will do.
 							 */
 							Place p1 = net.addPlace("p1e" + edge.toString());
