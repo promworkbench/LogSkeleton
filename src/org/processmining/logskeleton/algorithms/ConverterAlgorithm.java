@@ -52,24 +52,26 @@ public class ConverterAlgorithm {
 		net = PetrinetFactory.newPetrinet("Petri net converted from log skeleton " + graph.getTitle());
 
 		transitions = new HashMap<LogSkeletonNode, Transition>();
-		Place startPlace = net.addPlace("pstart");
-		Place endPlace = net.addPlace("pend");
-		/*
-		 * We're using "{" as first character of a silent transition as this character
-		 * follows all letters in the ASCII table. As a result, when sorted, the added 
-		 * silent transitions will come last.
-		 */
-		startTransition = net.addTransition("{start}");
-		startTransition.setInvisible(true);
-		endTransition = net.addTransition("{end}");
-		endTransition.setInvisible(true);
-		net.addArc(startPlace, startTransition);
-		net.addArc(endTransition, endPlace);
-
 		startMarking = new Marking();
-		startMarking.add(startPlace);
 		endMarking = new Marking();
-		endMarking.add(endPlace);
+		if (!configuration.isMerge()) {
+			Place startPlace = net.addPlace("{pi}");
+			Place endPlace = net.addPlace("{po}");
+			/*
+			 * We're using "{" as first character of a silent transition as this character
+			 * follows all letters in the ASCII table. As a result, when sorted, the added
+			 * silent transitions will come last.
+			 */
+			startTransition = net.addTransition(LogSkeletonCount.STARTEVENT);
+			startTransition.setInvisible(true);
+			endTransition = net.addTransition(LogSkeletonCount.ENDEVENT);
+			endTransition.setInvisible(true);
+			net.addArc(startPlace, startTransition);
+			net.addArc(endTransition, endPlace);
+
+			startMarking.add(startPlace);
+			endMarking.add(endPlace);
+		}
 	}
 
 	private void connect(PluginContext context) {
@@ -88,16 +90,18 @@ public class ConverterAlgorithm {
 				Transition transition = net.addTransition(node.getLabel());
 				if (node.getLabel().equals(LogSkeletonCount.STARTEVENT)) {
 					// Artificial start activity, make transition silent.
+					startTransition = transition;
 					transition.setInvisible(true);
-					Place place = net.addPlace("p|>");
-					net.addArc(startTransition, place);
+					Place place = net.addPlace("{pi}");
+					startMarking.add(place);
 					net.addArc(place, transition);
 				} else if (node.getLabel().equals(LogSkeletonCount.ENDEVENT)) {
 					// Artificial end activity, make transition silent.
+					endTransition = transition;
 					transition.setInvisible(true);
-					Place place = net.addPlace("p[]");
+					Place place = net.addPlace("{po}");
+					endMarking.add(place);
 					net.addArc(transition, place);
-					net.addArc(place, endTransition);
 				}
 				transitions.put(node, transition);
 			}
@@ -108,6 +112,9 @@ public class ConverterAlgorithm {
 		if (configuration.isInterval()) {
 			// Intervals
 			for (LogSkeletonNode node : graph.getNodes()) {
+				/*
+				 * Activity A (where A equals node.getLabel()).
+				 */
 				if (node.getLabel().equals(LogSkeletonCount.STARTEVENT)
 						|| node.getLabel().equals(LogSkeletonCount.ENDEVENT)) {
 					continue;
@@ -115,83 +122,83 @@ public class ConverterAlgorithm {
 				if (configuration.isEquivalence() && !node.getLabel().equals(node.getLabelRepresentative())) {
 					continue;
 				}
-				Transition t = configuration.isMerge() ? transitions.get(node) : net.addTransition(node.getLabel());
-				Place p1 = net.addPlace("p1" + node.getLabel());
-				Place p3 = net.addPlace("p3" + node.getLabel());
-				net.addArc(p1, t);
-				net.addArc(t, p3);
+				Transition aX = configuration.isMerge() ? transitions.get(node) : net.addTransition(node.getLabel());
+				Place piX = net.addPlace("{pi}" + node.getLabel());
+				Place qiX = net.addPlace("{qi}" + node.getLabel());
+				net.addArc(piX, aX);
+				net.addArc(aX, qiX);
 				/*
-				 * In the end, we want to have high tokens in the p3 place.
+				 * In the end, we want to have high(A) tokens in the qiA place.
 				 */
 				if (configuration.isMarking()) {
-					endMarking.add(p3, node.getHigh());
+					endMarking.add(qiX, node.getHigh());
 				} else {
-					net.addArc(p3, endTransition, node.getHigh());
+					net.addArc(qiX, endTransition, node.getHigh());
 				}
 				if (node.getLow() == node.getHigh()) {
 					/*
-					 * This activity always occurs high times. Put high tokens in the p1 place.
+					 * Activity A always occurs high times. Put high tokens in the piA place.
 					 */
 					if (configuration.isMarking()) {
-						startMarking.add(p1, node.getHigh());
+						startMarking.add(piX, node.getHigh());
 					} else {
-						net.addArc(startTransition, p1, node.getHigh());
+						net.addArc(startTransition, piX, node.getHigh());
 					}
 				} else if (node.getLow() == 0) {
 					/*
-					 * This activity may not occur at all. Put high tokens in the p1 place.
+					 * Activity A may not occur at all. Put high tokens in the piA place.
 					 */
 					if (configuration.isMarking()) {
-						startMarking.add(p1, node.getHigh());
+						startMarking.add(piX, node.getHigh());
 					} else {
-						net.addArc(startTransition, p1, node.getHigh());
+						net.addArc(startTransition, piX, node.getHigh());
 					}
 					/*
-					 * Transition t1 skips the activity.
+					 * Transition tA skips the activity A.
 					 */
-					Transition t1 = net.addTransition("{i}" + node.getLabel());
-					t1.setInvisible(true);
-					net.addArc(p1, t1);
-					net.addArc(t1, p3);
+					Transition tX = net.addTransition("{ti}" + node.getLabel());
+					tX.setInvisible(true);
+					net.addArc(piX, tX);
+					net.addArc(tX, qiX);
 				} else {
 					/*
-					 * This activity needs to occur at least low times, but at most high times.
+					 * Activity A needs to occur at least low times, but at most high times.
 					 */
-					Place p2 = net.addPlace("p2" + node.getLabel());
+					Place riX = net.addPlace("{ri}" + node.getLabel());
 					/*
-					 * Transition t1 skips the activity.
+					 * Transition t1A skips the activity A.
 					 */
-					Transition t1 = net.addTransition("{i1}" + node.getLabel());
-					t1.setInvisible(true);
+					Transition tiX = net.addTransition("{ti}" + node.getLabel());
+					tiX.setInvisible(true);
 					/*
-					 * Transition t2 avoid skipping the activity.
+					 * Transition uiA avoids skipping the activity A.
 					 */
-					Transition t2 = net.addTransition("{i2}" + node.getLabel());
-					t2.setInvisible(true);
+					Transition uiX = net.addTransition("{ui}" + node.getLabel());
+					uiX.setInvisible(true);
 					/*
 					 * Add low tokens to the p2 place. This many times, the activity may be skipped.
 					 */
 					if (configuration.isMarking()) {
-						startMarking.add(p1, node.getLow());
+						startMarking.add(piX, node.getLow());
 					} else {
-						net.addArc(startTransition, p1, node.getLow());
+						net.addArc(startTransition, piX, node.getLow());
 					}
 					/*
 					 * Add the remaining high-low tokens in the p1 place. This many times, the
 					 * activity may not be skipped.
 					 */
 					if (configuration.isMarking()) {
-						startMarking.add(p2, node.getHigh() - node.getLow());
+						startMarking.add(riX, node.getHigh() - node.getLow());
 					} else {
-						net.addArc(startTransition, p2, node.getHigh() - node.getLow());
+						net.addArc(startTransition, riX, node.getHigh() - node.getLow());
 					}
 					/*
 					 * Connect everything.
 					 */
-					net.addArc(p2, t2);
-					net.addArc(t2, p1);
-					net.addArc(p2, t1);
-					net.addArc(t1, p3);
+					net.addArc(riX, uiX);
+					net.addArc(uiX, piX);
+					net.addArc(riX, tiX);
+					net.addArc(tiX, qiX);
 				}
 			}
 		}
@@ -274,14 +281,14 @@ public class ConverterAlgorithm {
 						}
 					}
 					if (requiredNodes.size() > 1) {
-						Transition t1 = net.addTransition("{e}" + node.getLabel());
-						t1.setInvisible(true);
+						Transition teA = net.addTransition("{te}" + node.getLabel());
+						teA.setInvisible(true);
 						for (LogSkeletonNode requiredNode : requiredNodes) {
-							Transition t = configuration.isMerge() ? transitions.get(requiredNode)
+							Transition aX = configuration.isMerge() ? transitions.get(requiredNode)
 									: net.addTransition(requiredNode.getLabel());
-							Place p1 = net.addPlace("p1" + requiredNode.getLabel());
-							net.addArc(t, p1);
-							net.addArc(p1, t1);
+							Place peX = net.addPlace("{pe}" + requiredNode.getLabel());
+							net.addArc(aX, peX);
+							net.addArc(peX, teA);
 						}
 					} else {
 						System.out.println("[ConverterAlgorithm] Equivalence class for " + node.getLabel()
@@ -296,10 +303,10 @@ public class ConverterAlgorithm {
 		if (configuration.isAlwaysAfter()) {
 			for (LogSkeletonEdge edge : graph.getEdges().values()) {
 				if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS) {
-					// Head always after tail
-					Transition tt = configuration.isMerge() ? transitions.get(edge.getTailNode())
+					// Head (B) always after tail (A)
+					Transition aA = configuration.isMerge() ? transitions.get(edge.getTailNode())
 							: net.addTransition(edge.getTailNode().getLabel());
-					Transition th = configuration.isMerge() ? transitions.get(edge.getHeadNode())
+					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
 					if (configuration.isNever() && edge.getTailNode().getHigh() <= 1
 							&& edge.getHeadNode().getHigh() <= 1 && edge.getHeadType() == LogSkeletonEdgeType.NEVER) {
@@ -310,66 +317,65 @@ public class ConverterAlgorithm {
 							&& edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
-						 * Both the tail and the head activity occur at most once, and always occur
-						 * equally often. The p1 place between them will do.
+						 * Both A and B occur at most once, and always occur equally often. The paAB
+						 * place between them will do.
 						 */
-						Place p1 = net.addPlace("p1e" + edge.toString());
-						net.addArc(tt, p1);
-						net.addArc(p1, th);
+						Place paAB = net.addPlace("{pa}" + edge.toString());
+						net.addArc(aA, paAB);
+						net.addArc(paAB, aB);
 					} else if (edge.getTailNode().getLabelRepresentative()
-									.equals(edge.getHeadNode().getLabelRepresentative())) {
+							.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
-						 * Simplification: Both the tail and the head activity always occur
-						 * equally often. The p1 place between them will do.
+						 * Simplification: Both A and B always occur equally often. The paAB place
+						 * between them will do.
 						 */
-						Place p1 = net.addPlace("p1e" + edge.toString());
-						net.addArc(tt, p1);
-						net.addArc(p1, th);
+						Place paAB = net.addPlace("{pa}" + edge.toString());
+						net.addArc(aA, paAB);
+						net.addArc(paAB, aB);
 					} else {
 						/*
-						 * Place p1 models that the constraint is not satisfied: We need to do the head
-						 * activity.
+						 * Place qaAB models that the constraint is not satisfied: We need to do B.
 						 */
-						Place p1 = net.addPlace("p1a" + edge.toString());
+						Place qaAB = net.addPlace("{qa}" + edge.toString());
 						/*
-						 * Place p2 models that the constraint is satisfied.
+						 * Place paAB models that the constraint is satisfied.
 						 */
-						Place p2 = net.addPlace("p2a" + edge.toString());
+						Place paAB = net.addPlace("{pa}" + edge.toString());
 						/*
 						 * Initially, the constraint is satisfied.
 						 */
 						if (configuration.isMarking()) {
-							startMarking.add(p2);
-							endMarking.add(p2);
+							startMarking.add(paAB);
+							endMarking.add(paAB);
 						} else {
-							net.addArc(startTransition, p2);
-							net.addArc(p2, endTransition);
+							net.addArc(startTransition, paAB);
+							net.addArc(paAB, endTransition);
 						}
 						/*
-						 * Transition t1 models two possibilities: 1. Either we need to do the tail
-						 * activity, which will violate the constraint. 2. Or we need to do the head
-						 * activity, which will not violate the constraint.
+						 * Transition taAB models two possibilities: 1. Either we need to do B, which
+						 * will violate the constraint. 2. Or we need to do A, which will not violate
+						 * the constraint.
 						 */
-						Transition t1 = net.addTransition("{a}" + edge.toString());
-						t1.setInvisible(true);
+						Transition taAB = net.addTransition("{ta}" + edge.toString());
+						taAB.setInvisible(true);
 						/*
 						 * Connect everything.
 						 */
-						net.addArc(p2, t1);
-						net.addArc(t1, p1);
+						net.addArc(paAB, taAB);
+						net.addArc(taAB, qaAB);
 						/*
-						 * Firing the head activity restores the constraint.
+						 * Firing B restores the constraint.
 						 */
-						net.addArc(p1, th);
-						net.addArc(th, p2);
+						net.addArc(qaAB, aB);
+						net.addArc(aB, paAB);
 						/*
-						 * Firing the tail activity violates the constraint.
+						 * Firing A (temporarily) violates the constraint.
 						 */
-						net.addArc(tt, p1);
+						net.addArc(aA, qaAB);
 						if (edge.getTailNode().getHigh() <= 1) {
-							net.addArc(p2, tt);
+							net.addArc(paAB, aA);
 						} else {
-							net.addArc(p1, tt);
+							net.addArc(qaAB, aA);
 						}
 					}
 				}
@@ -381,10 +387,10 @@ public class ConverterAlgorithm {
 		if (configuration.isAlwaysBefore()) {
 			for (LogSkeletonEdge edge : graph.getEdges().values()) {
 				if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS) {
-					// Tail always before head
-					Transition tt = configuration.isMerge() ? transitions.get(edge.getTailNode())
+					// Tail (B) always before head (A)
+					Transition aA = configuration.isMerge() ? transitions.get(edge.getTailNode())
 							: net.addTransition(edge.getTailNode().getLabel());
-					Transition th = configuration.isMerge() ? transitions.get(edge.getHeadNode())
+					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
 					if (configuration.isNever() && edge.getTailNode().getHigh() <= 1
 							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailType() == LogSkeletonEdgeType.NEVER) {
@@ -400,71 +406,69 @@ public class ConverterAlgorithm {
 							 */
 						} else {
 							/*
-							 * Both the tail and the head activity occur at most once, and always occur
-							 * equally often. The p1 place between them will do.
+							 * Both A and B occur at most once, and always occur equally often. The pbAB
+							 * place between them will do.
 							 */
-							Place p1 = net.addPlace("p1e" + edge.toString());
-							net.addArc(tt, p1);
-							net.addArc(p1, th);
+							Place pbAB = net.addPlace("{pb}" + edge.toString());
+							net.addArc(aA, pbAB);
+							net.addArc(pbAB, aB);
 						}
 					} else if (edge.getTailNode().getLabelRepresentative()
-									.equals(edge.getHeadNode().getLabelRepresentative())) {
+							.equals(edge.getHeadNode().getLabelRepresentative())) {
 						if (configuration.isAlwaysAfter()) {
 							/*
 							 * Avoid duplication: addAlwaysAfter() will take care of this.
 							 */
 						} else {
 							/*
-							 * Simplification: Both the tail and the head activity always occur
-							 * equally often. The p1 place between them will do.
+							 * Simplification: Both A and B always occur equally often. The pbAB place
+							 * between them will do.
 							 */
-							Place p1 = net.addPlace("p1e" + edge.toString());
-							net.addArc(tt, p1);
-							net.addArc(p1, th);
+							Place pbAB = net.addPlace("{pb}" + edge.toString());
+							net.addArc(aA, pbAB);
+							net.addArc(pbAB, aB);
 						}
 					} else {
 						/*
-						 * Place p1 models that the constraint is not satisfied: We need to do the head
-						 * activity.
+						 * Place qbAB models that the constraint is not satisfied: We need to do B.
 						 */
-						Place p1 = net.addPlace("p1b" + edge.toString());
+						Place qbAB = net.addPlace("{qb}" + edge.toString());
 						/*
-						 * Place p2 models that the constraint is satisfied.
+						 * Place pbAB models that the constraint is satisfied.
 						 */
-						Place p2 = net.addPlace("p2b" + edge.toString());
+						Place pbAB = net.addPlace("{pb}" + edge.toString());
 						/*
 						 * Initially, the constraint is satisfied.
 						 */
 						if (configuration.isMarking()) {
-							startMarking.add(p2);
-							endMarking.add(p2);
+							startMarking.add(pbAB);
+							endMarking.add(pbAB);
 						} else {
-							net.addArc(startTransition, p2);
-							net.addArc(p2, endTransition);
+							net.addArc(startTransition, pbAB);
+							net.addArc(pbAB, endTransition);
 						}
 						/*
-						 * Transition t1 models two possibilities: 1. Either we needed to do the tail
-						 * activity, which will not violate the constraint. 2. Or we needed to do the
-						 * tail activity, which will not violate the constraint as well.
+						 * Transition tbAB models two possibilities: 1. Either we needed to do A, which
+						 * will not violate the constraint. 2. Or we needed to do B, which will not
+						 * violate the constraint as well.
 						 * 
 						 * This seems a bit strange, but this works as follows: - In the initial state,
-						 * we cannot do the head transition. - After having fired the head transition,
-						 * the token will be in the p1 place. - As long as the token is in the p1 place,
-						 * the head transition can fire. - As long as the token is in the p1 place, the
-						 * tail transition can fire after the t1 transition fires first. - At the end,
-						 * the t1 transition can fire to reach the end marking.
+						 * we cannot do B. - After having fired A, the token will be in the qbAB place.
+						 * - As long as the token is in the qbAB place, B can fire. - As long as the
+						 * token is in the qbAB place, A can fire after the tbAB transition fires first.
+						 * - At the end, the tbAB transition can fire to reach the end marking.
 						 */
-						Transition t1 = net.addTransition("{b}" + edge.toString());
-						t1.setInvisible(true);
-						net.addArc(p2, tt);
-						net.addArc(tt, p1);
-						net.addArc(p1, t1);
-						net.addArc(t1, p2);
-						net.addArc(p1, th);
+						Transition tbAB = net.addTransition("{tb}" + edge.toString());
+						tbAB.setInvisible(true);
+						net.addArc(pbAB, aA);
+						net.addArc(aA, qbAB);
+						net.addArc(qbAB, tbAB);
+						net.addArc(tbAB, pbAB);
+						net.addArc(qbAB, aB);
 						if (edge.getHeadNode().getHigh() <= 1) {
-							net.addArc(th, p2);
+							net.addArc(aB, pbAB);
 						} else {
-							net.addArc(th, p1);
+							net.addArc(aB, qbAB);
 						}
 					}
 				}
@@ -477,10 +481,10 @@ public class ConverterAlgorithm {
 			for (LogSkeletonEdge edge : graph.getEdges().values()) {
 				if (edge.getHeadType() == LogSkeletonEdgeType.NEVER
 						|| edge.getTailType() == LogSkeletonEdgeType.NEVER) {
-					// Head never before tail or tail never after head
-					Transition tt = configuration.isMerge() ? transitions.get(edge.getTailNode())
+					// Head (B) never before tail (A) or A never after B
+					Transition aA = configuration.isMerge() ? transitions.get(edge.getTailNode())
 							: net.addTransition(edge.getTailNode().getLabel());
-					Transition th = configuration.isMerge() ? transitions.get(edge.getHeadNode())
+					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
 					if (edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 && edge.getTailNode()
 							.getLabelRepresentative().equals(edge.getHeadNode().getLabelRepresentative())) {
@@ -488,43 +492,53 @@ public class ConverterAlgorithm {
 						 * Both the tail and the head activity occur at most once, and always occur
 						 * equally often. The p1 place between them will do.
 						 */
-						Place p1 = net.addPlace("p1e" + edge.toString());
-						net.addArc(tt, p1);
-						net.addArc(p1, th);
+						Place pnAB = net.addPlace("{pn}" + edge.toString());
+						net.addArc(aA, pnAB);
+						net.addArc(pnAB, aB);
 					} else {
-						Place p1 = net.addPlace("p1n" + edge.toString());
-						Place p2 = net.addPlace("p2n" + edge.toString());
-						Place p3 = net.addPlace("p3n" + edge.toString());
+						/*
+						 * A token in place pnAB indicates that we can do A.
+						 */
+						Place pnAB = net.addPlace("{pn}" + edge.toString());
+						/*
+						 * A token in place qnAB indicates that we can do B.
+						 */
+						Place qnAB = net.addPlace("{qn}" + edge.toString());
+						/*
+						 * A token in place rnAB indicates that we have done all A's and now start doign
+						 * all B's.
+						 */
+						Place rnAB = net.addPlace("{rn}" + edge.toString());
 						if (configuration.isMarking()) {
-							startMarking.add(p1);
-							endMarking.add(p2);
+							startMarking.add(pnAB);
+							endMarking.add(qnAB);
 						} else {
-							net.addArc(startTransition, p1);
-							net.addArc(p2, endTransition);
+							net.addArc(startTransition, pnAB);
+							net.addArc(qnAB, endTransition);
 						}
 						if (edge.getTailNode().getLow() != 1 || edge.getTailNode().getHigh() != 1) {
-							Transition t1 = net.addTransition("{n1}" + edge.toString());
-							t1.setInvisible(true);
-							net.addArc(p1, t1);
-							net.addArc(t1, p3);
+							Transition tnAB = net.addTransition("{tn}" + edge.toString());
+							tnAB.setInvisible(true);
+							net.addArc(pnAB, tnAB);
+							net.addArc(tnAB, rnAB);
 						}
 						if (edge.getHeadNode().getLow() != 1 || edge.getHeadNode().getHigh() != 1) {
-							Transition t2 = net.addTransition("{n2}" + edge.toString());
-							t2.setInvisible(true);
-							net.addArc(p3, t2);
-							net.addArc(t2, p2);
+							Transition unAB = net.addTransition("{un}" + edge.toString());
+							unAB.setInvisible(true);
+							net.addArc(rnAB, unAB);
+							net.addArc(unAB, qnAB);
 						}
-						net.addArc(p1, tt);
-						net.addArc(th, p2);
+						net.addArc(pnAB, aA);
+						net.addArc(aB, qnAB);
 						if (edge.getTailNode().getHigh() <= 1) {
-							net.addArc(tt, p3);
+							net.addArc(aA, rnAB);
 						} else {
-							net.addArc(tt, p1);
+							net.addArc(aA, pnAB);
 						}
 						if (edge.getHeadNode().getHigh() <= 1) {
-							net.addArc(p3, th);
+							net.addArc(rnAB, aB);
 						} else {
-							net.addArc(p2, th);
+							net.addArc(qnAB, aB);
 						}
 					}
 				}
@@ -584,42 +598,42 @@ public class ConverterAlgorithm {
 			int i = 0;
 			for (Set<LogSkeletonNode> maximalNodes : maximalNodeSets) {
 				boolean canSkip = false;
-				Place p1 = net.addPlace("p1" + i);
-				Place p3 = net.addPlace("p3" + i);
+				Place px = net.addPlace("px" + i);
+				Place qx = net.addPlace("qx" + i);
 				if (configuration.isMarking()) {
-					startMarking.add(p1);
-					endMarking.add(p3);
+					startMarking.add(px);
+					endMarking.add(qx);
 				} else {
-					net.addArc(startTransition, p1);
-					net.addArc(p3, endTransition);
+					net.addArc(startTransition, px);
+					net.addArc(qx, endTransition);
 				}
 				for (LogSkeletonNode node : maximalNodes) {
-					Transition t = configuration.isMerge() ? transitions.get(node) : net.addTransition(node.getLabel());
+					Transition aX = configuration.isMerge() ? transitions.get(node) : net.addTransition(node.getLabel());
 					if (node.getHigh() <= 1) {
-						net.addArc(p1, t);
-						net.addArc(t, p3);
+						net.addArc(px, aX);
+						net.addArc(aX, qx);
 					} else {
 						canSkip = true;
-						Place p2 = net.addPlace("p2" + i);
-						Transition t1 = net.addTransition("{x1}" + i);
-						t1.setInvisible(true);
-						Transition t2 = net.addTransition("{x2}" + i);
-						t2.setInvisible(true);
-						net.addArc(p1, t1);
-						net.addArc(t1, p2);
-						net.addArc(p2, t);
-						net.addArc(t, p2);
-						net.addArc(p2, t2);
-						net.addArc(t2, p3);
+						Place rxX = net.addPlace("rx" + i);
+						Transition uxX = net.addTransition("{ux}" + i);
+						uxX.setInvisible(true);
+						Transition vxX = net.addTransition("{vx}" + i);
+						vxX.setInvisible(true);
+						net.addArc(px, uxX);
+						net.addArc(uxX, rxX);
+						net.addArc(rxX, aX);
+						net.addArc(aX, rxX);
+						net.addArc(rxX, vxX);
+						net.addArc(vxX, qx);
 					}
 					i++;
 				}
 				i++;
 				if (!canSkip) {
-					Transition t3 = net.addTransition("{x3}");
-					t3.setInvisible(true);
-					net.addArc(p1, t3);
-					net.addArc(t3, p3);
+					Transition tx = net.addTransition("{tx}");
+					tx.setInvisible(true);
+					net.addArc(px, tx);
+					net.addArc(tx, qx);
 				}
 			}
 		}
