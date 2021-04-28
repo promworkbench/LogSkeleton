@@ -82,6 +82,7 @@ public class PNClassifierAlgorithm {
 		}
 		activities.add(LogSkeletonCount.ENDEVENT);
 		boolean isPos = classify(activities, net, initialMarking, finalMarking);
+		System.out.println("[PNClassifierAlgorithm] " + isPos + " " + activities);
 		XAttributeBoolean isPosAttribute = XFactoryRegistry.instance().currentDefault()
 				.createAttributeBoolean("pdc:isPos", isPos, null);
 		classifiedTrace.getAttributes().put("pdc:isPos", isPosAttribute);
@@ -89,7 +90,7 @@ public class PNClassifierAlgorithm {
 	}
 
 	private boolean classify(List<String> activities, Petrinet net, Marking initialMarking, Marking finalMarking) {
-		System.out.println("[PNClassifierAlgorithm] Replaying trace " + activities);
+//		System.out.println("[PNClassifierAlgorithm] Replaying trace " + activities);
 		Marking currentMarking = new Marking(initialMarking);
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
@@ -108,29 +109,29 @@ public class PNClassifierAlgorithm {
 					return false;
 				}
 			}
-			System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
+//			System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
 			for (Place place : outputPlaces.get(transition)) {
 				currentMarking.add(place);
 			}
 		}
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{ti}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{te}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{tb}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{tn}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{un}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{tx}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{ux}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{vx}");
-		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
 		return currentMarking.equals(finalMarking);
 	}
 
@@ -148,7 +149,7 @@ public class PNClassifierAlgorithm {
 						}
 					}
 					if (enabled) {
-						System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
+//						System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
 						currentMarking = tmpMarking;
 						for (Place place : outputPlaces.get(transition)) {
 							currentMarking.add(place);
