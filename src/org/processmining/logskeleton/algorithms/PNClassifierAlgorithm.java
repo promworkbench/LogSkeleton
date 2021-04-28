@@ -113,12 +113,21 @@ public class PNClassifierAlgorithm {
 				currentMarking.add(place);
 			}
 		}
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{ti}");
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{te}");
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{tb}");
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{tn}");
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{un}");
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{tx}");
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		currentMarking = fireAll(net, currentMarking, "{ux}");
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, "{vx}");
 		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
@@ -139,7 +148,7 @@ public class PNClassifierAlgorithm {
 						}
 					}
 					if (enabled) {
-//						System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
+						System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
 						currentMarking = tmpMarking;
 						for (Place place : outputPlaces.get(transition)) {
 							currentMarking.add(place);
