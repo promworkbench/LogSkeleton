@@ -8,6 +8,7 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
+import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.logskeleton.algorithms.PNClassifierAlgorithm;
@@ -38,6 +39,14 @@ public class PNClassifierPlugin extends PNClassifierAlgorithm {
 			requiredParameterLabels = { 0, 1 } //
 	) //
 	public XLog run(UIPluginContext context, XLog log, Petrinet net) {
+		return runHeadless(context, log, net);
+	}
+	
+	@PluginVariant( //
+			variantLabel = "Classify Log using Petri net converted from Log Skeleton", //
+			requiredParameterLabels = { 0, 1 } //
+	) //
+	public XLog runHeadless(PluginContext context, XLog log, Petrinet net) {
 		XEventClassifier classifier = log.getClassifiers().size() > 0 ? log.getClassifiers().iterator().next() : new XEventNameClassifier();
 		Marking initialMarking = null;
 		Marking finalMarking = null;
