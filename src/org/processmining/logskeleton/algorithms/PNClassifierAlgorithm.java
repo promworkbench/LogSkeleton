@@ -58,7 +58,7 @@ public class PNClassifierAlgorithm {
 		placeMap = new HashMap<Place, Place>();
 		transitionMap = new HashMap<String, Transition>();
 		for (Transition transition : net.getTransitions()) {
-			if (transition.isInvisible() && transition.getLabel().startsWith("{")) {
+			if (transition.isInvisible() && transition.getLabel().startsWith(ConverterAlgorithm.PREFIX_START)) {
 				if (inputPlaces.get(transition).size() == 1 && outputPlaces.get(transition).size() == 1) {
 					placeMap.put(outputPlaces.get(transition).iterator().next(),
 							inputPlaces.get(transition).iterator().next());
@@ -115,21 +115,21 @@ public class PNClassifierAlgorithm {
 			}
 		}
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{ti}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_INTERVAL_T1);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{te}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EQUIVALENCE_T1);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{tb}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_BEFORE_T1);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{tn}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_NEVER_T1);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{un}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_NEVER_T2);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{tx}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T1);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{ux}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T2);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		currentMarking = fireAll(net, currentMarking, "{vx}");
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T3);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 //		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
 		return currentMarking.equals(finalMarking);
