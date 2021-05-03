@@ -351,7 +351,8 @@ public class ConverterAlgorithm {
 					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
 					if (configuration.isNever() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 && edge.getHeadType() == LogSkeletonEdgeType.NEVER) {
+							&& edge.getHeadNode().getHigh() <= 1 && edge.getHeadType() == LogSkeletonEdgeType.NEVER && edge.getTailNode().getLabelRepresentative()
+									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
 						 */
@@ -435,7 +436,8 @@ public class ConverterAlgorithm {
 					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
 					if (configuration.isNever() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailType() == LogSkeletonEdgeType.NEVER) {
+							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailType() == LogSkeletonEdgeType.NEVER && edge.getTailNode().getLabelRepresentative()
+									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
 						 */
