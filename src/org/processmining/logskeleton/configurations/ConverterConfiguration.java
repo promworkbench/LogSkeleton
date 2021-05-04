@@ -13,7 +13,7 @@ public class ConverterConfiguration {
 	private boolean skip;
 	
 	public ConverterConfiguration() {
-		setInterval(true);
+		setInterval(false);
 		setEquivalence(true);
 		setAlwaysAfter(true);
 		setAlwaysBefore(true);

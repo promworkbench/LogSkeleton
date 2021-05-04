@@ -90,7 +90,7 @@ public class PNClassifierAlgorithm {
 	}
 
 	private boolean classify(List<String> activities, Petrinet net, Marking initialMarking, Marking finalMarking) {
-//		System.out.println("[PNClassifierAlgorithm] Replaying trace " + activities);
+		System.out.println("[PNClassifierAlgorithm] Replaying trace " + activities);
 		Marking currentMarking = new Marking(initialMarking);
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
@@ -109,29 +109,29 @@ public class PNClassifierAlgorithm {
 					return false;
 				}
 			}
-//			System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
+			System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
 			for (Place place : outputPlaces.get(transition)) {
 				currentMarking.add(place);
 			}
 		}
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_INTERVAL_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EQUIVALENCE_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_BEFORE_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_NEVER_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_NEVER_T2);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T2);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T3);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-//		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
+		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
 		return currentMarking.equals(finalMarking);
 	}
 
