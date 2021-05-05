@@ -503,32 +503,32 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 			/*
-			 * Check whether no not-precedences are in the preset.
+			 * Check whether no not-precedences are in the postset.
 			 */
-			Set<String> notPreset = new HashSet<String>(countModel.getActivities());
-			notPreset.removeAll(preset);
-			if (notPrecedences.containsKey(activity) && !notPreset.containsAll(notPrecedences.get(activity))) {
+			Set<String> notPostset = new HashSet<String>(countModel.getActivities());
+			notPostset.removeAll(postset);
+			if (notPrecedences.containsKey(activity) && !notPostset.containsAll(notPrecedences.get(activity))) {
 				/*
 				 * Some not-precedences are in the preset. Report them as violations.
 				 */
 				Set<String> present = new HashSet<String>(notPrecedences.get(activity));
-				present.removeAll(notPreset);
+				present.removeAll(notPostset);
 				violations.add(new ViolationNotPrecedence(trace, activity, present));
 				if (configuration.isStopAtFirstViolation()) {
 					return violations;
 				}
 			}
 			/*
-			 * Check whether no not-responses are in the postset.
+			 * Check whether no not-responses are in the preset.
 			 */
-			Set<String> notPostset = new HashSet<String>(countModel.getActivities());
-			notPostset.removeAll(postset);
-			if (notResponses.containsKey(activity) && !notPostset.containsAll(notResponses.get(activity))) {
+			Set<String> notPreset = new HashSet<String>(countModel.getActivities());
+			notPreset.removeAll(preset);
+			if (notResponses.containsKey(activity) && !notPreset.containsAll(notResponses.get(activity))) {
 				/*
 				 * Some not-responses are in the postset. Report them as violations.
 				 */
 				Set<String> present = new HashSet<String>(notResponses.get(activity));
-				present.removeAll(notPostset);
+				present.removeAll(notPreset);
 				violations.add(new ViolationNotResponse(trace, activity, present));
 				if (configuration.isStopAtFirstViolation()) {
 					return violations;
