@@ -94,6 +94,7 @@ public class PNClassifierAlgorithm {
 		Marking currentMarking = new Marking(initialMarking);
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
+//			System.out.println("[PNClassifierAlgorithm] " + activity);
 			for (Place place : inputPlaces.get(transition)) {
 				if (currentMarking.contains(place)) {
 					currentMarking.remove(place);
@@ -119,7 +120,11 @@ public class PNClassifierAlgorithm {
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EQUIVALENCE_T1);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_AFTER_T2);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_BEFORE_T1);
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_BEFORE_T2);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_NEVER_T1);
 //		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);

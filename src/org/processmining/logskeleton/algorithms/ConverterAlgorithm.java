@@ -43,9 +43,11 @@ public class ConverterAlgorithm {
 	
 	static public String PREFIX_AFTER_P1 = PREFIX_START + "pa" + PREFIX_END;
 	static public String PREFIX_AFTER_P2 = PREFIX_START + "qa" + PREFIX_END;
+	static public String PREFIX_AFTER_P3 = PREFIX_START + "ra" + PREFIX_END;
 	
 	static public String PREFIX_BEFORE_P1 = PREFIX_START + "pt" + PREFIX_END;
 	static public String PREFIX_BEFORE_P2 = PREFIX_START + "qt" + PREFIX_END;
+	static public String PREFIX_BEFORE_P3 = PREFIX_START + "rt" + PREFIX_END;
 	
 	static public String PREFIX_NEVER_P1 = PREFIX_START + "pn" + PREFIX_END;
 	static public String PREFIX_NEVER_P2 = PREFIX_START + "qn" + PREFIX_END;
@@ -61,8 +63,10 @@ public class ConverterAlgorithm {
 	static public String PREFIX_EQUIVALENCE_T1 = PREFIX_START + "te" + PREFIX_END;
 	
 	static public String PREFIX_AFTER_T1 = PREFIX_START + "ta" + PREFIX_END;
+	static public String PREFIX_AFTER_T2 = PREFIX_START + "ua" + PREFIX_END;
 	
 	static public String PREFIX_BEFORE_T1 = PREFIX_START + "tb" + PREFIX_END;
+	static public String PREFIX_BEFORE_T2 = PREFIX_START + "ub" + PREFIX_END;
 	
 	static public String PREFIX_NEVER_T1 = PREFIX_START + "tn" + PREFIX_END;
 	static public String PREFIX_NEVER_T2 = PREFIX_START + "un" + PREFIX_END;
@@ -366,6 +370,29 @@ public class ConverterAlgorithm {
 						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
 						net.addArc(aA, paAB);
 						net.addArc(paAB, aB);
+					} else if (edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1) {
+						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
+						Place qaAB = net.addPlace(PREFIX_AFTER_P2 + edge.toString());
+						Place raAB = net.addPlace(PREFIX_AFTER_P3 + edge.toString());
+						if (configuration.isMarking()) {
+							startMarking.add(paAB);
+							endMarking.add(raAB);
+						} else {
+							net.addArc(startTransition, paAB);
+							net.addArc(raAB, endTransition);
+						}
+						Transition taAB = net.addTransition(PREFIX_AFTER_T1 + edge.toString());
+						taAB.setInvisible(true);
+						Transition uaAB = net.addTransition(PREFIX_AFTER_T2 + edge.toString());
+						uaAB.setInvisible(true);
+						net.addArc(paAB, aA);
+						net.addArc(paAB, taAB);
+						net.addArc(aA, qaAB);
+						net.addArc(taAB, qaAB);
+						net.addArc(qaAB, aB);
+						net.addArc(aB, raAB);
+						net.addArc(paAB, uaAB);
+						net.addArc(uaAB, raAB);
 					} else if (edge.getTailNode().getLabelRepresentative()
 							.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
@@ -457,6 +484,29 @@ public class ConverterAlgorithm {
 							net.addArc(aA, pbAB);
 							net.addArc(pbAB, aB);
 						}
+					} else if (edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1) {
+						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
+						Place qbAB = net.addPlace(PREFIX_BEFORE_P2 + edge.toString());
+						Place rbAB = net.addPlace(PREFIX_BEFORE_P3 + edge.toString());
+						if (configuration.isMarking()) {
+							startMarking.add(pbAB);
+							endMarking.add(rbAB);
+						} else {
+							net.addArc(startTransition, pbAB);
+							net.addArc(rbAB, endTransition);
+						}
+						Transition tbAB = net.addTransition(PREFIX_BEFORE_T1 + edge.toString());
+						tbAB.setInvisible(true);
+						Transition ubAB = net.addTransition(PREFIX_BEFORE_T2 + edge.toString());
+						ubAB.setInvisible(true);
+						net.addArc(pbAB, aA);
+						net.addArc(qbAB, tbAB);
+						net.addArc(aA, qbAB);
+						net.addArc(tbAB, rbAB);
+						net.addArc(qbAB, aB);
+						net.addArc(aB, rbAB);
+						net.addArc(pbAB, ubAB);
+						net.addArc(ubAB, rbAB);
 					} else if (edge.getTailNode().getLabelRepresentative()
 							.equals(edge.getHeadNode().getLabelRepresentative())) {
 						if (configuration.isAlwaysAfter()) {
