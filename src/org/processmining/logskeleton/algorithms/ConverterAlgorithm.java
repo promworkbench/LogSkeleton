@@ -394,15 +394,15 @@ public class ConverterAlgorithm {
 						net.addArc(aB, raAB);
 						net.addArc(paAB, uaAB);
 						net.addArc(uaAB, raAB);
-					} else if (edge.getTailNode().getLabelRepresentative()
-							.equals(edge.getHeadNode().getLabelRepresentative())) {
-						/*
-						 * Simplification: Both A and B always occur equally often. The paAB place
-						 * between them will do.
-						 */
-						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
-						net.addArc(aA, paAB);
-						net.addArc(paAB, aB);
+//					} else if (edge.getTailNode().getLabelRepresentative()
+//							.equals(edge.getHeadNode().getLabelRepresentative())) {
+//						/*
+//						 * Simplification: Both A and B always occur equally often. The paAB place
+//						 * between them will do.
+//						 */
+//						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
+//						net.addArc(aA, paAB);
+//						net.addArc(paAB, aB);
 					} else {
 						/*
 						 * Place qaAB models that the constraint is not satisfied: We need to do B.
@@ -509,21 +509,21 @@ public class ConverterAlgorithm {
 						net.addArc(aB, rbAB);
 						net.addArc(pbAB, ubAB);
 						net.addArc(ubAB, rbAB);
-					} else if (edge.getTailNode().getLabelRepresentative()
-							.equals(edge.getHeadNode().getLabelRepresentative())) {
-						if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && configuration.isAlwaysAfter()) {
-							/*
-							 * Avoid duplication: addAlwaysAfter() will take care of this.
-							 */
-						} else {
-							/*
-							 * Simplification: Both A and B always occur equally often. The pbAB place
-							 * between them will do.
-							 */
-							Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
-							net.addArc(aA, pbAB);
-							net.addArc(pbAB, aB);
-						}
+//					} else if (edge.getTailNode().getLabelRepresentative()
+//							.equals(edge.getHeadNode().getLabelRepresentative())) {
+//						if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && configuration.isAlwaysAfter()) {
+//							/*
+//							 * Avoid duplication: addAlwaysAfter() will take care of this.
+//							 */
+//						} else {
+//							/*
+//							 * Simplification: Both A and B always occur equally often. The pbAB place
+//							 * between them will do.
+//							 */
+//							Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
+//							net.addArc(aA, pbAB);
+//							net.addArc(pbAB, aB);
+//						}
 					} else {
 						/*
 						 * Place qbAB models that the constraint is not satisfied: We need to do B.
