@@ -29,48 +29,48 @@ public class ConverterAlgorithm {
 	private Marking startMarking;
 	private Marking endMarking;
 
-	static public String PREFIX_START ="{";
-	static public String PREFIX_END ="}";
-	
+	static public String PREFIX_START = "{";
+	static public String PREFIX_END = "}";
+
 	static public String PREFIX_PROCESS_P1 = PREFIX_START + "i" + PREFIX_END;
 	static public String PREFIX_PROCESS_P2 = PREFIX_START + "o" + PREFIX_END;
-	
+
 	static public String PREFIX_INTERVAL_P1 = PREFIX_START + "pi" + PREFIX_END;
 	static public String PREFIX_INTERVAL_P2 = PREFIX_START + "qi" + PREFIX_END;
 	static public String PREFIX_INTERVAL_P3 = PREFIX_START + "ri" + PREFIX_END;
-	
+
 	static public String PREFIX_EQUIVALENCE_P1 = PREFIX_START + "pe" + PREFIX_END;
-	
+
 	static public String PREFIX_AFTER_P1 = PREFIX_START + "pa" + PREFIX_END;
 	static public String PREFIX_AFTER_P2 = PREFIX_START + "qa" + PREFIX_END;
 	static public String PREFIX_AFTER_P3 = PREFIX_START + "ra" + PREFIX_END;
-	
-	static public String PREFIX_BEFORE_P1 = PREFIX_START + "pt" + PREFIX_END;
-	static public String PREFIX_BEFORE_P2 = PREFIX_START + "qt" + PREFIX_END;
-	static public String PREFIX_BEFORE_P3 = PREFIX_START + "rt" + PREFIX_END;
-	
+
+	static public String PREFIX_BEFORE_P1 = PREFIX_START + "pb" + PREFIX_END;
+	static public String PREFIX_BEFORE_P2 = PREFIX_START + "qb" + PREFIX_END;
+	static public String PREFIX_BEFORE_P3 = PREFIX_START + "rb" + PREFIX_END;
+
 	static public String PREFIX_NEVER_P1 = PREFIX_START + "pn" + PREFIX_END;
 	static public String PREFIX_NEVER_P2 = PREFIX_START + "qn" + PREFIX_END;
 	static public String PREFIX_NEVER_P3 = PREFIX_START + "rn" + PREFIX_END;
-	
+
 	static public String PREFIX_EXCLUSIVE_P1 = PREFIX_START + "px" + PREFIX_END;
 	static public String PREFIX_EXCLUSIVE_P2 = PREFIX_START + "qx" + PREFIX_END;
 	static public String PREFIX_EXCLUSIVE_P3 = PREFIX_START + "rx" + PREFIX_END;
 
 	static public String PREFIX_INTERVAL_T1 = PREFIX_START + "ti" + PREFIX_END;
 	static public String PREFIX_INTERVAL_T2 = PREFIX_START + "ui" + PREFIX_END;
-	
+
 	static public String PREFIX_EQUIVALENCE_T1 = PREFIX_START + "te" + PREFIX_END;
-	
+
 	static public String PREFIX_AFTER_T1 = PREFIX_START + "ta" + PREFIX_END;
 	static public String PREFIX_AFTER_T2 = PREFIX_START + "ua" + PREFIX_END;
-	
+
 	static public String PREFIX_BEFORE_T1 = PREFIX_START + "tb" + PREFIX_END;
 	static public String PREFIX_BEFORE_T2 = PREFIX_START + "ub" + PREFIX_END;
-	
+
 	static public String PREFIX_NEVER_T1 = PREFIX_START + "tn" + PREFIX_END;
 	static public String PREFIX_NEVER_T2 = PREFIX_START + "un" + PREFIX_END;
-	
+
 	static public String PREFIX_EXCLUSIVE_T1 = PREFIX_START + "tx" + PREFIX_END;
 	static public String PREFIX_EXCLUSIVE_T2 = PREFIX_START + "ux" + PREFIX_END;
 	static public String PREFIX_EXCLUSIVE_T3 = PREFIX_START + "vx" + PREFIX_END;
@@ -355,7 +355,8 @@ public class ConverterAlgorithm {
 					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
 					if (configuration.isNever() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 && edge.getHeadType() == LogSkeletonEdgeType.NEVER && edge.getTailNode().getLabelRepresentative()
+							&& edge.getHeadNode().getHigh() <= 1 && edge.getHeadType() == LogSkeletonEdgeType.NEVER
+							&& edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
@@ -463,7 +464,8 @@ public class ConverterAlgorithm {
 					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
 					if (configuration.isNever() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailType() == LogSkeletonEdgeType.NEVER && edge.getTailNode().getLabelRepresentative()
+							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailType() == LogSkeletonEdgeType.NEVER
+							&& edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
@@ -509,7 +511,7 @@ public class ConverterAlgorithm {
 						net.addArc(ubAB, rbAB);
 					} else if (edge.getTailNode().getLabelRepresentative()
 							.equals(edge.getHeadNode().getLabelRepresentative())) {
-						if (configuration.isAlwaysAfter()) {
+						if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && configuration.isAlwaysAfter()) {
 							/*
 							 * Avoid duplication: addAlwaysAfter() will take care of this.
 							 */
@@ -589,6 +591,13 @@ public class ConverterAlgorithm {
 						Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
 						net.addArc(aA, pnAB);
 						net.addArc(pnAB, aB);
+					} else if ((edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
+							|| edge.getTailType() == LogSkeletonEdgeType.ALWAYS)
+							&& (configuration.isAlwaysAfter() || configuration.isAlwaysBefore())
+							&& edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1) {
+						/*
+						 * Skip, always after or always before will take care of this.
+						 */
 					} else {
 						/*
 						 * A token in place pnAB indicates that we can do A.
@@ -702,7 +711,8 @@ public class ConverterAlgorithm {
 					net.addArc(qx, endTransition);
 				}
 				for (LogSkeletonNode node : maximalNodes) {
-					Transition aX = configuration.isMerge() ? transitions.get(node) : net.addTransition(node.getLabel());
+					Transition aX = configuration.isMerge() ? transitions.get(node)
+							: net.addTransition(node.getLabel());
 					if (node.getHigh() <= 1) {
 						net.addArc(px, aX);
 						net.addArc(aX, qx);
