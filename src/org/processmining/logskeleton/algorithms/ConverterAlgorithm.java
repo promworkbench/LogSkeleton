@@ -266,8 +266,8 @@ public class ConverterAlgorithm {
 							 * Candidate node is part of this equivalence class. OK.
 							 */
 							boolean isRequired = true;
-							if (configuration.isOptimizeEquivalence() && configuration.isAlwaysAfter()
-									&& candidateRequiredNode.getHigh() <= 1) {
+							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeAlwaysEquivalence()
+									&& configuration.isAlwaysAfter() && candidateRequiredNode.getHigh() <= 1) {
 								/*
 								 * Check if there is an equivalent preceding node that has always after with
 								 * this node. If so, this edge will take care of the equivalence check with that
@@ -285,8 +285,8 @@ public class ConverterAlgorithm {
 									}
 								}
 							}
-							if (configuration.isOptimizeEquivalence() && configuration.isAlwaysBefore()
-									&& candidateRequiredNode.getHigh() <= 1) {
+							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeAlwaysEquivalence()
+									&& configuration.isAlwaysBefore() && candidateRequiredNode.getHigh() <= 1) {
 								/*
 								 * Check if there is an equivalent preceding node that has always before with
 								 * this node. If so, this edge will take care of the equivalence check with that
@@ -304,8 +304,8 @@ public class ConverterAlgorithm {
 									}
 								}
 							}
-							if (configuration.isOptimizeEquivalence() && configuration.isNever()
-									&& candidateRequiredNode.getHigh() <= 1) {
+							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeNeverEquivalence()
+									&& configuration.isNever() && candidateRequiredNode.getHigh() <= 1) {
 								/*
 								 * Check if there is an equivalent preceding node that has never after/before
 								 * with this node. If so, this edge will take care of the equivalence check with
