@@ -198,10 +198,10 @@ public class GraphBuilderAlgorithm {
 				if (configuration.getActivities().contains(tailActivity)
 						|| configuration.getActivities().contains(headActivity)) {
 					LogSkeletonEdge edge = new LogSkeletonEdge();
-					LogSkeletonNode headNode = nodeMap.get(tailActivity);
-					LogSkeletonNode tailNode = nodeMap.get(headActivity);
-					edge.setTailNode(headNode);
-					edge.setHeadNode(tailNode);
+					LogSkeletonNode tailNode = nodeMap.get(tailActivity);
+					LogSkeletonNode headNode = nodeMap.get(headActivity);
+					edge.setTailNode(tailNode);
+					edge.setHeadNode(headNode);
 					if (configuration.getRelations().contains(LogSkeletonRelation.RESPONSE)) {
 						if (edge.getTailType() == null
 								&& logSkeleton.hasNonRedundantResponse(tailActivity, headActivity, activities)) {
@@ -295,11 +295,11 @@ public class GraphBuilderAlgorithm {
 						 * Some non-redundant relation found, add to graph.
 						 */
 						List<LogSkeletonNode> nodes = new ArrayList<LogSkeletonNode>();
-						nodes.add(tailNode);
 						nodes.add(headNode);
+						nodes.add(tailNode);
 						graph.getEdges().put(nodes, edge);
-						headNode.getIncoming().put(tailNode, edge);
 						tailNode.getOutgoing().put(headNode, edge);
+						headNode.getIncoming().put(tailNode, edge);
 					}
 				}
 			}

@@ -273,7 +273,7 @@ public class ConverterAlgorithm {
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
-								for (LogSkeletonEdge edge : candidateRequiredNode.getOutgoing().values()) {
+								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
 											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
@@ -293,7 +293,7 @@ public class ConverterAlgorithm {
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
-								for (LogSkeletonEdge edge : candidateRequiredNode.getOutgoing().values()) {
+								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
 											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
@@ -313,7 +313,7 @@ public class ConverterAlgorithm {
 								 * with this node. If so, this edge will take care of the equivalence check with
 								 * that node.
 								 */
-								for (LogSkeletonEdge edge : candidateRequiredNode.getOutgoing().values()) {
+								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if ((edge.getTailType() == LogSkeletonEdgeType.NEVER
 											|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) && node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
