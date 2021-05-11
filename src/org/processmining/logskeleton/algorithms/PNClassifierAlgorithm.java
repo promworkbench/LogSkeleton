@@ -62,6 +62,8 @@ public class PNClassifierAlgorithm {
 				if (inputPlaces.get(transition).size() == 1 && outputPlaces.get(transition).size() == 1) {
 					placeMap.put(outputPlaces.get(transition).iterator().next(),
 							inputPlaces.get(transition).iterator().next());
+				} else if (inputPlaces.get(transition).size() == 0 && outputPlaces.get(transition).size() == 1) {
+					placeMap.put(outputPlaces.get(transition).iterator().next(), null);
 				}
 			}
 			if (!transition.isInvisible() || transition.getLabel().equals(LogSkeletonCount.STARTEVENT)
@@ -90,19 +92,23 @@ public class PNClassifierAlgorithm {
 	}
 
 	private boolean classify(List<String> activities, Petrinet net, Marking initialMarking, Marking finalMarking) {
-//		System.out.println("[PNClassifierAlgorithm] Replaying trace " + activities);
+		//		System.out.println("[PNClassifierAlgorithm] Replaying trace " + activities);
 		Marking currentMarking = new Marking(initialMarking);
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
-//			System.out.println("[PNClassifierAlgorithm] " + activity);
+			//			System.out.println("[PNClassifierAlgorithm] " + activity);
 			for (Place place : inputPlaces.get(transition)) {
 				if (currentMarking.contains(place)) {
 					currentMarking.remove(place);
 				} else if (placeMap.containsKey(place)) {
-					if (currentMarking.contains(placeMap.get(place))) {
+					if (placeMap.get(place) == null) {
+					} else if (currentMarking.contains(placeMap.get(place))) {
 						currentMarking.remove(placeMap.get(place));
 					} else if (placeMap.containsKey(placeMap.get(place))) {
-						currentMarking.remove(placeMap.get(placeMap.get(place)));
+						if (placeMap.get(placeMap.get(place)) == null) {
+						} else if (currentMarking.contains(placeMap.get(placeMap.get(place)))) {
+							currentMarking.remove(placeMap.get(placeMap.get(place)));
+						}
 					} else {
 						return false;
 					}
@@ -110,33 +116,33 @@ public class PNClassifierAlgorithm {
 					return false;
 				}
 			}
-//			System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
+			//			System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
 			for (Place place : outputPlaces.get(transition)) {
 				currentMarking.add(place);
 			}
 		}
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_INTERVAL_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EQUIVALENCE_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_AFTER_T2);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_BEFORE_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_BEFORE_T2);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_NEVER_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_NEVER_T2);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T1);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T2);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T3);
-//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-//		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		//		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
 		return currentMarking.equals(finalMarking);
 	}
 
@@ -154,7 +160,7 @@ public class PNClassifierAlgorithm {
 						}
 					}
 					if (enabled) {
-//						System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
+						//						System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
 						currentMarking = tmpMarking;
 						for (Place place : outputPlaces.get(transition)) {
 							currentMarking.add(place);

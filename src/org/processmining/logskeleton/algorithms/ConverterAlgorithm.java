@@ -376,8 +376,8 @@ public class ConverterAlgorithm {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
 						 */
-					} else if (configuration.isOptimizeAlwaysEquivalence() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailNode().getLabelRepresentative()
+					} else if (configuration.isOptimizeAlwaysEquivalence() && /*edge.getTailNode().getHigh() <= 1
+							&& edge.getHeadNode().getHigh() <= 1 &&*/ edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Both A and B occur at most once, and always occur equally often. The paAB
@@ -388,28 +388,28 @@ public class ConverterAlgorithm {
 						net.addArc(paAB, aB);
 					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
 							&& edge.getHeadNode().getHigh() <= 1) {
-						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
+//						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
 						Place qaAB = net.addPlace(PREFIX_AFTER_P2 + edge.toString());
-						Place raAB = net.addPlace(PREFIX_AFTER_P3 + edge.toString());
-						if (configuration.isMarking()) {
-							startMarking.add(paAB);
-							endMarking.add(raAB);
-						} else {
-							net.addArc(startTransition, paAB);
-							net.addArc(raAB, endTransition);
-						}
+//						Place raAB = net.addPlace(PREFIX_AFTER_P3 + edge.toString());
+//						if (configuration.isMarking()) {
+//							startMarking.add(paAB);
+//							endMarking.add(raAB);
+//						} else {
+//							net.addArc(startTransition, paAB);
+//							net.addArc(raAB, endTransition);
+//						}
 						Transition taAB = net.addTransition(PREFIX_AFTER_T1 + edge.toString());
 						taAB.setInvisible(true);
-						Transition uaAB = net.addTransition(PREFIX_AFTER_T2 + edge.toString());
-						uaAB.setInvisible(true);
-						net.addArc(paAB, aA);
-						net.addArc(paAB, taAB);
+//						Transition uaAB = net.addTransition(PREFIX_AFTER_T2 + edge.toString());
+//						uaAB.setInvisible(true);
+//						net.addArc(paAB, aA);
+//						net.addArc(paAB, taAB);
 						net.addArc(aA, qaAB);
 						net.addArc(taAB, qaAB);
 						net.addArc(qaAB, aB);
-						net.addArc(aB, raAB);
-						net.addArc(paAB, uaAB);
-						net.addArc(uaAB, raAB);
+//						net.addArc(aB, raAB);
+//						net.addArc(paAB, uaAB);
+//						net.addArc(uaAB, raAB);
 					} else {
 						/*
 						 * Place qaAB models that the constraint is not satisfied: We need to do B.
@@ -418,17 +418,17 @@ public class ConverterAlgorithm {
 						/*
 						 * Place paAB models that the constraint is satisfied.
 						 */
-						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
+//						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
 						/*
 						 * Initially, the constraint is satisfied.
 						 */
-						if (configuration.isMarking()) {
-							startMarking.add(paAB);
-							endMarking.add(paAB);
-						} else {
-							net.addArc(startTransition, paAB);
-							net.addArc(paAB, endTransition);
-						}
+//						if (configuration.isMarking()) {
+//							startMarking.add(paAB);
+//							endMarking.add(paAB);
+//						} else {
+//							net.addArc(startTransition, paAB);
+//							net.addArc(paAB, endTransition);
+//						}
 						/*
 						 * Transition taAB models two possibilities: 1. Either we need to do B, which
 						 * will violate the constraint. 2. Or we need to do A, which will not violate
@@ -439,19 +439,19 @@ public class ConverterAlgorithm {
 						/*
 						 * Connect everything.
 						 */
-						net.addArc(paAB, taAB);
+//						net.addArc(paAB, taAB);
 						net.addArc(taAB, qaAB);
 						/*
 						 * Firing B restores the constraint.
 						 */
 						net.addArc(qaAB, aB);
-						net.addArc(aB, paAB);
+//						net.addArc(aB, paAB);
 						/*
 						 * Firing A (temporarily) violates the constraint.
 						 */
 						net.addArc(aA, qaAB);
 						if (edge.getTailNode().getHigh() <= 1) {
-							net.addArc(paAB, aA);
+//							net.addArc(paAB, aA);
 						} else {
 							net.addArc(qaAB, aA);
 						}
@@ -478,8 +478,8 @@ public class ConverterAlgorithm {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
 						 */
-					} else if (configuration.isOptimizeAlwaysEquivalence() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailNode().getLabelRepresentative()
+					} else if (configuration.isOptimizeAlwaysEquivalence() && /*edge.getTailNode().getHigh() <= 1
+							&& edge.getHeadNode().getHigh() <= 1 &&*/ edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						if (configuration.isAlwaysAfter() && edge.getTailType() == LogSkeletonEdgeType.ALWAYS) {
 							/*
@@ -496,28 +496,28 @@ public class ConverterAlgorithm {
 						}
 					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
 							&& edge.getHeadNode().getHigh() <= 1) {
-						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
+//						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
 						Place qbAB = net.addPlace(PREFIX_BEFORE_P2 + edge.toString());
-						Place rbAB = net.addPlace(PREFIX_BEFORE_P3 + edge.toString());
-						if (configuration.isMarking()) {
-							startMarking.add(pbAB);
-							endMarking.add(rbAB);
-						} else {
-							net.addArc(startTransition, pbAB);
-							net.addArc(rbAB, endTransition);
-						}
+//						Place rbAB = net.addPlace(PREFIX_BEFORE_P3 + edge.toString());
+//						if (configuration.isMarking()) {
+//							startMarking.add(pbAB);
+//							endMarking.add(rbAB);
+//						} else {
+//							net.addArc(startTransition, pbAB);
+//							net.addArc(rbAB, endTransition);
+//						}
 						Transition tbAB = net.addTransition(PREFIX_BEFORE_T1 + edge.toString());
 						tbAB.setInvisible(true);
-						Transition ubAB = net.addTransition(PREFIX_BEFORE_T2 + edge.toString());
-						ubAB.setInvisible(true);
-						net.addArc(pbAB, aA);
+//						Transition ubAB = net.addTransition(PREFIX_BEFORE_T2 + edge.toString());
+//						ubAB.setInvisible(true);
+//						net.addArc(pbAB, aA);
 						net.addArc(qbAB, tbAB);
 						net.addArc(aA, qbAB);
-						net.addArc(tbAB, rbAB);
+//						net.addArc(tbAB, rbAB);
 						net.addArc(qbAB, aB);
-						net.addArc(aB, rbAB);
-						net.addArc(pbAB, ubAB);
-						net.addArc(ubAB, rbAB);
+//						net.addArc(aB, rbAB);
+//						net.addArc(pbAB, ubAB);
+//						net.addArc(ubAB, rbAB);
 					} else {
 						/*
 						 * Place qbAB models that the constraint is not satisfied: We need to do B.
@@ -526,17 +526,17 @@ public class ConverterAlgorithm {
 						/*
 						 * Place pbAB models that the constraint is satisfied.
 						 */
-						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
+//						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
 						/*
 						 * Initially, the constraint is satisfied.
 						 */
-						if (configuration.isMarking()) {
-							startMarking.add(pbAB);
-							endMarking.add(pbAB);
-						} else {
-							net.addArc(startTransition, pbAB);
-							net.addArc(pbAB, endTransition);
-						}
+//						if (configuration.isMarking()) {
+//							startMarking.add(pbAB);
+//							endMarking.add(pbAB);
+//						} else {
+//							net.addArc(startTransition, pbAB);
+//							net.addArc(pbAB, endTransition);
+//						}
 						/*
 						 * Transition tbAB models two possibilities: 1. Either we needed to do A, which
 						 * will not violate the constraint. 2. Or we needed to do B, which will not
@@ -550,13 +550,13 @@ public class ConverterAlgorithm {
 						 */
 						Transition tbAB = net.addTransition(PREFIX_BEFORE_T1 + edge.toString());
 						tbAB.setInvisible(true);
-						net.addArc(pbAB, aA);
+//						net.addArc(pbAB, aA);
 						net.addArc(aA, qbAB);
 						net.addArc(qbAB, tbAB);
-						net.addArc(tbAB, pbAB);
+//						net.addArc(tbAB, pbAB);
 						net.addArc(qbAB, aB);
 						if (edge.getHeadNode().getHigh() <= 1) {
-							net.addArc(aB, pbAB);
+//							net.addArc(aB, pbAB);
 						} else {
 							net.addArc(aB, qbAB);
 						}
