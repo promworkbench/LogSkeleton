@@ -96,7 +96,7 @@ public class PNClassifierAlgorithm {
 		Marking currentMarking = new Marking(initialMarking);
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
-			//			System.out.println("[PNClassifierAlgorithm] " + activity);
+						System.out.println("[PNClassifierAlgorithm] " + activity);
 			for (Place place : inputPlaces.get(transition)) {
 				if (currentMarking.contains(place)) {
 					currentMarking.remove(place);
@@ -149,7 +149,7 @@ public class PNClassifierAlgorithm {
 	private Marking fireAll(Petrinet net, Marking currentMarking, String prefix) {
 		for (Transition transition : net.getTransitions()) {
 			if (transition.getLabel().startsWith(prefix)) {
-				boolean enabled = true;
+				boolean enabled = !inputPlaces.get(transition).isEmpty();
 				while (enabled) {
 					Marking tmpMarking = new Marking(currentMarking);
 					for (Place place : inputPlaces.get(transition)) {

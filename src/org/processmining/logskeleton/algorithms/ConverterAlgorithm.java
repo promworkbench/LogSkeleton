@@ -598,47 +598,89 @@ public class ConverterAlgorithm {
 						/*
 						 * A token in place pnAB indicates that we can do A.
 						 */
-						Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
+//						Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
 						/*
 						 * A token in place qnAB indicates that we can do B.
 						 */
-						Place qnAB = net.addPlace(PREFIX_NEVER_P2 + edge.toString());
+//						Place qnAB = net.addPlace(PREFIX_NEVER_P2 + edge.toString());
 						/*
 						 * A token in place rnAB indicates that we have done all A's and now start doign
 						 * all B's.
 						 */
 						Place rnAB = net.addPlace(PREFIX_NEVER_P3 + edge.toString());
-						if (configuration.isMarking()) {
-							startMarking.add(pnAB);
-							endMarking.add(qnAB);
-						} else {
-							net.addArc(startTransition, pnAB);
-							net.addArc(qnAB, endTransition);
-						}
-						if (edge.getTailNode().getLow() != 1 || edge.getTailNode().getHigh() != 1) {
-							Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
-							tnAB.setInvisible(true);
-							net.addArc(pnAB, tnAB);
-							net.addArc(tnAB, rnAB);
-						}
-						if (edge.getHeadNode().getLow() != 1 || edge.getHeadNode().getHigh() != 1) {
-							Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
-							unAB.setInvisible(true);
-							net.addArc(rnAB, unAB);
-							net.addArc(unAB, qnAB);
-						}
-						net.addArc(pnAB, aA);
-						net.addArc(aB, qnAB);
 						if (edge.getTailNode().getHigh() <= 1) {
 							net.addArc(aA, rnAB);
+							if (edge.getTailNode().getLow() == 0) {
+								Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
+								tnAB.setInvisible(true);
+								net.addArc(tnAB, rnAB);
+							}
 						} else {
+							Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
+							tnAB.setInvisible(true);
+							Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
 							net.addArc(aA, pnAB);
+							net.addArc(pnAB, aA);
+							net.addArc(pnAB, tnAB);
+							net.addArc(tnAB, rnAB);
+							if (configuration.isMarking()) {
+								startMarking.add(pnAB);
+							} else {
+								net.addArc(startTransition, pnAB);
+							}
 						}
 						if (edge.getHeadNode().getHigh() <= 1) {
 							net.addArc(rnAB, aB);
+							if (edge.getHeadNode().getLow() == 0) {
+								Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
+								unAB.setInvisible(true);
+								net.addArc(rnAB, unAB);
+							}
 						} else {
+							Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
+							unAB.setInvisible(true);
+							Place qnAB = net.addPlace(PREFIX_NEVER_P2 + edge.toString());
+							net.addArc(rnAB, unAB);
+							net.addArc(unAB, qnAB);
 							net.addArc(qnAB, aB);
+							net.addArc(aB, qnAB);
+							if (configuration.isMarking()) {
+								endMarking.add(qnAB);
+							} else {
+								net.addArc(qnAB, endTransition);
+							}
 						}
+//						if (configuration.isMarking()) {
+//							startMarking.add(pnAB);
+//							endMarking.add(qnAB);
+//						} else {
+//							net.addArc(startTransition, pnAB);
+//							net.addArc(qnAB, endTransition);
+//						}
+//						if (edge.getTailNode().getLow() != 1 || edge.getTailNode().getHigh() != 1) {
+//							Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
+//							tnAB.setInvisible(true);
+//							net.addArc(pnAB, tnAB);
+//							net.addArc(tnAB, rnAB);
+//						}
+//						if (edge.getHeadNode().getLow() != 1 || edge.getHeadNode().getHigh() != 1) {
+//							Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
+//							unAB.setInvisible(true);
+//							net.addArc(rnAB, unAB);
+//							net.addArc(unAB, qnAB);
+//						}
+//						net.addArc(pnAB, aA);
+//						net.addArc(aB, qnAB);
+//						if (edge.getTailNode().getHigh() <= 1) {
+//							net.addArc(aA, rnAB);
+//						} else {
+//							net.addArc(aA, pnAB);
+//						}
+//						if (edge.getHeadNode().getHigh() <= 1) {
+//							net.addArc(rnAB, aB);
+//						} else {
+//							net.addArc(qnAB, aB);
+//						}
 					}
 				}
 			}
