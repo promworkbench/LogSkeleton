@@ -273,7 +273,7 @@ public class ConverterAlgorithm {
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
-								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
+								for (LogSkeletonEdge edge : candidateRequiredNode.getOutgoing().values()) {
 									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
 											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
@@ -293,7 +293,7 @@ public class ConverterAlgorithm {
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
-								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
+								for (LogSkeletonEdge edge : candidateRequiredNode.getOutgoing().values()) {
 									if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
 											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
@@ -313,7 +313,7 @@ public class ConverterAlgorithm {
 								 * with this node. If so, this edge will take care of the equivalence check with
 								 * that node.
 								 */
-								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
+								for (LogSkeletonEdge edge : candidateRequiredNode.getOutgoing().values()) {
 									if ((edge.getTailType() == LogSkeletonEdgeType.NEVER
 											|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) && node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
@@ -332,8 +332,15 @@ public class ConverterAlgorithm {
 							}
 						}
 					}
+//					String s = "[";
+//					String x = "";
+//					for (LogSkeletonNode n : requiredNodes) {
+//						x = x + s + n.getLabel();
+//						s = ",";
+//					}
+//					x = x + "]";
+//					System.out.println("[ConverterAlgorithm] Creating fragment for " + x);
 					if (requiredNodes.size() > 1) {
-						System.out.println("[ConverterAlgorithm] Creating fragment for " + requiredNodes);
 						Transition teA = net.addTransition(PREFIX_EQUIVALENCE_T1 + node.getLabel());
 						teA.setInvisible(true);
 						for (LogSkeletonNode requiredNode : requiredNodes) {
