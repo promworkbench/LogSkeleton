@@ -333,6 +333,7 @@ public class ConverterAlgorithm {
 						}
 					}
 					if (requiredNodes.size() > 1) {
+						System.out.println("[ConverterAlgorithm] Creating fragment for " + requiredNodes);
 						Transition teA = net.addTransition(PREFIX_EQUIVALENCE_T1 + node.getLabel());
 						teA.setInvisible(true);
 						for (LogSkeletonNode requiredNode : requiredNodes) {
@@ -457,7 +458,7 @@ public class ConverterAlgorithm {
 		if (configuration.isAlwaysBefore()) {
 			for (LogSkeletonEdge edge : graph.getEdges().values()) {
 				if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS) {
-					// Tail (B) always before head (A)
+					// Tail (A) always before head (B)
 					Transition aA = configuration.isMerge() ? transitions.get(edge.getTailNode())
 							: net.addTransition(edge.getTailNode().getLabel());
 					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
