@@ -473,7 +473,7 @@ public class ConverterAlgorithm {
 					} else if (configuration.isOptimizeAlwaysEquivalence() && edge.getTailNode().getHigh() <= 1
 							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
-						if (configuration.isAlwaysAfter()) {
+						if (configuration.isAlwaysAfter() && edge.getTailType() == LogSkeletonEdgeType.ALWAYS) {
 							/*
 							 * Avoid duplication: addAlwaysAfter() will take care of this.
 							 */
