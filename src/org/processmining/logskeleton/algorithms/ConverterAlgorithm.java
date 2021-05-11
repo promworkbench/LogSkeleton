@@ -275,6 +275,7 @@ public class ConverterAlgorithm {
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
+											&& edge.getTailNode().getHigh() <= 1
 											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
@@ -294,6 +295,7 @@ public class ConverterAlgorithm {
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
+											&& edge.getTailNode().getHigh() <= 1
 											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
@@ -314,6 +316,7 @@ public class ConverterAlgorithm {
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if ((edge.getTailType() == LogSkeletonEdgeType.NEVER
 											|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) && node.getHigh() <= 1
+											&& edge.getTailNode().getHigh() <= 1
 											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
