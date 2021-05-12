@@ -212,7 +212,7 @@ public class PNClassifierAlgorithm {
 						}
 					}
 					if (enabled) {
-												System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
+//												System.out.println("[PNClassifierAlgorithm] Fired transition " + transition.getLabel());
 						currentMarking = tmpMarking;
 						for (Place place : outputPlaces.get(transition)) {
 							currentMarking.add(place);

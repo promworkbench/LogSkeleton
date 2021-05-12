@@ -81,11 +81,12 @@ public class ConverterAlgorithm {
 		initMerge(graph, configuration);
 
 		// Add all fragments for the seelcted constraints.
+		Map<LogSkeletonNode, Set<LogSkeletonNode>> never = new HashMap<LogSkeletonNode, Set<LogSkeletonNode>>();
 		addInterval(graph, configuration);
 		addEquivalence(graph, configuration);
-		addAlwaysAfter(graph, configuration);
-		addAlwaysBefore(graph, configuration);
-		addNever(graph, configuration);
+		addAlwaysAfter(graph, configuration, never);
+		addAlwaysBefore(graph, configuration, never);
+		addNever(graph, configuration, never);
 		addExclusive(graph, configuration);
 
 		// Connect the net with the start (initial) and end (final) marking.
@@ -267,16 +268,18 @@ public class ConverterAlgorithm {
 							 */
 							boolean isRequired = true;
 							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeAlwaysEquivalence()
-									&& configuration.isAlwaysAfter() /*&& candidateRequiredNode.getHigh() <= 1*/) {
+									&& configuration.isAlwaysAfter() /* && candidateRequiredNode.getHigh() <= 1 */) {
 								/*
 								 * Check if there is an equivalent preceding node that has always after with
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
-									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && /*node.getHigh() <= 1
-											&& edge.getTailNode().getHigh() <= 1
-											&&*/ edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
+									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS
+											&& /*
+												 * node.getHigh() <= 1 && edge.getTailNode().getHigh() <= 1 &&
+												 */ edge.getTailNode().getLabelRepresentative()
+													.equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
 										 * of this node.
@@ -287,16 +290,18 @@ public class ConverterAlgorithm {
 								}
 							}
 							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeAlwaysEquivalence()
-									&& configuration.isAlwaysBefore() /*&& candidateRequiredNode.getHigh() <= 1*/) {
+									&& configuration.isAlwaysBefore() /* && candidateRequiredNode.getHigh() <= 1 */) {
 								/*
 								 * Check if there is an equivalent preceding node that has always before with
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
-									if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS && /*node.getHigh() <= 1
-											&& edge.getTailNode().getHigh() <= 1
-											&&*/ edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
+									if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
+											&& /*
+												 * node.getHigh() <= 1 && edge.getTailNode().getHigh() <= 1 &&
+												 */ edge.getTailNode().getLabelRepresentative()
+													.equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
 										 * of this node.
@@ -307,7 +312,7 @@ public class ConverterAlgorithm {
 								}
 							}
 							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeNeverEquivalence()
-									&& configuration.isNever() /*&& candidateRequiredNode.getHigh() <= 1*/) {
+									&& configuration.isNever() /* && candidateRequiredNode.getHigh() <= 1 */) {
 								/*
 								 * Check if there is an equivalent preceding node that has never after/before
 								 * with this node. If so, this edge will take care of the equivalence check with
@@ -315,9 +320,11 @@ public class ConverterAlgorithm {
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if ((edge.getTailType() == LogSkeletonEdgeType.NEVER
-											|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) && /*node.getHigh() <= 1
-											&& edge.getTailNode().getHigh() <= 1
-											&&*/ edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
+											|| edge.getHeadType() == LogSkeletonEdgeType.NEVER)
+											&& /*
+												 * node.getHigh() <= 1 && edge.getTailNode().getHigh() <= 1 &&
+												 */ edge.getTailNode().getLabelRepresentative()
+													.equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
 										 * of this node.
@@ -332,14 +339,14 @@ public class ConverterAlgorithm {
 							}
 						}
 					}
-//					String s = "[";
-//					String x = "";
-//					for (LogSkeletonNode n : requiredNodes) {
-//						x = x + s + n.getLabel();
-//						s = ",";
-//					}
-//					x = x + "]";
-//					System.out.println("[ConverterAlgorithm] Creating fragment for " + x);
+					//					String s = "[";
+					//					String x = "";
+					//					for (LogSkeletonNode n : requiredNodes) {
+					//						x = x + s + n.getLabel();
+					//						s = ",";
+					//					}
+					//					x = x + "]";
+					//					System.out.println("[ConverterAlgorithm] Creating fragment for " + x);
 					if (requiredNodes.size() > 1) {
 						Transition teA = net.addTransition(PREFIX_EQUIVALENCE_T1 + node.getLabel());
 						teA.setInvisible(true);
@@ -359,7 +366,8 @@ public class ConverterAlgorithm {
 		}
 	}
 
-	private void addAlwaysAfter(LogSkeletonGraph graph, ConverterConfiguration configuration) {
+	private void addAlwaysAfter(LogSkeletonGraph graph, ConverterConfiguration configuration,
+			Map<LogSkeletonNode, Set<LogSkeletonNode>> never) {
 		if (configuration.isAlwaysAfter()) {
 			for (LogSkeletonEdge edge : graph.getEdges().values()) {
 				if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS) {
@@ -376,8 +384,14 @@ public class ConverterAlgorithm {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
 						 */
-					} else if (configuration.isOptimizeAlwaysEquivalence() && /*edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 &&*/ edge.getTailNode().getLabelRepresentative()
+						if (!never.containsKey(edge.getTailNode())) {
+							never.put(edge.getTailNode(), new HashSet<LogSkeletonNode>());
+						}
+						never.get(edge.getTailNode()).add(edge.getHeadNode());
+					} else if (configuration.isOptimizeAlwaysEquivalence()
+							&& /*
+								 * edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 &&
+								 */ edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Both A and B occur at most once, and always occur equally often. The paAB
@@ -388,28 +402,28 @@ public class ConverterAlgorithm {
 						net.addArc(paAB, aB);
 					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
 							&& edge.getHeadNode().getHigh() <= 1) {
-//						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
+						//						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
 						Place qaAB = net.addPlace(PREFIX_AFTER_P2 + edge.toString());
-//						Place raAB = net.addPlace(PREFIX_AFTER_P3 + edge.toString());
-//						if (configuration.isMarking()) {
-//							startMarking.add(paAB);
-//							endMarking.add(raAB);
-//						} else {
-//							net.addArc(startTransition, paAB);
-//							net.addArc(raAB, endTransition);
-//						}
+						//						Place raAB = net.addPlace(PREFIX_AFTER_P3 + edge.toString());
+						//						if (configuration.isMarking()) {
+						//							startMarking.add(paAB);
+						//							endMarking.add(raAB);
+						//						} else {
+						//							net.addArc(startTransition, paAB);
+						//							net.addArc(raAB, endTransition);
+						//						}
 						Transition taAB = net.addTransition(PREFIX_AFTER_T1 + edge.toString());
 						taAB.setInvisible(true);
-//						Transition uaAB = net.addTransition(PREFIX_AFTER_T2 + edge.toString());
-//						uaAB.setInvisible(true);
-//						net.addArc(paAB, aA);
-//						net.addArc(paAB, taAB);
+						//						Transition uaAB = net.addTransition(PREFIX_AFTER_T2 + edge.toString());
+						//						uaAB.setInvisible(true);
+						//						net.addArc(paAB, aA);
+						//						net.addArc(paAB, taAB);
 						net.addArc(aA, qaAB);
 						net.addArc(taAB, qaAB);
 						net.addArc(qaAB, aB);
-//						net.addArc(aB, raAB);
-//						net.addArc(paAB, uaAB);
-//						net.addArc(uaAB, raAB);
+						//						net.addArc(aB, raAB);
+						//						net.addArc(paAB, uaAB);
+						//						net.addArc(uaAB, raAB);
 					} else {
 						/*
 						 * Place qaAB models that the constraint is not satisfied: We need to do B.
@@ -418,17 +432,17 @@ public class ConverterAlgorithm {
 						/*
 						 * Place paAB models that the constraint is satisfied.
 						 */
-//						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
+						//						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
 						/*
 						 * Initially, the constraint is satisfied.
 						 */
-//						if (configuration.isMarking()) {
-//							startMarking.add(paAB);
-//							endMarking.add(paAB);
-//						} else {
-//							net.addArc(startTransition, paAB);
-//							net.addArc(paAB, endTransition);
-//						}
+						//						if (configuration.isMarking()) {
+						//							startMarking.add(paAB);
+						//							endMarking.add(paAB);
+						//						} else {
+						//							net.addArc(startTransition, paAB);
+						//							net.addArc(paAB, endTransition);
+						//						}
 						/*
 						 * Transition taAB models two possibilities: 1. Either we need to do B, which
 						 * will violate the constraint. 2. Or we need to do A, which will not violate
@@ -439,19 +453,19 @@ public class ConverterAlgorithm {
 						/*
 						 * Connect everything.
 						 */
-//						net.addArc(paAB, taAB);
+						//						net.addArc(paAB, taAB);
 						net.addArc(taAB, qaAB);
 						/*
 						 * Firing B restores the constraint.
 						 */
 						net.addArc(qaAB, aB);
-//						net.addArc(aB, paAB);
+						//						net.addArc(aB, paAB);
 						/*
 						 * Firing A (temporarily) violates the constraint.
 						 */
 						net.addArc(aA, qaAB);
 						if (edge.getTailNode().getHigh() <= 1) {
-//							net.addArc(paAB, aA);
+							//							net.addArc(paAB, aA);
 						} else {
 							net.addArc(qaAB, aA);
 						}
@@ -461,7 +475,8 @@ public class ConverterAlgorithm {
 		}
 	}
 
-	private void addAlwaysBefore(LogSkeletonGraph graph, ConverterConfiguration configuration) {
+	private void addAlwaysBefore(LogSkeletonGraph graph, ConverterConfiguration configuration,
+			Map<LogSkeletonNode, Set<LogSkeletonNode>> never) {
 		if (configuration.isAlwaysBefore()) {
 			for (LogSkeletonEdge edge : graph.getEdges().values()) {
 				if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS) {
@@ -478,8 +493,14 @@ public class ConverterAlgorithm {
 						/*
 						 * Avoid duplication: addNever() will take care of this.
 						 */
-					} else if (configuration.isOptimizeAlwaysEquivalence() && /*edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 &&*/ edge.getTailNode().getLabelRepresentative()
+						if (!never.containsKey(edge.getTailNode())) {
+							never.put(edge.getTailNode(), new HashSet<LogSkeletonNode>());
+						}
+						never.get(edge.getTailNode()).add(edge.getHeadNode());
+					} else if (configuration.isOptimizeAlwaysEquivalence()
+							&& /*
+								 * edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 &&
+								 */ edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						if (configuration.isAlwaysAfter() && edge.getTailType() == LogSkeletonEdgeType.ALWAYS) {
 							/*
@@ -496,28 +517,28 @@ public class ConverterAlgorithm {
 						}
 					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
 							&& edge.getHeadNode().getHigh() <= 1) {
-//						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
+						//						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
 						Place qbAB = net.addPlace(PREFIX_BEFORE_P2 + edge.toString());
-//						Place rbAB = net.addPlace(PREFIX_BEFORE_P3 + edge.toString());
-//						if (configuration.isMarking()) {
-//							startMarking.add(pbAB);
-//							endMarking.add(rbAB);
-//						} else {
-//							net.addArc(startTransition, pbAB);
-//							net.addArc(rbAB, endTransition);
-//						}
+						//						Place rbAB = net.addPlace(PREFIX_BEFORE_P3 + edge.toString());
+						//						if (configuration.isMarking()) {
+						//							startMarking.add(pbAB);
+						//							endMarking.add(rbAB);
+						//						} else {
+						//							net.addArc(startTransition, pbAB);
+						//							net.addArc(rbAB, endTransition);
+						//						}
 						Transition tbAB = net.addTransition(PREFIX_BEFORE_T1 + edge.toString());
 						tbAB.setInvisible(true);
-//						Transition ubAB = net.addTransition(PREFIX_BEFORE_T2 + edge.toString());
-//						ubAB.setInvisible(true);
-//						net.addArc(pbAB, aA);
+						//						Transition ubAB = net.addTransition(PREFIX_BEFORE_T2 + edge.toString());
+						//						ubAB.setInvisible(true);
+						//						net.addArc(pbAB, aA);
 						net.addArc(qbAB, tbAB);
 						net.addArc(aA, qbAB);
-//						net.addArc(tbAB, rbAB);
+						//						net.addArc(tbAB, rbAB);
 						net.addArc(qbAB, aB);
-//						net.addArc(aB, rbAB);
-//						net.addArc(pbAB, ubAB);
-//						net.addArc(ubAB, rbAB);
+						//						net.addArc(aB, rbAB);
+						//						net.addArc(pbAB, ubAB);
+						//						net.addArc(ubAB, rbAB);
 					} else {
 						/*
 						 * Place qbAB models that the constraint is not satisfied: We need to do B.
@@ -526,17 +547,17 @@ public class ConverterAlgorithm {
 						/*
 						 * Place pbAB models that the constraint is satisfied.
 						 */
-//						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
+						//						Place pbAB = net.addPlace(PREFIX_BEFORE_P1 + edge.toString());
 						/*
 						 * Initially, the constraint is satisfied.
 						 */
-//						if (configuration.isMarking()) {
-//							startMarking.add(pbAB);
-//							endMarking.add(pbAB);
-//						} else {
-//							net.addArc(startTransition, pbAB);
-//							net.addArc(pbAB, endTransition);
-//						}
+						//						if (configuration.isMarking()) {
+						//							startMarking.add(pbAB);
+						//							endMarking.add(pbAB);
+						//						} else {
+						//							net.addArc(startTransition, pbAB);
+						//							net.addArc(pbAB, endTransition);
+						//						}
 						/*
 						 * Transition tbAB models two possibilities: 1. Either we needed to do A, which
 						 * will not violate the constraint. 2. Or we needed to do B, which will not
@@ -550,13 +571,13 @@ public class ConverterAlgorithm {
 						 */
 						Transition tbAB = net.addTransition(PREFIX_BEFORE_T1 + edge.toString());
 						tbAB.setInvisible(true);
-//						net.addArc(pbAB, aA);
+						//						net.addArc(pbAB, aA);
 						net.addArc(aA, qbAB);
 						net.addArc(qbAB, tbAB);
-//						net.addArc(tbAB, pbAB);
+						//						net.addArc(tbAB, pbAB);
 						net.addArc(qbAB, aB);
 						if (edge.getHeadNode().getHigh() <= 1) {
-//							net.addArc(aB, pbAB);
+							//							net.addArc(aB, pbAB);
 						} else {
 							net.addArc(aB, qbAB);
 						}
@@ -566,7 +587,8 @@ public class ConverterAlgorithm {
 		}
 	}
 
-	private void addNever(LogSkeletonGraph graph, ConverterConfiguration configuration) {
+	private void addNever(LogSkeletonGraph graph, ConverterConfiguration configuration,
+			Map<LogSkeletonNode, Set<LogSkeletonNode>> never) {
 		if (configuration.isNever()) {
 			for (LogSkeletonEdge edge : graph.getEdges().values()) {
 				if (edge.getHeadType() == LogSkeletonEdgeType.NEVER
@@ -576,7 +598,9 @@ public class ConverterAlgorithm {
 							: net.addTransition(edge.getTailNode().getLabel());
 					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
-					if (configuration.isOptimizeNeverAlways()
+					if ((!never.containsKey(edge.getTailNode())
+							|| !never.get(edge.getTailNode()).contains(edge.getHeadNode()))
+							&& configuration.isOptimizeNeverAlways()
 							&& (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
 									|| edge.getTailType() == LogSkeletonEdgeType.ALWAYS)
 							&& (configuration.isAlwaysAfter() || configuration.isAlwaysBefore())
@@ -584,8 +608,10 @@ public class ConverterAlgorithm {
 						/*
 						 * Skip, always after or always before will take care of this.
 						 */
-					} else if (configuration.isOptimizeNeverEquivalence() && /*edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 &&*/ edge.getTailNode().getLabelRepresentative()
+					} else if (configuration.isOptimizeNeverEquivalence()
+							&& /*
+								 * edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1 &&
+								 */ edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Both the tail and the head activity occur at most once, and always occur
@@ -598,11 +624,11 @@ public class ConverterAlgorithm {
 						/*
 						 * A token in place pnAB indicates that we can do A.
 						 */
-//						Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
+						//						Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
 						/*
 						 * A token in place qnAB indicates that we can do B.
 						 */
-//						Place qnAB = net.addPlace(PREFIX_NEVER_P2 + edge.toString());
+						//						Place qnAB = net.addPlace(PREFIX_NEVER_P2 + edge.toString());
 						/*
 						 * A token in place rnAB indicates that we have done all A's and now start doign
 						 * all B's.
@@ -650,37 +676,37 @@ public class ConverterAlgorithm {
 								net.addArc(qnAB, endTransition);
 							}
 						}
-//						if (configuration.isMarking()) {
-//							startMarking.add(pnAB);
-//							endMarking.add(qnAB);
-//						} else {
-//							net.addArc(startTransition, pnAB);
-//							net.addArc(qnAB, endTransition);
-//						}
-//						if (edge.getTailNode().getLow() != 1 || edge.getTailNode().getHigh() != 1) {
-//							Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
-//							tnAB.setInvisible(true);
-//							net.addArc(pnAB, tnAB);
-//							net.addArc(tnAB, rnAB);
-//						}
-//						if (edge.getHeadNode().getLow() != 1 || edge.getHeadNode().getHigh() != 1) {
-//							Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
-//							unAB.setInvisible(true);
-//							net.addArc(rnAB, unAB);
-//							net.addArc(unAB, qnAB);
-//						}
-//						net.addArc(pnAB, aA);
-//						net.addArc(aB, qnAB);
-//						if (edge.getTailNode().getHigh() <= 1) {
-//							net.addArc(aA, rnAB);
-//						} else {
-//							net.addArc(aA, pnAB);
-//						}
-//						if (edge.getHeadNode().getHigh() <= 1) {
-//							net.addArc(rnAB, aB);
-//						} else {
-//							net.addArc(qnAB, aB);
-//						}
+						//						if (configuration.isMarking()) {
+						//							startMarking.add(pnAB);
+						//							endMarking.add(qnAB);
+						//						} else {
+						//							net.addArc(startTransition, pnAB);
+						//							net.addArc(qnAB, endTransition);
+						//						}
+						//						if (edge.getTailNode().getLow() != 1 || edge.getTailNode().getHigh() != 1) {
+						//							Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
+						//							tnAB.setInvisible(true);
+						//							net.addArc(pnAB, tnAB);
+						//							net.addArc(tnAB, rnAB);
+						//						}
+						//						if (edge.getHeadNode().getLow() != 1 || edge.getHeadNode().getHigh() != 1) {
+						//							Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
+						//							unAB.setInvisible(true);
+						//							net.addArc(rnAB, unAB);
+						//							net.addArc(unAB, qnAB);
+						//						}
+						//						net.addArc(pnAB, aA);
+						//						net.addArc(aB, qnAB);
+						//						if (edge.getTailNode().getHigh() <= 1) {
+						//							net.addArc(aA, rnAB);
+						//						} else {
+						//							net.addArc(aA, pnAB);
+						//						}
+						//						if (edge.getHeadNode().getHigh() <= 1) {
+						//							net.addArc(rnAB, aB);
+						//						} else {
+						//							net.addArc(qnAB, aB);
+						//						}
 					}
 				}
 			}
