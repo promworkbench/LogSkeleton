@@ -96,7 +96,7 @@ public class PNClassifierAlgorithm {
 		Marking currentMarking = new Marking(initialMarking);
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
-						System.out.println("[PNClassifierAlgorithm] " + activity);
+//						System.out.println("[PNClassifierAlgorithm] " + activity);
 			for (Place place : inputPlaces.get(transition)) {
 				if (currentMarking.contains(place)) {
 					currentMarking.remove(place);
@@ -121,6 +121,56 @@ public class PNClassifierAlgorithm {
 				currentMarking.add(place);
 			}
 		}
+		
+//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+		for (Place place : finalMarking.baseSet()) {
+			while (finalMarking.occurrences(place) > currentMarking.occurrences(place)) {
+				/*
+				 * We're some tokens short for this place in the final marking.
+				 */
+				if (placeMap.containsKey(place)) {
+					/*
+					 * Tokens may be coming for this place.
+					 */
+					if (placeMap.get(place) == null) {
+						/*
+						 * Place has a token generator. 
+						 * Generate sufficiently many tokens for this place.
+						 */
+						currentMarking.add(place, finalMarking.occurrences(place) - currentMarking.occurrences(place));
+					} else if (currentMarking.contains(placeMap.get(place))) {
+						/*
+						 * Predecessor place contains tokens. 
+						 * Move one to this place.
+						 */
+						currentMarking.remove(placeMap.get(place));
+						currentMarking.add(place);
+					} else if (placeMap.containsKey(placeMap.get(place))) {
+						/*
+						 * Tokens may be coming for the predecessor place.
+						 */
+						if (placeMap.get(placeMap.get(place)) == null) {
+							/*
+							 * Predecessor place has a token generator. 
+							 * Generate sufficiently many tokens for this place.
+							 */
+							currentMarking.add(place, finalMarking.occurrences(place) - currentMarking.occurrences(place));
+						} else if (currentMarking.contains(placeMap.get(placeMap.get(place)))) {
+							/*
+							 * Predecessor of predecessor place contains tokens. 
+							 * Move one to this place.
+							 */
+							currentMarking.remove(placeMap.get(placeMap.get(place)));
+							currentMarking.add(place);
+						}
+					} else {
+						break;
+					}
+				} else {
+					break;
+				}
+			}
+		}
 		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_INTERVAL_T1);
 		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
@@ -141,8 +191,8 @@ public class PNClassifierAlgorithm {
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T2);
 		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T3);
-		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
-		//		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
+//				System.out.println("[PNClassifierAlgorithm] Adapted current marking: " + currentMarking);
+//				System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
 		return currentMarking.equals(finalMarking);
 	}
 
