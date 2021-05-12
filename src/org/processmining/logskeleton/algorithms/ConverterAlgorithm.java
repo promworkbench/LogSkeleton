@@ -267,16 +267,16 @@ public class ConverterAlgorithm {
 							 */
 							boolean isRequired = true;
 							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeAlwaysEquivalence()
-									&& configuration.isAlwaysAfter() && candidateRequiredNode.getHigh() <= 1) {
+									&& configuration.isAlwaysAfter() /*&& candidateRequiredNode.getHigh() <= 1*/) {
 								/*
 								 * Check if there is an equivalent preceding node that has always after with
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
-									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
+									if (edge.getTailType() == LogSkeletonEdgeType.ALWAYS && /*node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
-											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
+											&&*/ edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
 										 * of this node.
@@ -287,16 +287,16 @@ public class ConverterAlgorithm {
 								}
 							}
 							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeAlwaysEquivalence()
-									&& configuration.isAlwaysBefore() && candidateRequiredNode.getHigh() <= 1) {
+									&& configuration.isAlwaysBefore() /*&& candidateRequiredNode.getHigh() <= 1*/) {
 								/*
 								 * Check if there is an equivalent preceding node that has always before with
 								 * this node. If so, this edge will take care of the equivalence check with that
 								 * node.
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
-									if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS && node.getHigh() <= 1
+									if (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS && /*node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
-											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
+											&&*/ edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
 										 * of this node.
@@ -307,7 +307,7 @@ public class ConverterAlgorithm {
 								}
 							}
 							if (configuration.isOptimizeEquivalence() && configuration.isOptimizeNeverEquivalence()
-									&& configuration.isNever() && candidateRequiredNode.getHigh() <= 1) {
+									&& configuration.isNever() /*&& candidateRequiredNode.getHigh() <= 1*/) {
 								/*
 								 * Check if there is an equivalent preceding node that has never after/before
 								 * with this node. If so, this edge will take care of the equivalence check with
@@ -315,9 +315,9 @@ public class ConverterAlgorithm {
 								 */
 								for (LogSkeletonEdge edge : candidateRequiredNode.getIncoming().values()) {
 									if ((edge.getTailType() == LogSkeletonEdgeType.NEVER
-											|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) && node.getHigh() <= 1
+											|| edge.getHeadType() == LogSkeletonEdgeType.NEVER) && /*node.getHigh() <= 1
 											&& edge.getTailNode().getHigh() <= 1
-											&& edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
+											&&*/ edge.getTailNode().getLabelRepresentative().equals(node.getLabel())) {
 										/*
 										 * Not needed as candidate. The preceding node will take care of the equivalence
 										 * of this node.
@@ -576,8 +576,16 @@ public class ConverterAlgorithm {
 							: net.addTransition(edge.getTailNode().getLabel());
 					Transition aB = configuration.isMerge() ? transitions.get(edge.getHeadNode())
 							: net.addTransition(edge.getHeadNode().getLabel());
-					if (configuration.isOptimizeNeverEquivalence() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1 && edge.getTailNode().getLabelRepresentative()
+					if (configuration.isOptimizeNeverAlways()
+							&& (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
+									|| edge.getTailType() == LogSkeletonEdgeType.ALWAYS)
+							&& (configuration.isAlwaysAfter() || configuration.isAlwaysBefore())
+							&& edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1) {
+						/*
+						 * Skip, always after or always before will take care of this.
+						 */
+					} else if (configuration.isOptimizeNeverEquivalence() && /*edge.getTailNode().getHigh() <= 1
+							&& edge.getHeadNode().getHigh() <= 1 &&*/ edge.getTailNode().getLabelRepresentative()
 									.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Both the tail and the head activity occur at most once, and always occur
@@ -586,14 +594,6 @@ public class ConverterAlgorithm {
 						Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
 						net.addArc(aA, pnAB);
 						net.addArc(pnAB, aB);
-					} else if (configuration.isOptimizeNeverAlways()
-							&& (edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
-									|| edge.getTailType() == LogSkeletonEdgeType.ALWAYS)
-							&& (configuration.isAlwaysAfter() || configuration.isAlwaysBefore())
-							&& edge.getTailNode().getHigh() <= 1 && edge.getHeadNode().getHigh() <= 1) {
-						/*
-						 * Skip, always after or always before will take care of this.
-						 */
 					} else {
 						/*
 						 * A token in place pnAB indicates that we can do A.
