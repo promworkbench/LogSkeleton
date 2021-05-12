@@ -19,6 +19,7 @@ public class ConverterConfiguration {
 	private boolean optimizeAlwaysElementary;
 	private boolean optimizeNeverEquivalence;
 	private boolean optimizeNeverAlways;
+	private boolean optimizeNeverElementary;
 	
 	public ConverterConfiguration() {
 		/*
@@ -50,6 +51,7 @@ public class ConverterConfiguration {
 		setOptimizeAlwaysElementary(true);
 		setOptimizeNeverEquivalence(true);
 		setOptimizeNeverAlways(true);
+		setOptimizeNeverElementary(true);
 	}
 	
 	public boolean isInterval() {
@@ -162,6 +164,14 @@ public class ConverterConfiguration {
 
 	public void setOptimizeNeverAlways(boolean optimizeNeverAlways) {
 		this.optimizeNeverAlways = optimizeNeverAlways;
+	}
+
+	public boolean isOptimizeNeverElementary() {
+		return optimizeNeverElementary;
+	}
+
+	public void setOptimizeNeverElementary(boolean optimizeNeverElementary) {
+		this.optimizeNeverElementary = optimizeNeverElementary;
 	}
 	
 }

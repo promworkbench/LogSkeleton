@@ -608,7 +608,7 @@ public class ConverterAlgorithm {
 						 * all B's.
 						 */
 						Place rnAB = net.addPlace(PREFIX_NEVER_P3 + edge.toString());
-						if (edge.getTailNode().getHigh() <= 1) {
+						if (configuration.isOptimizeNeverElementary() && edge.getTailNode().getHigh() <= 1) {
 							net.addArc(aA, rnAB);
 							if (edge.getTailNode().getLow() == 0) {
 								Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
@@ -629,7 +629,7 @@ public class ConverterAlgorithm {
 								net.addArc(startTransition, pnAB);
 							}
 						}
-						if (edge.getHeadNode().getHigh() <= 1) {
+						if (configuration.isOptimizeNeverElementary() && edge.getHeadNode().getHigh() <= 1) {
 							net.addArc(rnAB, aB);
 							if (edge.getHeadNode().getLow() == 0) {
 								Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
