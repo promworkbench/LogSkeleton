@@ -509,7 +509,11 @@ public class ConverterAlgorithm {
 							net.addArc(aA, rnAB);
 							net.addArc(rnAB, aB);
 							if (edge.getTailNode().getHigh() > 1) {
-								net.addArc(startTransition, rnAB);
+								if (configuration.isMarking()) {
+									startMarking.add(rnAB);
+								} else {
+									net.addArc(startTransition, rnAB);
+								}
 								net.addArc(rnAB, aA);
 							} else if (edge.getTailNode().getLow() == 0) {
 								Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
@@ -517,7 +521,11 @@ public class ConverterAlgorithm {
 								net.addArc(tnAB, rnAB);
 							}
 							if (edge.getHeadNode().getHigh() > 1) {
-								net.addArc(rnAB, endTransition);
+								if (configuration.isMarking()) {
+									endMarking.add(rnAB);
+								} else {
+									net.addArc(rnAB, endTransition);
+								}
 								net.addArc(aB, rnAB);
 							} else if (edge.getHeadNode().getLow() == 0) {
 								Transition unAB = net.addTransition(PREFIX_NEVER_T2 + edge.toString());
@@ -529,14 +537,22 @@ public class ConverterAlgorithm {
 							Place rnAB = net.addPlace(PREFIX_NEVER_P3 + edge.toString());
 							Transition tnAB = net.addTransition(PREFIX_NEVER_T1 + edge.toString());
 							tnAB.setInvisible(true);
-							net.addArc(startTransition, pnAB);
+							if (configuration.isMarking()) {
+								startMarking.add(pnAB);
+							} else {
+								net.addArc(startTransition, pnAB);
+							}
 							net.addArc(pnAB, aA);
 							net.addArc(aA, pnAB);
 							net.addArc(pnAB, tnAB);
 							net.addArc(tnAB, rnAB);
 							net.addArc(rnAB, aB);
 							net.addArc(aB, rnAB);
-							net.addArc(rnAB, endTransition);
+							if (configuration.isMarking()) {
+								endMarking.add(rnAB);
+							} else {
+								net.addArc(rnAB, endTransition);
+							}
 						}
 					}
 				}
