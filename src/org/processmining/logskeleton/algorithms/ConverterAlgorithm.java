@@ -375,8 +375,8 @@ public class ConverterAlgorithm {
 						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
 						net.addArc(aA, paAB);
 						net.addArc(paAB, aB);
-					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1) {
+					} else if (configuration.isOptimizeAlwaysElementary()
+							&& edge.getTailNode().getHigh() <= edge.getHeadNode().getHigh()) {
 						Place qaAB = net.addPlace(PREFIX_AFTER_P2 + edge.toString());
 						Transition taAB = net.addTransition(PREFIX_AFTER_T1 + edge.toString());
 						taAB.setInvisible(true);
@@ -431,9 +431,8 @@ public class ConverterAlgorithm {
 							deferredToNever.put(edge.getTailNode(), new HashSet<LogSkeletonNode>());
 						}
 						deferredToNever.get(edge.getTailNode()).add(edge.getHeadNode());
-					} else if (configuration.isOptimizeAlwaysEquivalence()
-							&& edge.getTailNode().getLabelRepresentative()
-									.equals(edge.getHeadNode().getLabelRepresentative())) {
+					} else if (configuration.isOptimizeAlwaysEquivalence() && edge.getTailNode()
+							.getLabelRepresentative().equals(edge.getHeadNode().getLabelRepresentative())) {
 						if (configuration.isAlwaysAfter() && edge.getTailType() == LogSkeletonEdgeType.ALWAYS) {
 							/*
 							 * Avoid duplication: addAlwaysAfter() will take care of this.
@@ -447,8 +446,8 @@ public class ConverterAlgorithm {
 							net.addArc(aA, pbAB);
 							net.addArc(pbAB, aB);
 						}
-					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
-							&& edge.getHeadNode().getHigh() <= 1) {
+					} else if (configuration.isOptimizeAlwaysElementary()
+							&& edge.getTailNode().getHigh() >= edge.getHeadNode().getHigh()) {
 						Place qbAB = net.addPlace(PREFIX_BEFORE_P2 + edge.toString());
 						Transition tbAB = net.addTransition(PREFIX_BEFORE_T1 + edge.toString());
 						tbAB.setInvisible(true);
@@ -493,9 +492,8 @@ public class ConverterAlgorithm {
 						/*
 						 * Skip, always after or always before will take care of this.
 						 */
-					} else if (configuration.isOptimizeNeverEquivalence()
-							&& edge.getTailNode().getLabelRepresentative()
-									.equals(edge.getHeadNode().getLabelRepresentative())) {
+					} else if (configuration.isOptimizeNeverEquivalence() && edge.getTailNode().getLabelRepresentative()
+							.equals(edge.getHeadNode().getLabelRepresentative())) {
 						/*
 						 * Both the tail and the head activity occur at most once, and always occur
 						 * equally often. The p1 place between them will do.
@@ -503,8 +501,19 @@ public class ConverterAlgorithm {
 						Place pnAB = net.addPlace(PREFIX_NEVER_P1 + edge.toString());
 						net.addArc(aA, pnAB);
 						net.addArc(pnAB, aB);
+					} else if (configuration.isAlwaysAfter() && edge.getTailType() == LogSkeletonEdgeType.ALWAYS
+							&& edge.getHeadNode().getHigh() <= 1) {
+						/*
+						 * Always after will take care of this.
+						 */
+					} else if (configuration.isAlwaysBefore() && edge.getHeadType() == LogSkeletonEdgeType.ALWAYS
+							&& edge.getTailNode().getHigh() <= 1) {
+						/*
+						 * Always before will take care of this.
+						 */
 					} else {
-						if (configuration.isOptimizeNeverElementary() && (edge.getTailNode().getHigh() <= 1 || edge.getHeadNode().getHigh() <= 1)) {
+						if (configuration.isOptimizeNeverElementary()
+								&& (edge.getTailNode().getHigh() <= 1 || edge.getHeadNode().getHigh() <= 1)) {
 							Place rnAB = net.addPlace(PREFIX_NEVER_P3 + edge.toString());
 							net.addArc(aA, rnAB);
 							net.addArc(rnAB, aB);
