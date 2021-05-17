@@ -97,6 +97,11 @@ public class PNClassifierAlgorithm {
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
 //						System.out.println("[PNClassifierAlgorithm] " + activity);
+//						System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
+			if (!inputPlaces.containsKey(transition)) {
+				System.out.println("[PNClassifierAlgorithm] Unknown transition: " + transition.getLabel());
+				return false;
+			}
 			for (Place place : inputPlaces.get(transition)) {
 				if (currentMarking.contains(place)) {
 					currentMarking.remove(place);
@@ -116,7 +121,7 @@ public class PNClassifierAlgorithm {
 					return false;
 				}
 			}
-			//			System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
+//						System.out.println("[PNClassifierAlgorithm] Replayed activity " + activity);
 			for (Place place : outputPlaces.get(transition)) {
 				currentMarking.add(place);
 			}
@@ -193,8 +198,8 @@ public class PNClassifierAlgorithm {
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T2);
 		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_EXCLUSIVE_T3);
-//				System.out.println("[PNClassifierAlgorithm] Adapted current marking: " + currentMarking);
-//				System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
+				System.out.println("[PNClassifierAlgorithm] Adapted current marking: " + currentMarking);
+				System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
 		return currentMarking.equals(finalMarking);
 	}
 
