@@ -375,8 +375,8 @@ public class ConverterAlgorithm {
 						Place paAB = net.addPlace(PREFIX_AFTER_P1 + edge.toString());
 						net.addArc(aA, paAB);
 						net.addArc(paAB, aB);
-					} else if (configuration.isOptimizeAlwaysElementary()
-							&& edge.getTailNode().getHigh() <= edge.getHeadNode().getHigh()) {
+					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
+							&& edge.getHeadNode().getHigh() <= 1) {
 						Place qaAB = net.addPlace(PREFIX_AFTER_P2 + edge.toString());
 						Transition taAB = net.addTransition(PREFIX_AFTER_T1 + edge.toString());
 						taAB.setInvisible(true);
@@ -446,8 +446,8 @@ public class ConverterAlgorithm {
 							net.addArc(aA, pbAB);
 							net.addArc(pbAB, aB);
 						}
-					} else if (configuration.isOptimizeAlwaysElementary()
-							&& edge.getTailNode().getHigh() >= edge.getHeadNode().getHigh()) {
+					} else if (configuration.isOptimizeAlwaysElementary() && edge.getTailNode().getHigh() <= 1
+							&& edge.getHeadNode().getHigh() <= 1) {
 						Place qbAB = net.addPlace(PREFIX_BEFORE_P2 + edge.toString());
 						Transition tbAB = net.addTransition(PREFIX_BEFORE_T1 + edge.toString());
 						tbAB.setInvisible(true);
