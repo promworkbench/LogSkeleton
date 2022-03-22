@@ -365,8 +365,11 @@ public class PNClassifierAlgorithm {
 		for (Place place : currentMarking.baseSet()) {
 			while (currentMarking.occurrences(place) > finalMarking.occurrences(place)) {
 				replayResult.addRemaining(1);
-				replayResult.addConsumed(1);
 				currentMarking.remove(place);
+			}
+			while (currentMarking.occurrences(place) < finalMarking.occurrences(place)) {
+				replayResult.addMissing(1);
+				currentMarking.add(place);
 			}
 		}
 		for (Place place : finalMarking.baseSet()) {
