@@ -358,7 +358,7 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
-		if (relation == notPrecedences || relation == notResponses) {
+		if (relation == notResponses) {
 			for (String activity2 : precedences.get(activity)) {
 				if (activities.contains(activity2)) {
 					for (String activity3 : relation.get(activity2)) {
@@ -371,6 +371,8 @@ public class LogSkeleton implements HTMLToString {
 					}
 				}
 			}
+		}
+		if (relation == notPrecedences) {
 			for (String activity2 : responses.get(activity)) {
 				if (activities.contains(activity2)) {
 					for (String activity3 : relation.get(activity2)) {

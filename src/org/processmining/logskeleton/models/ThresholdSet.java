@@ -149,4 +149,8 @@ public class ThresholdSet implements Set<String> {
 			totalMap.put(activity, total);
 		}
 	}
+	
+	public String toString() {
+		return countMap.toString();
+	}
 }
