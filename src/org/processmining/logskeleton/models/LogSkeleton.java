@@ -358,34 +358,34 @@ public class LogSkeleton implements HTMLToString {
 				}
 			}
 		}
-		if (relation == notResponses) {
-			for (String activity2 : precedences.get(activity)) {
-				if (activities.contains(activity2)) {
-					for (String activity3 : relation.get(activity2)) {
-						if (activities.contains(activity3)) {
-							if (relation.get(activity).contains(activity3)
-							/* && !relation.get(activity3).contains(activity2) */) {
-								redundantActivities.add(activity3);
-							}
-						}
-					}
-				}
-			}
-		}
-		if (relation == notPrecedences) {
-			for (String activity2 : responses.get(activity)) {
-				if (activities.contains(activity2)) {
-					for (String activity3 : relation.get(activity2)) {
-						if (activities.contains(activity3)) {
-							if (relation.get(activity).contains(activity3)
-							/* && !relation.get(activity3).contains(activity2) */) {
-								redundantActivities.add(activity3);
-							}
-						}
-					}
-				}
-			}
-		}
+//		if (relation == notResponses) {
+//			for (String activity2 : precedences.get(activity)) {
+//				if (activities.contains(activity2)) {
+//					for (String activity3 : relation.get(activity2)) {
+//						if (activities.contains(activity3)) {
+//							if (relation.get(activity).contains(activity3)
+//							/* && !relation.get(activity3).contains(activity2) */) {
+//								redundantActivities.add(activity3);
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//		if (relation == notPrecedences) {
+//			for (String activity2 : responses.get(activity)) {
+//				if (activities.contains(activity2)) {
+//					for (String activity3 : relation.get(activity2)) {
+//						if (activities.contains(activity3)) {
+//							if (relation.get(activity).contains(activity3)
+//							/* && !relation.get(activity3).contains(activity2) */) {
+//								redundantActivities.add(activity3);
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
 		return redundantActivities;
 	}
 
