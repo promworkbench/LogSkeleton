@@ -21,8 +21,8 @@ public class LogSkeletonCount {
 	/*
 	 * The names to use for the start and end events.
 	 */
-	public final static String STARTEVENT = "|>";
-	public final static String ENDEVENT = "[]";
+	public final static String STARTEVENT = "\u25BA"; // "|>"; // "\u25BA";
+	public final static String ENDEVENT = "\u25A0"; // "[]"; // "\u25A0";
 
 	/*
 	 * Counts how many times an activity occurred in the entire log. If

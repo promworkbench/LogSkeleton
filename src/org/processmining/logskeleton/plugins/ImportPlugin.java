@@ -3,6 +3,7 @@ package org.processmining.logskeleton.plugins;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -33,7 +34,7 @@ public class ImportPlugin extends AbstractImportPlugin {
 
 	protected Object importFromStream(PluginContext context, InputStream input, String filename, long fileSizeInBytes)
 			throws Exception {
-		Reader streamReader = new InputStreamReader(input);
+		Reader streamReader = new InputStreamReader(input, StandardCharsets.UTF_8);
 		CsvReader csvReader = new CsvReader(streamReader);
 		LogSkeleton logSkeleton = new LogSkeleton();
 		logSkeleton.importFromStream(csvReader);
