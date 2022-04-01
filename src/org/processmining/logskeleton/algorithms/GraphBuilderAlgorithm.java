@@ -239,7 +239,7 @@ public class GraphBuilderAlgorithm {
 								 */
 								edge.setHeadType(LogSkeletonEdgeType.EXCLUSIVE);
 								edge.setSymmetric(true);
-								int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity, tailActivity);
+								int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity, headActivity);
 								if (threshold < 100) {
 									edge.setHeadPercentage(threshold);
 								}
@@ -251,7 +251,7 @@ public class GraphBuilderAlgorithm {
 								 */
 								edge.setTailType(LogSkeletonEdgeType.EXCLUSIVE);
 								edge.setSymmetric(true);
-								int threshold = logSkeleton.getMaxThresholdNotCoExistence(tailActivity, headActivity);
+								int threshold = logSkeleton.getMaxThresholdNotCoExistence(headActivity, tailActivity);
 								if (threshold < 100) {
 									edge.setTailPercentage(threshold);
 								}
