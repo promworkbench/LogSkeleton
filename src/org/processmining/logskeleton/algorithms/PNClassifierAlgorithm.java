@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XConceptExtension;
@@ -26,7 +27,7 @@ import org.processmining.models.semantics.petrinet.Marking;
 
 public class PNClassifierAlgorithm {
 
-	private Map<Place, Place> placeMap;
+	private Map<Place, Set<Place>> placeMap;
 	private Map<String, Transition> transitionMap;
 	private Map<Transition, Collection<Place>> inputPlaces;
 	private Map<Transition, Collection<Place>> outputPlaces;
@@ -69,15 +70,21 @@ public class PNClassifierAlgorithm {
 				inputPlaces.get(edge.getTarget()).add((Place) edge.getSource());
 			}
 		}
-		placeMap = new HashMap<Place, Place>();
+		placeMap = new HashMap<Place, Set<Place>>();
 		transitionMap = new HashMap<String, Transition>();
 		for (Transition transition : net.getTransitions()) {
 			if (transition.isInvisible() && transition.getLabel().startsWith(ConverterAlgorithm.PREFIX_START)) {
-				if (inputPlaces.get(transition).size() == 1 && outputPlaces.get(transition).size() == 1) {
-					placeMap.put(outputPlaces.get(transition).iterator().next(),
-							inputPlaces.get(transition).iterator().next());
-				} else if (inputPlaces.get(transition).size() == 0 && outputPlaces.get(transition).size() == 1) {
-					placeMap.put(outputPlaces.get(transition).iterator().next(), null);
+				if (outputPlaces.get(transition).size() == 1) {
+					Set<Place> places = placeMap.get(outputPlaces.get(transition).iterator().next());
+					if (places == null) {
+						places = new HashSet<Place>();
+						placeMap.put(outputPlaces.get(transition).iterator().next(), places);
+					}
+					if (inputPlaces.get(transition).size() == 1) {
+						places.add(inputPlaces.get(transition).iterator().next());
+					} else if (inputPlaces.get(transition).size() == 0) {
+						places.add(null);
+					}
 				}
 			}
 			if (!transition.isInvisible() || transition.getLabel().equals(LogSkeletonCount.STARTEVENT)
@@ -124,10 +131,13 @@ public class PNClassifierAlgorithm {
 		replayResult.addProduced(initialMarking.baseSet().size());
 		for (String activity : activities) {
 			Transition transition = transitionMap.get(activity);
+			System.out.println("[PNClassifierAlgorithm] Replaying transition: "
+					+ (transition == null ? "<null>" : transition.getLabel()));
 			//						System.out.println("[PNClassifierAlgorithm] " + activity);
 			//						System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 			if (!inputPlaces.containsKey(transition)) {
-				System.out.println("[PNClassifierAlgorithm] Unknown transition: " + transition.getLabel());
+				System.out.println("[PNClassifierAlgorithm] Unknown transition: "
+						+ (transition == null ? "<null>" : transition.getLabel()));
 				/*
 				 * Unknown transition. Assume one input and one output.
 				 */
@@ -142,80 +152,104 @@ public class PNClassifierAlgorithm {
 				/*
 				 * Need to consume a token from this input place.
 				 */
+				//				System.out.println("[PNClassifierAlgorithm] Checking input place " + place.getLabel());
 				replayResult.addConsumed(1);
 				if (currentMarking.contains(place)) {
 					/*
 					 * Token is there. Consume it now.
 					 */
 					currentMarking.remove(place);
+					//					System.out.println("[PNClassifierAlgorithm] Input place marked");
 				} else if (placeMap.containsKey(place)) {
-					if (placeMap.get(place) == null) {
-						/*
-						 * Place has a token generator. Use it to produce the
-						 * token.
-						 */
-						replayResult.addProduced(1);
-						if (repairedLog != null) {
-							XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
-							XConceptExtension.instance().assignName(event, "->" + place.getLabel());
-							repairedTrace.add(event);
-						}
-					} else if (currentMarking.contains(placeMap.get(place))) {
-						/*
-						 * Place can get a token on one step from another place.
-						 * Get it.
-						 */
-						replayResult.addConsumed(1);
-						replayResult.addProduced(1);
-						if (repairedLog != null) {
-							XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
-							XConceptExtension.instance().assignName(event,
-									placeMap.get(place).getLabel() + "->" + place.getLabel());
-							repairedTrace.add(event);
-						}
-						currentMarking.remove(placeMap.get(place));
-					} else if (placeMap.containsKey(placeMap.get(place))) {
-						/*
-						 * Place can get a token in two steps from another
-						 * place. Get it.
-						 */
-						if (placeMap.get(placeMap.get(place)) == null) {
+					boolean isOK = false;
+					for (Place parentPlace : placeMap.get(place)) {
+						if (parentPlace == null) {
 							/*
-							 * First step is a token generator.
+							 * Place has a token generator. Use it to produce
+							 * the token.
+							 */
+							replayResult.addProduced(1);
+							isOK = true;
+							//							System.out.println("[PNClassifierAlgorithm] Place has token generator");
+							if (repairedLog != null) {
+								XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
+								XConceptExtension.instance().assignName(event, "->" + place.getLabel());
+								repairedTrace.add(event);
+							}
+							break;
+						} else if (currentMarking.contains(parentPlace)) {
+							/*
+							 * Place can get a token on one step from another
+							 * place. Get it.
 							 */
 							replayResult.addConsumed(1);
-							replayResult.addProduced(2);
+							replayResult.addProduced(1);
+							isOK = true;
+//							System.out.println(
+//									"[PNClassifierAlgorithm] Parent place " + parentPlace.getLabel() + " marked");
 							if (repairedLog != null) {
 								XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
-								XConceptExtension.instance().assignName(event, "->" + placeMap.get(place).getLabel());
-								repairedTrace.add(event);
-								event = XFactoryRegistry.instance().currentDefault().createEvent();
 								XConceptExtension.instance().assignName(event,
-										placeMap.get(place).getLabel() + "->" + place.getLabel());
+										parentPlace.getLabel() + "->" + place.getLabel());
 								repairedTrace.add(event);
 							}
-						} else if (currentMarking.contains(placeMap.get(placeMap.get(place)))) {
+							currentMarking.remove(parentPlace);
+							break;
+						} else if (placeMap.containsKey(parentPlace)) {
 							/*
-							 * First step is not a token generator.
+							 * Place can get a token in two steps from another
+							 * place. Get it.
 							 */
-							replayResult.addConsumed(2);
-							replayResult.addProduced(2);
-							if (repairedLog != null) {
-								XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
-								XConceptExtension.instance().assignName(event,
-										placeMap.get(placeMap.get(place)).getLabel() + "->"
-												+ placeMap.get(place).getLabel());
-								repairedTrace.add(event);
-								event = XFactoryRegistry.instance().currentDefault().createEvent();
-								XConceptExtension.instance().assignName(event,
-										placeMap.get(place).getLabel() + "->" + place.getLabel());
-								repairedTrace.add(event);
+							for (Place grandParentPlace : placeMap.get(parentPlace)) {
+								if (grandParentPlace == null) {
+									/*
+									 * First step is a token generator.
+									 */
+									replayResult.addConsumed(1);
+									replayResult.addProduced(2);
+									isOK = true;
+//									System.out.println("[PNClassifierAlgorithm] Parent place " + parentPlace.getLabel()
+//											+ " has token generator");
+									if (repairedLog != null) {
+										XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
+										XConceptExtension.instance().assignName(event, "->" + parentPlace.getLabel());
+										repairedTrace.add(event);
+										event = XFactoryRegistry.instance().currentDefault().createEvent();
+										XConceptExtension.instance().assignName(event,
+												parentPlace.getLabel() + "->" + place.getLabel());
+										repairedTrace.add(event);
+									}
+									break;
+								} else if (currentMarking.contains(grandParentPlace)) {
+									/*
+									 * First step is not a token generator.
+									 */
+									replayResult.addConsumed(2);
+									replayResult.addProduced(2);
+									isOK = true;
+//									System.out.println("[PNClassifierAlgorithm] Grandparent place "
+//											+ grandParentPlace.getLabel() + " is marked");
+									if (repairedLog != null) {
+										XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
+										XConceptExtension.instance().assignName(event,
+												grandParentPlace.getLabel() + "->" + parentPlace.getLabel());
+										repairedTrace.add(event);
+										event = XFactoryRegistry.instance().currentDefault().createEvent();
+										XConceptExtension.instance().assignName(event,
+												parentPlace.getLabel() + "->" + place.getLabel());
+										repairedTrace.add(event);
+									}
+									currentMarking.remove(grandParentPlace);
+									break;
+								}
 							}
-							currentMarking.remove(placeMap.get(placeMap.get(place)));
+							if (isOK) {
+								break;
+							}
 						}
-					} else {
+					}
+					if (!isOK) {
 						replayResult.addMissing(1);
-						//						return false;
 					}
 				} else {
 					replayResult.addMissing(1);
@@ -230,11 +264,18 @@ public class PNClassifierAlgorithm {
 			}
 			for (Place place : outputPlaces.get(transition)) {
 				currentMarking.add(place);
+				replayResult.addProduced(1);
 			}
+//			System.out.println("[PNClassifierAlgorithm] Result " + replayResult);
 		}
 
+//		System.out.println("[PNClassifierAlgorithm] Adapted current marking: " + currentMarking);
+//		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
 		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		for (Place place : finalMarking.baseSet()) {
+//			System.out.println("[PNClassifierAlgorithm] Checking input place " + place.getLabel());
+//			System.out.println("[PNClassifierAlgorithm] Final " + finalMarking.occurrences(place));
+//			System.out.println("[PNClassifierAlgorithm] Current " + currentMarking.occurrences(place));
 			while (finalMarking.occurrences(place) > currentMarking.occurrences(place)) {
 				/*
 				 * We're some tokens short for this place in the final marking.
@@ -243,102 +284,123 @@ public class PNClassifierAlgorithm {
 					/*
 					 * Tokens may be coming for this place.
 					 */
-					if (placeMap.get(place) == null) {
-						/*
-						 * Place has a token generator. Generate sufficiently
-						 * many tokens for this place.
-						 */
-						replayResult.addProduced(finalMarking.occurrences(place) - currentMarking.occurrences(place));
-						if (repairedLog != null) {
-							for (int i = currentMarking.occurrences(place); i < finalMarking.occurrences(place); i++) {
-								XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
-								XConceptExtension.instance().assignName(event,
-										placeMap.get(place).getLabel() + "->" + place.getLabel());
-								repairedTrace.add(event);
-							}
-						}
-						currentMarking.add(place, finalMarking.occurrences(place) - currentMarking.occurrences(place));
-					} else if (currentMarking.contains(placeMap.get(place))) {
-						replayResult.addConsumed(1);
-						replayResult.addProduced(1);
-						/*
-						 * Predecessor place contains tokens. Move one to this
-						 * place.
-						 */
-						if (repairedLog != null) {
-							XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
-							XConceptExtension.instance().assignName(event,
-									placeMap.get(place).getLabel() + "->" + place.getLabel());
-							repairedTrace.add(event);
-						}
-						currentMarking.remove(placeMap.get(place));
-						currentMarking.add(place);
-					} else if (placeMap.containsKey(placeMap.get(place))) {
-						/*
-						 * Tokens may be coming for the predecessor place.
-						 */
-						if (placeMap.get(placeMap.get(place)) == null) {
+					boolean isOK = false;
+					for (Place parentPlace : placeMap.get(place)) {
+						if (parentPlace == null) {
 							/*
-							 * Predecessor place has a token generator. Generate
+							 * Place has a token generator. Generate
 							 * sufficiently many tokens for this place.
 							 */
 							replayResult
-									.addConsumed(finalMarking.occurrences(place) - currentMarking.occurrences(place));
-							replayResult.addProduced(
-									2 * (finalMarking.occurrences(place) - currentMarking.occurrences(place)));
+									.addProduced(finalMarking.occurrences(place) - currentMarking.occurrences(place));
+//							System.out.println("[PNClassifierAlgorithm] Place has token generator");
+							isOK = true;
 							if (repairedLog != null) {
 								for (int i = currentMarking.occurrences(place); i < finalMarking
 										.occurrences(place); i++) {
 									XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
-									XConceptExtension.instance().assignName(event,
-											placeMap.get(placeMap.get(place)).getLabel() + "->"
-													+ placeMap.get(place).getLabel());
-									repairedTrace.add(event);
-									event = XFactoryRegistry.instance().currentDefault().createEvent();
-									XConceptExtension.instance().assignName(event,
-											placeMap.get(place).getLabel() + "->" + place.getLabel());
+									XConceptExtension.instance().assignName(event, "->" + place.getLabel());
 									repairedTrace.add(event);
 								}
 							}
 							currentMarking.add(place,
 									finalMarking.occurrences(place) - currentMarking.occurrences(place));
-						} else if (currentMarking.contains(placeMap.get(placeMap.get(place)))) {
+							break;
+						} else if (currentMarking.contains(parentPlace)) {
+							replayResult.addConsumed(1);
+							replayResult.addProduced(1);
+							isOK = true;
+//							System.out.println("[PNClassifierAlgorithm] Parent place " + parentPlace + " is marked");
 							/*
-							 * Predecessor of predecessor place contains tokens.
-							 * Move one to this place.
+							 * Predecessor place contains tokens. Move one to
+							 * this place.
 							 */
-							replayResult.addConsumed(2);
-							replayResult.addProduced(2);
 							if (repairedLog != null) {
 								XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
 								XConceptExtension.instance().assignName(event,
-										placeMap.get(placeMap.get(place)).getLabel() + "->"
-												+ placeMap.get(place).getLabel());
-								repairedTrace.add(event);
-								event = XFactoryRegistry.instance().currentDefault().createEvent();
-								XConceptExtension.instance().assignName(event,
-										placeMap.get(place).getLabel() + "->" + place.getLabel());
+										parentPlace.getLabel() + "->" + place.getLabel());
 								repairedTrace.add(event);
 							}
-							currentMarking.remove(placeMap.get(placeMap.get(place)));
+							currentMarking.remove(parentPlace);
 							currentMarking.add(place);
-						} else {
-							replayResult.addMissing(1);
-							replayResult.addConsumed(1);
 							break;
+						} else if (placeMap.containsKey(parentPlace)) {
+							/*
+							 * Tokens may be coming for the predecessor place.
+							 */
+							for (Place grandParentPlace : placeMap.get(parentPlace)) {
+								if (grandParentPlace == null) {
+									/*
+									 * Predecessor place has a token generator.
+									 * Generate sufficiently many tokens for
+									 * this place.
+									 */
+									replayResult.addConsumed(
+											finalMarking.occurrences(place) - currentMarking.occurrences(place));
+									replayResult.addProduced(
+											2 * (finalMarking.occurrences(place) - currentMarking.occurrences(place)));
+									isOK = true;
+//									System.out.println("[PNClassifierAlgorithm] Parent place " + parentPlace.getLabel()
+//											+ " has token generator");
+									if (repairedLog != null) {
+										for (int i = currentMarking.occurrences(place); i < finalMarking
+												.occurrences(place); i++) {
+											XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
+											XConceptExtension.instance().assignName(event,
+													"->" + parentPlace.getLabel());
+											repairedTrace.add(event);
+											event = XFactoryRegistry.instance().currentDefault().createEvent();
+											XConceptExtension.instance().assignName(event,
+													parentPlace.getLabel() + "->" + place.getLabel());
+											repairedTrace.add(event);
+										}
+									}
+									currentMarking.add(place,
+											finalMarking.occurrences(place) - currentMarking.occurrences(place));
+									break;
+								} else if (currentMarking.contains(grandParentPlace)) {
+									/*
+									 * Predecessor of predecessor place contains
+									 * tokens. Move one to this place.
+									 */
+									replayResult.addConsumed(2);
+									replayResult.addProduced(2);
+									isOK = true;
+//									System.out.println("[PNClassifierAlgorithm] Grandparent place "
+//											+ grandParentPlace.getLabel() + " is marked");
+									if (repairedLog != null) {
+										XEvent event = XFactoryRegistry.instance().currentDefault().createEvent();
+										XConceptExtension.instance().assignName(event,
+												grandParentPlace.getLabel() + "->" + parentPlace.getLabel());
+										repairedTrace.add(event);
+										event = XFactoryRegistry.instance().currentDefault().createEvent();
+										XConceptExtension.instance().assignName(event,
+												parentPlace.getLabel() + "->" + place.getLabel());
+										repairedTrace.add(event);
+									}
+									currentMarking.remove(grandParentPlace);
+									currentMarking.add(place);
+									break;
+								}
+							}
+							if (isOK) {
+								break;
+							}
 						}
-					} else {
+					}
+					if (!isOK) {
+//						System.out.println("[PNClassifierAlgorithm] Missing");
 						replayResult.addMissing(1);
 						replayResult.addConsumed(1);
-						break;
 					}
 				} else {
+//					System.out.println("[PNClassifierAlgorithm] Missing");
 					replayResult.addMissing(1);
 					replayResult.addConsumed(1);
-					break;
 				}
 			}
 		}
+//		System.out.println("[PNClassifierAlgorithm] Result " + replayResult);
 		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
 		currentMarking = fireAll(net, currentMarking, ConverterAlgorithm.PREFIX_INTERVAL_T1, replayResult);
 		//		System.out.println("[PNClassifierAlgorithm] Current marking: " + currentMarking);
@@ -362,7 +424,9 @@ public class PNClassifierAlgorithm {
 
 		System.out.println("[PNClassifierAlgorithm] Adapted current marking: " + currentMarking);
 		System.out.println("[PNClassifierAlgorithm] Final marking: " + finalMarking);
-		for (Place place : currentMarking.baseSet()) {
+		System.out.println("[PNClassifierAlgorithm] Result " + replayResult);
+		Set<Place> places = new TreeSet<Place>(currentMarking.baseSet());
+		for (Place place : places) {
 			while (currentMarking.occurrences(place) > finalMarking.occurrences(place)) {
 				replayResult.addRemaining(1);
 				currentMarking.remove(place);

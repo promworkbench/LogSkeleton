@@ -45,4 +45,8 @@ public class TokenBasedReplayResult {
 	public double getFitness() {
 		return 0.5 * ((consumed - missing) / (1.0 * consumed)) + 0.5 * ((produced - remaining) / (1.0 * produced));
 	}
+	
+	public String toString() {
+		return "consumed(missing)=" + consumed + "(" + missing + "), produced(remaining)=" + produced + "(" + remaining +")";
+	}
 }
