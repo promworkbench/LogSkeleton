@@ -205,7 +205,7 @@ public class BrowserAlgorithm {
 		y++;
 
 		final NiceSlider notCoExistenceSlider = SlickerFactory.instance().createNiceIntegerSlider("Not Co-Existence", 0,
-				20, 100 - configuration.getPrecedenceThreshold(), Orientation.HORIZONTAL);
+				20, 100 - configuration.getNotCoExistenceThreshold(), Orientation.HORIZONTAL);
 		notCoExistenceSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
