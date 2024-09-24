@@ -390,13 +390,15 @@ public class PNClassifierAlgorithm {
 					}
 					if (!isOK) {
 //						System.out.println("[PNClassifierAlgorithm] Missing");
-						replayResult.addMissing(1);
-						replayResult.addConsumed(1);
+						replayResult.addMissing(finalMarking.occurrences(place) - currentMarking.occurrences(place));
+						replayResult.addConsumed(finalMarking.occurrences(place) - currentMarking.occurrences(place));
+						break;
 					}
 				} else {
 //					System.out.println("[PNClassifierAlgorithm] Missing");
-					replayResult.addMissing(1);
-					replayResult.addConsumed(1);
+					replayResult.addMissing(finalMarking.occurrences(place) - currentMarking.occurrences(place));
+					replayResult.addConsumed(finalMarking.occurrences(place) - currentMarking.occurrences(place));
+					break;
 				}
 			}
 		}
